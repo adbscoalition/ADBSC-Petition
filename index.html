@@ -10,6 +10,18 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div id="loader" class="loader" aria-live="polite">
+    <div class="loader-panel">
+      <p class="loader-title">CLT Magnetic</p>
+      <div class="loader-bar-wrap">
+        <div id="loaderBar" class="loader-bar"></div>
+      </div>
+      <p id="loaderCount" class="loader-count">0</p>
+    </div>
+    <div class="shards" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </div>
   <div class="bg-overlay"></div>
   <main class="container">
     <section class="hero card">
@@ -174,8 +186,50 @@ CLT Magnetic Field is fictional. To see a "CLT Magnetic Field", try charlottemag
   </main>
 
   <script>
+    const loader = document.getElementById('loader');
+    const loaderCount = document.getElementById('loaderCount');
+    const loaderBar = document.getElementById('loaderBar');
     const copyBtn = document.getElementById('copyBtn');
     const instructionText = document.getElementById('instructionText');
+
+    function animateLoader() {
+      const duration = 800;
+      const start = performance.now();
+
+      const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+
+      function frame(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeOut(progress);
+
+        let value;
+        if (progress < 0.33) {
+          value = Math.floor((eased / 0.33) * 100);
+        } else if (progress < 0.66) {
+          value = Math.floor(100 + ((eased - 0.33) / 0.33) * (1_000_000 - 100));
+        } else {
+          value = Math.floor(1_000_000 + ((eased - 0.66) / 0.34) * (999_999_999_999_999 - 1_000_000));
+        }
+
+        loaderCount.textContent = value.toLocaleString();
+        loaderBar.style.width = `${Math.min(progress * 100, 100)}%`;
+
+        if (progress < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          loaderCount.textContent = '999,999,999,999,999';
+          loader.classList.add('is-shattering');
+          setTimeout(() => {
+            loader.classList.add('is-hidden');
+          }, 780);
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    animateLoader();
 
     copyBtn.addEventListener('click', async () => {
       try {

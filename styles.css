@@ -26,6 +26,98 @@ body {
   overflow-x: hidden;
 }
 
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(130deg, #ff4db8, #ff7ce0, #ff59a8);
+  transition: opacity 0.35s ease;
+}
+
+.loader-panel {
+  width: min(520px, 88vw);
+  border-radius: 16px;
+  padding: 1.1rem;
+  background: rgba(30, 0, 30, 0.32);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(6px);
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.loader-title {
+  margin: 0 0 0.5rem;
+  font-family: 'Gravitas One', serif;
+  color: #fff;
+}
+
+.loader-bar-wrap {
+  width: 100%;
+  height: 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.loader-bar {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #fff, #35e8ff);
+}
+
+.loader-count {
+  margin: 0.65rem 0 0;
+  font-size: clamp(1rem, 4vw, 1.7rem);
+  color: #fff8fd;
+  font-weight: 800;
+}
+
+.shards {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.shards span {
+  position: absolute;
+  width: 34%;
+  height: 38%;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.28), rgba(255, 105, 201, 0.12));
+  opacity: 0;
+}
+
+.shards span:nth-child(1) { top: 8%; left: 6%; }
+.shards span:nth-child(2) { top: 6%; right: 8%; }
+.shards span:nth-child(3) { top: 33%; left: 34%; }
+.shards span:nth-child(4) { bottom: 14%; left: 9%; }
+.shards span:nth-child(5) { bottom: 7%; right: 11%; }
+.shards span:nth-child(6) { top: 28%; right: 28%; }
+
+.loader.is-shattering .loader-panel {
+  animation: panelBreak 0.7s ease forwards;
+}
+
+.loader.is-shattering .shards span {
+  animation: shardFly 0.8s ease forwards;
+}
+
+.loader.is-shattering .shards span:nth-child(1) { --dx: -42vw; --dy: -28vh; --r: -35deg; }
+.loader.is-shattering .shards span:nth-child(2) { --dx: 38vw; --dy: -32vh; --r: 24deg; }
+.loader.is-shattering .shards span:nth-child(3) { --dx: 0vw; --dy: -42vh; --r: 8deg; }
+.loader.is-shattering .shards span:nth-child(4) { --dx: -34vw; --dy: 35vh; --r: -22deg; }
+.loader.is-shattering .shards span:nth-child(5) { --dx: 33vw; --dy: 39vh; --r: 27deg; }
+.loader.is-shattering .shards span:nth-child(6) { --dx: 42vw; --dy: 4vh; --r: 33deg; }
+
+.loader.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .bg-overlay {
   position: fixed;
   inset: 0;
@@ -177,6 +269,7 @@ h2 {
   padding: 0.58rem 0.95rem;
   cursor: pointer;
   transition: transform 0.16s ease, filter 0.16s ease;
+  font-family: 'Public Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
 
 #copyBtn:hover {
@@ -248,5 +341,19 @@ pre {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes panelBreak {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.04) rotate(-1deg); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0; }
+}
+
+@keyframes shardFly {
+  0% { opacity: 0.75; transform: translate(0, 0) rotate(0deg) scale(1); }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(0.65);
   }
 }
