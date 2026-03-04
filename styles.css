@@ -1,0 +1,154 @@
+:root {
+  --bg: #070709;
+  --card: rgba(12, 15, 30, 0.78);
+  --line: rgba(255, 255, 255, 0.15);
+  --text: #f3f5ff;
+  --muted: #b9c0e6;
+  --primary: #7f8dff;
+  --primary-2: #8de3ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Outfit', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg) url('https://i.ibb.co/qFWFtnB9/download.png') center/cover fixed no-repeat;
+  position: relative;
+}
+
+.bg-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(127, 141, 255, 0.25), transparent 40%),
+    radial-gradient(circle at bottom left, rgba(141, 227, 255, 0.2), transparent 45%),
+    rgba(3, 4, 10, 0.6);
+  pointer-events: none;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.card {
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 18px;
+  padding: 1.2rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.hero {
+  text-align: center;
+}
+
+.logo {
+  width: min(220px, 60vw);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3.3rem);
+  margin: 0.7rem 0 0.2rem;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--primary-2);
+  font-weight: 700;
+}
+
+.description {
+  max-width: 700px;
+  margin: 0.8rem auto 0;
+  color: var(--muted);
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.link-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.8rem;
+}
+
+.link-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.9rem;
+  background: rgba(255, 255, 255, 0.03);
+  transition: transform 0.16s ease, border-color 0.16s ease;
+}
+
+.link-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary-2);
+}
+
+.link-card h3 {
+  margin: 0;
+}
+
+.link-card p {
+  margin: 0.5rem 0;
+  color: var(--muted);
+}
+
+.link-card small {
+  color: #ffd4c6;
+}
+
+.instructions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+#copyBtn {
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-2));
+  color: #081425;
+  font-weight: 700;
+  padding: 0.55rem 0.8rem;
+  cursor: pointer;
+}
+
+.hint {
+  margin-top: 0;
+  color: var(--muted);
+}
+
+pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 440px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.9rem;
+  background: rgba(0, 0, 0, 0.35);
+  line-height: 1.4;
+  color: #e9ecff;
+}
