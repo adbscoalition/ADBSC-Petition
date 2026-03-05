@@ -15,7 +15,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: 'Fredoka', 'Public Sans', system-ui, sans-serif;
+  font-family: 'Public Sans', system-ui, sans-serif;
   color: var(--text);
   background: var(--bg) url('https://i.ibb.co/qFWFtnB9/download.png') center/cover fixed no-repeat;
   overflow-x: hidden;
@@ -86,7 +86,7 @@ body {
 
 .loader-core h1,
 .loader-phase {
-  font-family: 'Baloo 2', 'Fredoka', sans-serif;
+  font-family: 'Gravitas One', serif;
 }
 
 .loader-phase {
@@ -163,6 +163,16 @@ body {
   position: relative;
 }
 
+
+.panel,
+.launch,
+.tier {
+  background-image:
+    radial-gradient(circle at 12px 12px, rgba(255, 205, 234, 0.08) 0 2px, transparent 2px),
+    radial-gradient(circle at 28px 28px, rgba(255, 205, 234, 0.06) 0 2px, transparent 2px);
+  background-size: 40px 40px;
+}
+
 .cupid::before {
   content: '💘';
   position: absolute;
@@ -182,7 +192,7 @@ body {
 }
 
 h2, h3, summary {
-  font-family: 'Baloo 2', 'Fredoka', sans-serif;
+  font-family: 'Gravitas One', serif;
   letter-spacing: 0.01em;
 }
 
@@ -228,9 +238,9 @@ h2, h3, summary {
 .launch h3 { margin: 0; }
 .launch p { margin: 0.45rem 0; font-weight: 800; }
 .launch small { color: #fff7df; }
-.launch-chatgpt { background: linear-gradient(135deg, rgba(255, 181, 226, 0.34), rgba(156,239,255,0.2)); }
-.launch-gemini { background: linear-gradient(135deg, rgba(201,162,255,0.38), rgba(255,190,231,0.24)); }
-.launch-grok { background: linear-gradient(135deg, rgba(255,110,202,0.42), rgba(255,214,145,0.26)); }
+.launch-chatgpt { background-color: rgba(255, 181, 226, 0.15); background-image: linear-gradient(135deg, rgba(255, 181, 226, 0.34), rgba(156,239,255,0.2)), radial-gradient(circle at 12px 12px, rgba(255, 205, 234, 0.08) 0 2px, transparent 2px), radial-gradient(circle at 28px 28px, rgba(255, 205, 234, 0.06) 0 2px, transparent 2px); background-size: auto,40px 40px,40px 40px; }
+.launch-gemini { background-color: rgba(201,162,255,0.15); background-image: linear-gradient(135deg, rgba(201,162,255,0.38), rgba(255,190,231,0.24)), radial-gradient(circle at 12px 12px, rgba(255, 205, 234, 0.08) 0 2px, transparent 2px), radial-gradient(circle at 28px 28px, rgba(255, 205, 234, 0.06) 0 2px, transparent 2px); background-size: auto,40px 40px,40px 40px; }
+.launch-grok { background-color: rgba(255,110,202,0.16); background-image: linear-gradient(135deg, rgba(255,110,202,0.42), rgba(255,214,145,0.26)), radial-gradient(circle at 12px 12px, rgba(255, 205, 234, 0.08) 0 2px, transparent 2px), radial-gradient(circle at 28px 28px, rgba(255, 205, 234, 0.06) 0 2px, transparent 2px); background-size: auto,40px 40px,40px 40px; }
 .launch.best { border-color: rgba(255,226,79,0.9); box-shadow: inset 0 0 0 1px rgba(255,226,79,0.45); }
 
 .heading-row { display: flex; justify-content: space-between; align-items: center; gap: 0.7rem; }
