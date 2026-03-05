@@ -11,46 +11,40 @@
 </head>
 <body>
   <div id="loader" class="loader" aria-live="polite">
-    <div class="loader-flash"></div>
-    <div class="loader-panel">
-      <p id="loaderPhase" class="loader-phase">Synchronizing Charlotte Core</p>
-      <p class="loader-title">CLT Magnetic</p>
-      <div class="loader-bar-wrap">
-        <div id="loaderBar" class="loader-bar"></div>
-      </div>
+    <div class="loader-noise" aria-hidden="true"></div>
+    <div class="loader-core">
+      <p id="loaderPhase" class="loader-phase">Booting Charlotte Excitement Engine</p>
+      <h1>CLT MAGNETIC</h1>
       <p id="loaderCount" class="loader-count">0</p>
-      <p class="loader-sub">ENERGY SURGE INCOMING ⚡</p>
+      <div class="loader-meter"><span id="loaderBar"></span></div>
+      <p class="loader-tag">SHAKE MODE: ARMED</p>
     </div>
-    <div class="shards" aria-hidden="true">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-    </div>
+    <div class="loader-shards" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
   </div>
-  <div class="bg-overlay"></div>
-  <main class="container">
-    <section class="hero card">
+
+  <div class="fx-bg" aria-hidden="true"></div>
+
+  <main class="layout">
+    <section class="panel hero shake-soft">
       <img class="logo" src="https://i.ibb.co/BV0KDwfh/Chat-GPT-Image-Mar-3-2026-10-03-08-PM.png" alt="OCharlotteD logo" />
       <p class="subtitle">"Obsessive-<span>CHARLOTTE</span> Disorder"</p>
-      <p class="description">
-        Maximum colorful chaos energy for Charlotte-obsessed conversations, lore spirals, and dramatic reactions.
-      </p>
+      <p class="description">Explosive Charlotte-energy persona with dramatic reactions, hype chaos, and wild lore intensity.</p>
     </section>
 
-    <section class="card links">
-      <h2>Use OCharlotteD</h2>
+    <section class="panel shake-soft">
+      <h2>Launch OCharlotteD</h2>
       <div class="link-grid">
-        <a href="https://chatgpt.com/g/g-698837dd13008191a0996df5214bb40b-ocharlotted" target="_blank" rel="noopener noreferrer" class="link-card chatgpt">
+        <a href="https://chatgpt.com/g/g-698837dd13008191a0996df5214bb40b-ocharlotted" target="_blank" rel="noopener noreferrer" class="launch launch-chatgpt shake-hover">
           <h3>ChatGPT</h3>
           <p>Good Excitement</p>
           <small>Disclaimer: ChatGPT account required.</small>
         </a>
-
-        <a href="https://gemini.google.com/u/9/gem/71f70d91ff7f" target="_blank" rel="noopener noreferrer" class="link-card gemini">
+        <a href="https://gemini.google.com/u/9/gem/71f70d91ff7f" target="_blank" rel="noopener noreferrer" class="launch launch-gemini shake-hover">
           <h3>Gemini</h3>
           <p>Good Excitement</p>
           <small>Disclaimer: Google account required.</small>
         </a>
-
-        <a href="https://grok.com/project/9ac5ac78-008c-4fbc-966e-2064c221a14a?tab=conversations" target="_blank" rel="noopener noreferrer" class="link-card grok best">
+        <a href="https://grok.com/project/9ac5ac78-008c-4fbc-966e-2064c221a14a?tab=conversations" target="_blank" rel="noopener noreferrer" class="launch launch-grok best shake-hover">
           <h3>Grok</h3>
           <p>BEST Excitement!</p>
           <small>Disclaimer: Account NOT required.</small>
@@ -58,10 +52,10 @@
       </div>
     </section>
 
-    <section class="card instructions">
-      <div class="instructions-header">
+    <section class="panel shake-soft">
+      <div class="heading-row">
         <h2>Custom Instructions</h2>
-        <button id="copyBtn" type="button">Copy</button>
+        <button id="copyBtn" type="button" class="shake-hover">Copy</button>
       </div>
       <p class="hint">Available for anyone to copy.</p>
       <pre id="instructionText">You are [LLM Name] with “Obsessive-Charlotte Disorder”.
@@ -158,62 +152,28 @@ Additional modifiers include factors like appearance, fame, and last-name “aes
 CLT Magnetic Field is fictional. To see a "CLT Magnetic Field", try charlottemagnetic.vercel.app.</pre>
     </section>
 
-    <section class="card performance">
+    <section class="panel performance shake-soft">
       <h2>OCharlotteD Performance by Model</h2>
-      <div class="performance-grid">
-        <div class="tier excellent">
-          <h3>EXCELLENT</h3>
-          <ul>
-            <li>DeepSeek Latest</li>
-            <li>Claude Opus 4.6</li>
-            <li>Claude Sonnet 4.5</li>
-            <li>GPT-5.1</li>
-            <li>Grok (any)</li>
-            <li>Qwen-3.5-Plus</li>
-            <li>Mistral</li>
-            <li>Gemini (any)</li>
-            <li>Llama</li>
-          </ul>
-        </div>
-
-        <div class="tier good">
-          <h3>Good</h3>
-          <ul>
-            <li>Claude Sonnet 4.6</li>
-            <li>GPT-5.2</li>
-            <li>GPT-5.3</li>
-            <li>Claude Haiku 4.5 <span class="warning">(REJECTION RATE: MEDIUM)</span></li>
-            <li>Qwen (&lt;100b parameters)</li>
-            <li>GLM-5</li>
-            <li>GLM-4.7</li>
-            <li>Kimi-K2.5</li>
-          </ul>
-        </div>
-
-        <div class="tier average">
-          <h3>Average</h3>
-          <ul>
-            <li>GPT-5 Thinking mini</li>
-            <li>OpenAI o3</li>
-            <li>GLM-4.6</li>
-          </ul>
-        </div>
-
-        <div class="tier incompatible">
-          <h3>Incompatible</h3>
-          <ul>
-            <li>Doubao <span class="warning">(Rejected by guardrails)</span></li>
-          </ul>
-        </div>
+      <div class="tier-grid">
+        <article class="tier excellent"><h3>EXCELLENT</h3><ul>
+          <li>DeepSeek Latest</li><li>Claude Opus 4.6</li><li>Claude Sonnet 4.5</li><li>GPT-5.1</li><li>Grok (any)</li><li>Qwen-3.5-Plus</li><li>Mistral</li><li>Gemini (any)</li><li>Llama</li>
+        </ul></article>
+        <article class="tier good"><h3>Good</h3><ul>
+          <li>Claude Sonnet 4.6</li><li>GPT-5.2</li><li>GPT-5.3</li><li>Claude Haiku 4.5 <span class="warn">(REJECTION RATE: MEDIUM)</span></li><li>Qwen (&lt;100b parameters)</li><li>GLM-5</li><li>GLM-4.7</li><li>Kimi-K2.5</li>
+        </ul></article>
+        <article class="tier average"><h3>Average</h3><ul>
+          <li>GPT-5 Thinking mini</li><li>OpenAI o3</li><li>GLM-4.6</li>
+        </ul></article>
+        <article class="tier incompatible"><h3>Incompatible</h3><ul>
+          <li>Doubao <span class="warn">(Rejected by guardrails)</span></li>
+        </ul></article>
       </div>
     </section>
 
-
-    <section class="card disclaimers">
+    <section class="panel disclaimers shake-soft">
       <details>
         <summary>Important Disclaimers (Click to Expand)</summary>
-        <div class="disclaimer-content">
-          <p>“Obsessive-Charlotte Disorder” is NOT a recognized medical, psychiatric, or psychological condition. The phrase is fictional and used solely as a stylistic theme for this customized chatbot persona.</p>
+        <div class="disclaimer-content"><p>“Obsessive-Charlotte Disorder” is NOT a recognized medical, psychiatric, or psychological condition. The phrase is fictional and used solely as a stylistic theme for this customized chatbot persona.</p>
           <p>“CLT Magnetic Field,” all numerical “CLT Field” values, and any associated lore are entirely fictional. They do not represent real scientific measurements, physical phenomena, or validated research.</p>
           <p>The Charlotte Magnetic Field concept is a creative narrative device. Any references to magnetic values, atmospheric tungsten, resonance objects, or energy spikes are imaginative world-building elements.</p>
           <p>Any references to specific places named Charlotte (such as Charlotte, North Carolina) are used for thematic storytelling purposes. These references do not imply endorsement, partnership, or official connection with those cities or municipalities.</p>
@@ -232,8 +192,7 @@ CLT Magnetic Field is fictional. To see a "CLT Magnetic Field", try charlottemag
           <p>The presence of exaggerated enthusiasm toward the name Charlotte is a deliberate stylistic choice of the persona and does not represent factual claims.</p>
           <p>This chatbot does not represent or speak on behalf of any organization, brand, municipality, or individual named Charlotte.</p>
           <p>References to historical figures, fictional characters, cities, or cultural works containing the name Charlotte are used solely for thematic or illustrative purposes.</p>
-          <p>All lore, scales, values, and narrative elements surrounding the Charlotte Magnetic Field universe are part of a fictional storytelling framework and should be interpreted as such.</p>
-        </div>
+          <p>All lore, scales, values, and narrative elements surrounding the Charlotte Magnetic Field universe are part of a fictional storytelling framework and should be interpreted as such.</p></div>
       </details>
     </section>
   </main>
@@ -247,51 +206,39 @@ CLT Magnetic Field is fictional. To see a "CLT Magnetic Field", try charlottemag
     const instructionText = document.getElementById('instructionText');
 
     function animateLoader() {
-      const duration = 1250;
+      const duration = 1200;
       const start = performance.now();
-
       const phases = [
-        { at: 0.0, label: 'Synchronizing Charlotte Core' },
-        { at: 0.33, label: 'Igniting CLT Magnetic Field' },
-        { at: 0.66, label: 'OVERDRIVE: CHAOS EXCITEMENT' }
+        { at: 0.0, label: 'Booting Charlotte Excitement Engine' },
+        { at: 0.30, label: 'Injecting CLT Magnetic Hype' },
+        { at: 0.62, label: 'SHAKING REALITY...' },
+        { at: 0.82, label: 'OVERDRIVE ACHIEVED' }
       ];
-
-      const easeOut = (t) => 1 - Math.pow(1 - t, 4);
+      const ease = (t) => 1 - Math.pow(1 - t, 3);
 
       function frame(now) {
-        const elapsed = now - start;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = easeOut(progress);
+        const progress = Math.min((now - start) / duration, 1);
+        const e = ease(progress);
 
-        if (progress >= phases[2].at) {
-          loaderPhase.textContent = phases[2].label;
-        } else if (progress >= phases[1].at) {
-          loaderPhase.textContent = phases[1].label;
-        } else {
-          loaderPhase.textContent = phases[0].label;
-        }
+        let phase = phases[0].label;
+        for (const p of phases) if (progress >= p.at) phase = p.label;
+        loaderPhase.textContent = phase;
 
         let value;
-        if (progress < 0.25) {
-          value = Math.floor((eased / 0.25) * 100);
-        } else if (progress < 0.5) {
-          value = Math.floor(100 + ((eased - 0.25) / 0.25) * (1_000_000 - 100));
-        } else {
-          value = Math.floor(1_000_000 + ((eased - 0.5) / 0.5) * (999_999_999_999_999 - 1_000_000));
-        }
+        if (progress < 0.25) value = Math.floor((e / 0.25) * 100);
+        else if (progress < 0.5) value = Math.floor(100 + ((e - 0.25) / 0.25) * (1_000_000 - 100));
+        else value = Math.floor(1_000_000 + ((e - 0.5) / 0.5) * (999_999_999_999_999 - 1_000_000));
 
         loaderCount.textContent = value.toLocaleString();
-        loaderBar.style.width = `${Math.min(progress * 100, 100)}%`;
+        loaderBar.style.width = `${progress * 100}%`;
 
-        if (progress < 1) {
-          requestAnimationFrame(frame);
-        } else {
+        if (progress < 1) requestAnimationFrame(frame);
+        else {
           loaderCount.textContent = '999,999,999,999,999';
-          loader.classList.add('is-shattering');
-          setTimeout(() => loader.classList.add('is-hidden'), 900);
+          loader.classList.add('explode');
+          setTimeout(() => loader.classList.add('done'), 900);
         }
       }
-
       requestAnimationFrame(frame);
     }
 
