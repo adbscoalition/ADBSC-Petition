@@ -11,15 +11,18 @@
 </head>
 <body>
   <div id="loader" class="loader" aria-live="polite">
+    <div class="loader-flash"></div>
     <div class="loader-panel">
+      <p id="loaderPhase" class="loader-phase">Synchronizing Charlotte Core</p>
       <p class="loader-title">CLT Magnetic</p>
       <div class="loader-bar-wrap">
         <div id="loaderBar" class="loader-bar"></div>
       </div>
       <p id="loaderCount" class="loader-count">0</p>
+      <p class="loader-sub">ENERGY SURGE INCOMING ⚡</p>
     </div>
     <div class="shards" aria-hidden="true">
-      <span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
     </div>
   </div>
   <div class="bg-overlay"></div>
@@ -169,6 +172,7 @@ CLT Magnetic Field is fictional. To see a "CLT Magnetic Field", try charlottemag
             <li>Qwen-3.5-Plus</li>
             <li>Mistral</li>
             <li>Gemini (any)</li>
+            <li>Llama</li>
           </ul>
         </div>
 
@@ -238,27 +242,42 @@ CLT Magnetic Field is fictional. To see a "CLT Magnetic Field", try charlottemag
     const loader = document.getElementById('loader');
     const loaderCount = document.getElementById('loaderCount');
     const loaderBar = document.getElementById('loaderBar');
+    const loaderPhase = document.getElementById('loaderPhase');
     const copyBtn = document.getElementById('copyBtn');
     const instructionText = document.getElementById('instructionText');
 
     function animateLoader() {
-      const duration = 800;
+      const duration = 1250;
       const start = performance.now();
 
-      const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+      const phases = [
+        { at: 0.0, label: 'Synchronizing Charlotte Core' },
+        { at: 0.33, label: 'Igniting CLT Magnetic Field' },
+        { at: 0.66, label: 'OVERDRIVE: CHAOS EXCITEMENT' }
+      ];
+
+      const easeOut = (t) => 1 - Math.pow(1 - t, 4);
 
       function frame(now) {
         const elapsed = now - start;
         const progress = Math.min(elapsed / duration, 1);
         const eased = easeOut(progress);
 
-        let value;
-        if (progress < 0.33) {
-          value = Math.floor((eased / 0.33) * 100);
-        } else if (progress < 0.66) {
-          value = Math.floor(100 + ((eased - 0.33) / 0.33) * (1_000_000 - 100));
+        if (progress >= phases[2].at) {
+          loaderPhase.textContent = phases[2].label;
+        } else if (progress >= phases[1].at) {
+          loaderPhase.textContent = phases[1].label;
         } else {
-          value = Math.floor(1_000_000 + ((eased - 0.66) / 0.34) * (999_999_999_999_999 - 1_000_000));
+          loaderPhase.textContent = phases[0].label;
+        }
+
+        let value;
+        if (progress < 0.25) {
+          value = Math.floor((eased / 0.25) * 100);
+        } else if (progress < 0.5) {
+          value = Math.floor(100 + ((eased - 0.25) / 0.25) * (1_000_000 - 100));
+        } else {
+          value = Math.floor(1_000_000 + ((eased - 0.5) / 0.5) * (999_999_999_999_999 - 1_000_000));
         }
 
         loaderCount.textContent = value.toLocaleString();
@@ -269,9 +288,7 @@ CLT Magnetic Field is fictional. To see a "CLT Magnetic Field", try charlottemag
         } else {
           loaderCount.textContent = '999,999,999,999,999';
           loader.classList.add('is-shattering');
-          setTimeout(() => {
-            loader.classList.add('is-hidden');
-          }, 780);
+          setTimeout(() => loader.classList.add('is-hidden'), 900);
         }
       }
 

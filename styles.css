@@ -29,52 +29,81 @@ body {
 .loader {
   position: fixed;
   inset: 0;
-  z-index: 20;
+  z-index: 30;
   display: grid;
   place-items: center;
-  background: linear-gradient(130deg, #ff4db8, #ff7ce0, #ff59a8);
-  transition: opacity 0.35s ease;
+  background: radial-gradient(circle at 20% 20%, #ff9be9 0%, #ff52bb 32%, #8700ff 100%);
+  transition: opacity 0.4s ease;
+  overflow: hidden;
+}
+
+.loader-flash {
+  position: absolute;
+  inset: -30%;
+  background: conic-gradient(from 0deg, rgba(255,255,255,0.28), rgba(255,255,255,0), rgba(255,255,255,0.28));
+  animation: spinFlash 1.4s linear infinite;
 }
 
 .loader-panel {
-  width: min(520px, 88vw);
-  border-radius: 16px;
-  padding: 1.1rem;
-  background: rgba(30, 0, 30, 0.32);
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(6px);
+  width: min(580px, 90vw);
+  border-radius: 20px;
+  padding: 1.2rem;
+  background: rgba(20, 0, 30, 0.42);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
   text-align: center;
   position: relative;
   z-index: 2;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14), 0 20px 60px rgba(255, 0, 157, 0.45);
+}
+
+.loader-phase {
+  margin: 0;
+  color: #fff7ff;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  animation: phasePulse 0.4s ease-in-out infinite alternate;
 }
 
 .loader-title {
-  margin: 0 0 0.5rem;
+  margin: 0.45rem 0 0.5rem;
   font-family: 'Gravitas One', serif;
   color: #fff;
+  font-size: clamp(1.2rem, 3.2vw, 2rem);
+  text-shadow: 0 0 20px rgba(255, 230, 251, 0.8);
 }
 
 .loader-bar-wrap {
   width: 100%;
-  height: 14px;
+  height: 16px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .loader-bar {
   height: 100%;
   width: 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, #fff, #35e8ff);
+  background: linear-gradient(90deg, #fff, #35e8ff, #66ff8f, #ffe74d);
+  background-size: 220% 100%;
+  animation: barShift 0.8s linear infinite;
 }
 
 .loader-count {
-  margin: 0.65rem 0 0;
-  font-size: clamp(1rem, 4vw, 1.7rem);
+  margin: 0.65rem 0 0.25rem;
+  font-size: clamp(1.1rem, 5vw, 2rem);
   color: #fff8fd;
   font-weight: 800;
+}
+
+.loader-sub {
+  margin: 0;
+  color: #fff3bb;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 .shards {
@@ -85,33 +114,32 @@ body {
 
 .shards span {
   position: absolute;
-  width: 34%;
-  height: 38%;
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.28), rgba(255, 105, 201, 0.12));
+  width: 28%;
+  height: 30%;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.4), rgba(255, 105, 201, 0.1));
   opacity: 0;
 }
 
-.shards span:nth-child(1) { top: 8%; left: 6%; }
-.shards span:nth-child(2) { top: 6%; right: 8%; }
-.shards span:nth-child(3) { top: 33%; left: 34%; }
-.shards span:nth-child(4) { bottom: 14%; left: 9%; }
-.shards span:nth-child(5) { bottom: 7%; right: 11%; }
-.shards span:nth-child(6) { top: 28%; right: 28%; }
+.shards span:nth-child(1) { top: 8%; left: 3%; }
+.shards span:nth-child(2) { top: 5%; right: 6%; }
+.shards span:nth-child(3) { top: 24%; left: 34%; }
+.shards span:nth-child(4) { bottom: 16%; left: 6%; }
+.shards span:nth-child(5) { bottom: 9%; right: 10%; }
+.shards span:nth-child(6) { top: 35%; right: 28%; }
+.shards span:nth-child(7) { top: 50%; left: 15%; }
+.shards span:nth-child(8) { bottom: 25%; right: 35%; }
 
-.loader.is-shattering .loader-panel {
-  animation: panelBreak 0.7s ease forwards;
-}
-
-.loader.is-shattering .shards span {
-  animation: shardFly 0.8s ease forwards;
-}
-
-.loader.is-shattering .shards span:nth-child(1) { --dx: -42vw; --dy: -28vh; --r: -35deg; }
-.loader.is-shattering .shards span:nth-child(2) { --dx: 38vw; --dy: -32vh; --r: 24deg; }
-.loader.is-shattering .shards span:nth-child(3) { --dx: 0vw; --dy: -42vh; --r: 8deg; }
-.loader.is-shattering .shards span:nth-child(4) { --dx: -34vw; --dy: 35vh; --r: -22deg; }
-.loader.is-shattering .shards span:nth-child(5) { --dx: 33vw; --dy: 39vh; --r: 27deg; }
-.loader.is-shattering .shards span:nth-child(6) { --dx: 42vw; --dy: 4vh; --r: 33deg; }
+.loader.is-shattering .loader-panel { animation: panelBreak 0.9s ease forwards; }
+.loader.is-shattering .loader-flash { animation: flashOut 0.9s ease forwards; }
+.loader.is-shattering .shards span { animation: shardFly 1s ease forwards; }
+.loader.is-shattering .shards span:nth-child(1) { --dx: -45vw; --dy: -30vh; --r: -35deg; }
+.loader.is-shattering .shards span:nth-child(2) { --dx: 42vw; --dy: -35vh; --r: 24deg; }
+.loader.is-shattering .shards span:nth-child(3) { --dx: 0vw; --dy: -46vh; --r: 8deg; }
+.loader.is-shattering .shards span:nth-child(4) { --dx: -40vw; --dy: 40vh; --r: -22deg; }
+.loader.is-shattering .shards span:nth-child(5) { --dx: 37vw; --dy: 40vh; --r: 27deg; }
+.loader.is-shattering .shards span:nth-child(6) { --dx: 44vw; --dy: 8vh; --r: 33deg; }
+.loader.is-shattering .shards span:nth-child(7) { --dx: -28vw; --dy: 26vh; --r: -12deg; }
+.loader.is-shattering .shards span:nth-child(8) { --dx: 26vw; --dy: -20vh; --r: 18deg; }
 
 .loader.is-hidden {
   opacity: 0;
@@ -144,10 +172,10 @@ body {
 .card {
   backdrop-filter: blur(12px);
   border: 1px solid var(--line);
-  background: var(--card);
+  background: linear-gradient(160deg, rgba(32, 5, 44, 0.82), rgba(13, 4, 37, 0.7));
   border-radius: 20px;
   padding: 1.2rem;
-  box-shadow: 0 16px 42px rgba(106, 0, 108, 0.35);
+  box-shadow: 0 16px 42px rgba(106, 0, 108, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
   animation: riseIn 0.75s ease both;
 }
 
@@ -156,11 +184,10 @@ body {
 }
 
 .logo {
-  width: min(230px, 60vw);
-  border-radius: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.48);
-  box-shadow: 0 0 0 7px rgba(255, 77, 184, 0.2), 0 18px 42px rgba(0, 0, 0, 0.52);
-  animation: floatLogo 3s ease-in-out infinite;
+  width: min(420px, 92vw);
+  border-radius: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.68);
+  box-shadow: 0 0 0 10px rgba(255, 77, 184, 0.26), 0 24px 70px rgba(0, 0, 0, 0.62);
 }
 
 h1,
@@ -217,9 +244,9 @@ h2 {
 }
 
 .link-card:hover {
-  transform: translateY(-5px) scale(1.01);
+  transform: translateY(-7px) scale(1.03) rotate(-0.4deg);
   border-color: #ffffff;
-  box-shadow: 0 14px 34px rgba(255, 255, 255, 0.16);
+  box-shadow: 0 14px 34px rgba(255, 255, 255, 0.22);
 }
 
 .link-card h3 {
@@ -358,6 +385,27 @@ pre {
   }
 }
 
+
+
+@keyframes spinFlash {
+  from { transform: rotate(0deg) scale(1); }
+  to { transform: rotate(360deg) scale(1.08); }
+}
+
+@keyframes barShift {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 220% 0%; }
+}
+
+@keyframes phasePulse {
+  from { transform: scale(1); opacity: 0.8; }
+  to { transform: scale(1.02); opacity: 1; }
+}
+
+@keyframes flashOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
 
 .performance h2 {
   margin-bottom: 0.8rem;
