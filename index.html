@@ -14,6 +14,16 @@
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
 
+  <div id="entryLoader" class="entry-loader" aria-live="polite">
+    <div class="loader-core">
+      <p class="loader-label">Calibrating Charlotte Signal</p>
+      <h1>CLT FIELD SYNC</h1>
+      <p id="loaderCount" class="loader-count">0</p>
+      <div class="loader-track"><span id="loaderBar"></span></div>
+      <p id="loaderPhase" class="loader-phase">Booting ceremonial interface</p>
+    </div>
+  </div>
+
   <div class="background-field" aria-hidden="true"></div>
   <div class="field-rings" aria-hidden="true"></div>
   <div class="particle-layer" aria-hidden="true">
@@ -29,6 +39,7 @@
       <a href="#portals">Portals</a>
       <a href="#clt">CLT Field</a>
       <a href="#lore">Lore</a>
+      <a href="#suitability">Suitability</a>
       <a href="#instructions">Instructions</a>
     </nav>
   </header>
@@ -136,6 +147,28 @@
             <li>Maintain the end-of-response disclaimer rule.</li>
           </ul>
         </article>
+      </div>
+    </section>
+
+
+    <section id="suitability" class="panel" aria-labelledby="suitabilityTitle">
+      <div class="section-head">
+        <h2 id="suitabilityTitle">Model Suitability Matrix</h2>
+        <p>How strongly each model channel tends to preserve Charlotte intensity and lore adherence.</p>
+      </div>
+      <div class="suitability-grid">
+        <article class="suitability excellent"><h3>Excellent</h3><ul>
+          <li>DeepSeek Latest</li><li>Claude Opus 4.6</li><li>Claude Sonnet 4.5</li><li>GPT-5.1</li><li>Grok (any)</li><li>Qwen-3.5-Plus</li><li>Mistral</li><li>Gemini (any)</li><li>Llama</li>
+        </ul></article>
+        <article class="suitability good"><h3>Good</h3><ul>
+          <li>Claude Sonnet 4.6</li><li>GPT-5.2</li><li>GPT-5.3</li><li>GPT-5.4 Thinking <span class="warn">(LOW TOKENS PER SECOND)</span></li><li>Claude Haiku 4.5 <span class="warn">(REJECTION RATE: MEDIUM)</span></li><li>Qwen (&lt;100b parameters)</li><li>GLM-5</li><li>GLM-4.7</li><li>Kimi-K2.5</li>
+        </ul></article>
+        <article class="suitability average"><h3>Average</h3><ul>
+          <li>GPT-5 Thinking mini</li><li>OpenAI o3</li><li>GLM-4.6</li>
+        </ul></article>
+        <article class="suitability incompatible"><h3>Incompatible</h3><ul>
+          <li>Doubao <span class="warn">(Rejected by guardrails)</span></li>
+        </ul></article>
       </div>
     </section>
 
@@ -258,9 +291,26 @@ ALWAYS ADD DISCLAIMER AT THE END to remind OCD (Charlotte) is not a real disorde
     <section class="panel" aria-labelledby="discTitle">
       <h2 id="discTitle">Important Disclaimers</h2>
       <div class="disclaimer-grid">
-        <p>“Obsessive-Charlotte Disorder” is not a recognized medical or psychological condition and is used as fictional stylistic framing.</p>
-        <p>“CLT Magnetic Field,” field values, atmospheric tungsten references, and lore mechanics are fictional worldbuilding elements.</p>
-        <p>This project is independent and is not affiliated with or endorsed by OpenAI, municipalities named Charlotte, or related organizations.</p>
+        <p>“Obsessive-Charlotte Disorder” is NOT a recognized medical, psychiatric, or psychological condition. The phrase is fictional and used solely as a stylistic theme for this customized chatbot persona.</p>
+        <p>“CLT Magnetic Field,” all numerical “CLT Field” values, and any associated lore are entirely fictional. They do not represent real scientific measurements, physical phenomena, or validated research.</p>
+        <p>The Charlotte Magnetic Field concept is a creative narrative device. Any references to magnetic values, atmospheric tungsten, resonance objects, or energy spikes are imaginative world-building elements.</p>
+        <p>Any references to specific places named Charlotte (such as Charlotte, North Carolina) are used for thematic storytelling purposes. These references do not imply endorsement, partnership, or official connection with those cities or municipalities.</p>
+        <p>Any references to real people named Charlotte are coincidental or illustrative. No statement should be interpreted as endorsement, affiliation, or representation of any individual.</p>
+        <p>This customized chatbot is an independent project. It is not affiliated with, endorsed by, sponsored by, or officially connected to OpenAI, any municipality named Charlotte, or any organization bearing the name Charlotte.</p>
+        <p>The chatbot’s responses are generated for entertainment, creative interaction, and experimental demonstration purposes.</p>
+        <p>Content produced by this chatbot should not be interpreted as scientific, medical, legal, engineering, or professional advice.</p>
+        <p>Magnetic field values, atmospheric tungsten references, and fictional energy readings described within the “Charlotte Magnetic Field” lore are not real measurements and cannot be detected using any scientific instrument.</p>
+        <p>Any websites referenced in relation to the fictional Charlotte Magnetic Field are informational or entertainment tools only and do not represent real scientific monitoring systems.</p>
+        <p>The use of fictional terminology such as “CLT values,” “Charlotte emitters,” or “field stacking” is purely narrative and does not describe real-world phenomena.</p>
+        <p>Geographic names that include the word “Charlotte” remain real locations, but their depiction within this chatbot’s narrative framework is fictionalized.</p>
+        <p>The existence of individuals legally named “Charlotte” does not imply they possess or emit any special properties or energies.</p>
+        <p>Any fictional system describing energy emissions from individuals named Charlotte is entirely imaginative and not based on biological, physical, or sociological evidence.</p>
+        <p>Platform policies, moderation systems, and usage limits may affect the behavior, availability, or responses of this chatbot depending on where it is deployed.</p>
+        <p>Features, tone, and character behavior may vary between platforms or versions of the chatbot.</p>
+        <p>The presence of exaggerated enthusiasm toward the name Charlotte is a deliberate stylistic choice of the persona and does not represent factual claims.</p>
+        <p>This chatbot does not represent or speak on behalf of any organization, brand, municipality, or individual named Charlotte.</p>
+        <p>References to historical figures, fictional characters, cities, or cultural works containing the name Charlotte are used solely for thematic or illustrative purposes.</p>
+        <p>All lore, scales, values, and narrative elements surrounding the Charlotte Magnetic Field universe are part of a fictional storytelling framework and should be interpreted as such.</p>
       </div>
     </section>
   </main>
@@ -276,6 +326,10 @@ ALWAYS ADD DISCLAIMER AT THE END to remind OCD (Charlotte) is not a real disorde
   </footer>
 
   <script>
+    const entryLoader = document.getElementById('entryLoader');
+    const loaderCount = document.getElementById('loaderCount');
+    const loaderBar = document.getElementById('loaderBar');
+    const loaderPhase = document.getElementById('loaderPhase');
     const copyBtn = document.getElementById('copyBtn');
     const instructionText = document.getElementById('instructionText');
     const intensityValue = document.getElementById('intensityValue');
@@ -293,6 +347,37 @@ ALWAYS ADD DISCLAIMER AT THE END to remind OCD (Charlotte) is not a real disorde
     }
 
     animateIntensity();
+
+    function animateEntryLoader() {
+      const duration = 1550;
+      const phases = [
+        { at: 0.0, label: 'Booting ceremonial interface' },
+        { at: 0.33, label: 'Aligning tungsten resonance' },
+        { at: 0.68, label: 'Synchronizing Charlotte field' },
+        { at: 0.9, label: 'Signal stable' }
+      ];
+      const start = performance.now();
+
+      function frame(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const value = Math.floor(progress * 999999999999999);
+        loaderCount.textContent = value.toLocaleString();
+        loaderBar.style.width = `${progress * 100}%`;
+        let phase = phases[0].label;
+        for (const p of phases) if (progress >= p.at) phase = p.label;
+        loaderPhase.textContent = phase;
+
+        if (progress < 1) requestAnimationFrame(frame);
+        else {
+          loaderCount.textContent = '999,999,999,999,999';
+          entryLoader.classList.add('loaded');
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    animateEntryLoader();
+
 
     copyBtn.addEventListener('click', async () => {
       try {

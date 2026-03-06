@@ -46,6 +46,73 @@ body {
   border-radius: 8px;
 }
 
+.entry-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 20%, rgba(146, 96, 255, 0.4), rgba(8, 10, 16, 0.98));
+  backdrop-filter: blur(8px);
+  transition: opacity 0.55s ease, visibility 0.55s ease;
+}
+
+.entry-loader.loaded {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-core {
+  width: min(680px, calc(100% - 2rem));
+  border-radius: 20px;
+  border: 1px solid rgba(184, 197, 255, 0.45);
+  background: linear-gradient(160deg, rgba(26, 31, 52, 0.92), rgba(15, 18, 30, 0.92));
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255,255,255,0.08);
+  padding: 1.1rem;
+  text-align: center;
+}
+
+.loader-core h1,
+.loader-label {
+  font-family: 'Gravitas One', serif;
+}
+
+.loader-label,
+.loader-phase {
+  margin: 0;
+  color: var(--cyan);
+}
+
+.loader-core h1 {
+  margin: 0.35rem 0;
+  font-size: clamp(1.2rem, 4.5vw, 2rem);
+}
+
+.loader-count {
+  margin: 0;
+  font-size: clamp(1.1rem, 5vw, 2rem);
+  color: #fff;
+  font-weight: 800;
+}
+
+.loader-track {
+  margin: 0.6rem 0;
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.24);
+  overflow: hidden;
+  background: rgba(153,163,190,0.2);
+}
+
+.loader-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--violet), var(--magenta), var(--cyan));
+}
+
+
 .background-field,
 .field-rings,
 .particle-layer {
@@ -346,6 +413,28 @@ p { color: var(--text-soft); line-height: 1.58; }
 
 .lore-card ul { margin: 0.65rem 0 0; padding-left: 1.05rem; }
 .lore-card li { margin-bottom: 0.45rem; color: var(--text-soft); }
+
+.suitability-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.8rem;
+}
+
+.suitability {
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  padding: 0.9rem;
+  background: rgba(20, 23, 36, 0.62);
+}
+
+.suitability h3 { font-size: 1rem; }
+.suitability ul { margin: 0.65rem 0 0; padding-left: 1.05rem; }
+.suitability li { margin-bottom: 0.4rem; color: var(--text-soft); }
+.suitability.excellent { border-color: rgba(255, 62, 168, 0.56); }
+.suitability.good { border-color: rgba(156, 239, 255, 0.56); }
+.suitability.average { border-color: rgba(184, 197, 255, 0.45); }
+.suitability.incompatible { border-color: rgba(255, 133, 133, 0.62); }
+.warn { color: #ffd6ea; font-weight: 700; }
 
 .section-row {
   display: flex;
