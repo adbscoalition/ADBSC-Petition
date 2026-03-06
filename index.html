@@ -40,9 +40,6 @@
       </div>
 
       <p id="loaderStatus" class="loader-status">Field intensity rising...</p>
-      <div class="loader-actions">
-        <button id="enterFieldBtn" class="btn primary" type="button">Enter the Field</button>
-      </div>
     </div>
   </div>
 
@@ -57,7 +54,8 @@
       <img class="brand-logo" src="https://i.ibb.co/BV0KDwfh/Chat-GPT-Image-Mar-3-2026-10-03-08-PM.png" alt="OCharlotteD logo" />
       <p class="brand-tag">Digital shrine to <span>Charlotte energy</span></p>
     </div>
-    <nav class="header-nav" aria-label="Primary">
+    <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="primaryNav">Menu</button>
+    <nav id="primaryNav" class="header-nav" aria-label="Primary">
       <a href="#portals">Portals</a>
       <a href="#clt">CLT Field</a>
       <a href="#lore">Lore</a>
@@ -354,7 +352,8 @@ ALWAYS ADD DISCLAIMER AT THE END to remind OCD (Charlotte) is not a real disorde
     const tungstenValue = document.getElementById('tungstenValue');
     const tungstenBar = document.getElementById('tungstenBar');
     const loaderStatus = document.getElementById('loaderStatus');
-    const enterFieldBtn = document.getElementById('enterFieldBtn');
+    const navToggle = document.getElementById('navToggle');
+    const primaryNav = document.getElementById('primaryNav');
     const copyBtn = document.getElementById('copyBtn');
     const instructionText = document.getElementById('instructionText');
     const intensityValue = document.getElementById('intensityValue');
@@ -441,9 +440,20 @@ ALWAYS ADD DISCLAIMER AT THE END to remind OCD (Charlotte) is not a real disorde
     animateEntryLoader();
 
 
+    navToggle.addEventListener('click', () => {
+      const isOpen = primaryNav.classList.toggle('open');
+      navToggle.setAttribute('aria-expanded', String(isOpen));
+      navToggle.textContent = isOpen ? 'Close' : 'Menu';
+    });
 
-    enterFieldBtn.addEventListener('click', () => {
-      entryLoader.classList.add('loaded');
+    primaryNav.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        if (window.matchMedia('(max-width: 900px)').matches) {
+          primaryNav.classList.remove('open');
+          navToggle.setAttribute('aria-expanded', 'false');
+          navToggle.textContent = 'Menu';
+        }
+      });
     });
 
     copyBtn.addEventListener('click', async () => {
