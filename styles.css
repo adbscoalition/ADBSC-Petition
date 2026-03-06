@@ -160,12 +160,13 @@ body {
 }
 
 .panel {
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 26px;
   padding: 1.25rem;
-  background: linear-gradient(165deg, rgba(89, 29, 99, 0.75), rgba(42, 15, 61, 0.72));
+  background: linear-gradient(160deg, rgba(106, 35, 118, 0.82), rgba(46, 16, 68, 0.8));
   backdrop-filter: blur(10px);
-  box-shadow: 0 16px 44px rgba(98, 30, 120, 0.32), inset 0 0 0 1px rgba(255,255,255,0.12);
+  box-shadow: 0 18px 56px rgba(120, 38, 146, 0.4), inset 0 0 0 1px rgba(255,255,255,0.16);
   position: relative;
 }
 
@@ -174,9 +175,21 @@ body {
 .launch,
 .tier {
   background-image:
-    radial-gradient(circle at 12px 12px, rgba(255, 205, 234, 0.08) 0 2px, transparent 2px),
-    radial-gradient(circle at 28px 28px, rgba(255, 205, 234, 0.06) 0 2px, transparent 2px);
-  background-size: 40px 40px;
+    radial-gradient(circle at 12px 12px, rgba(255, 205, 234, 0.09) 0 2px, transparent 2px),
+    radial-gradient(circle at 28px 28px, rgba(255, 205, 234, 0.07) 0 2px, transparent 2px),
+    linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0));
+  background-size: 40px 40px, 40px 40px, auto;
+}
+
+
+.panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.09) 38%, transparent 62%);
+  transform: translateX(-120%);
+  animation: panelSweep 7s ease-in-out infinite;
 }
 
 .cupid::before {
@@ -240,12 +253,13 @@ h3 {
   border-radius: 18px;
   border: 2px solid var(--line);
   padding: 1rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
 }
 
 .launch:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 12px 30px rgba(255, 182, 229, 0.22);
+  transform: translateY(-5px) scale(1.025);
+  border-color: rgba(255, 235, 250, 0.85);
+  box-shadow: 0 16px 36px rgba(255, 182, 229, 0.28), 0 0 0 1px rgba(255,255,255,0.15) inset;
 }
 
 .launch h3 { margin: 0; }
@@ -332,6 +346,10 @@ pre {
     padding: 1rem;
   }
 
+  .panel::after {
+    animation-duration: 9s;
+  }
+
   .cupid::before {
     top: -10px;
     right: 10px;
@@ -364,3 +382,7 @@ pre {
 @keyframes barFlow { from { background-position: 0 0; } to { background-position: 240% 0; } }
 @keyframes bgPulse { from { opacity: 0.8; } to { opacity: 1; } }
 @keyframes heartFloat { 0% { transform: translateY(0) scale(1); opacity: 0.75; } 100% { transform: translateY(-120vh) scale(1.15); opacity: 0; } }
+@keyframes panelSweep {
+  0%, 75%, 100% { transform: translateX(-120%); }
+  45% { transform: translateX(120%); }
+}
