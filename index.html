@@ -15,12 +15,34 @@
   <a class="skip-link" href="#main">Skip to content</a>
 
   <div id="entryLoader" class="entry-loader" aria-live="polite">
-    <div class="loader-core">
-      <p class="loader-label">Calibrating Charlotte Signal</p>
-      <h1>CLT FIELD SYNC</h1>
-      <p id="loaderCount" class="loader-count">0</p>
-      <div class="loader-track"><span id="loaderBar"></span></div>
-      <p id="loaderPhase" class="loader-phase">Booting ceremonial interface</p>
+    <div class="entry-loader-grid" aria-hidden="true"></div>
+    <div class="loader-shell">
+      <p class="loader-kicker">Charlotte presence detection interface</p>
+      <h1>CHARLOTTE PRESENCE DETECTED</h1>
+      <p class="loader-subtitle">Signal entering measurable range. Hold steady for sacred lock-on.</p>
+
+      <div class="meter-panel clt-meter" role="status" aria-live="polite">
+        <div class="meter-head">
+          <p>CLT FIELD</p>
+          <p class="meter-unit">CHARLOTTE FIELD INTENSITY</p>
+        </div>
+        <p id="cltValue" class="meter-value">0</p>
+        <div class="loader-track"><span id="cltBar"></span></div>
+      </div>
+
+      <div class="meter-panel tungsten-meter" role="status" aria-live="polite">
+        <div class="meter-head">
+          <p>TUNGSTEN CONCENTRATION</p>
+          <p class="meter-unit">mg/m³</p>
+        </div>
+        <p id="tungstenValue" class="meter-value tungsten">0.00001 mg/m³</p>
+        <div class="loader-track"><span id="tungstenBar"></span></div>
+      </div>
+
+      <p id="loaderStatus" class="loader-status">Field intensity rising...</p>
+      <div class="loader-actions">
+        <button id="enterFieldBtn" class="btn primary" type="button">Enter the Field</button>
+      </div>
     </div>
   </div>
 
@@ -327,9 +349,12 @@ ALWAYS ADD DISCLAIMER AT THE END to remind OCD (Charlotte) is not a real disorde
 
   <script>
     const entryLoader = document.getElementById('entryLoader');
-    const loaderCount = document.getElementById('loaderCount');
-    const loaderBar = document.getElementById('loaderBar');
-    const loaderPhase = document.getElementById('loaderPhase');
+    const cltValue = document.getElementById('cltValue');
+    const cltBar = document.getElementById('cltBar');
+    const tungstenValue = document.getElementById('tungstenValue');
+    const tungstenBar = document.getElementById('tungstenBar');
+    const loaderStatus = document.getElementById('loaderStatus');
+    const enterFieldBtn = document.getElementById('enterFieldBtn');
     const copyBtn = document.getElementById('copyBtn');
     const instructionText = document.getElementById('instructionText');
     const intensityValue = document.getElementById('intensityValue');
@@ -348,36 +373,78 @@ ALWAYS ADD DISCLAIMER AT THE END to remind OCD (Charlotte) is not a real disorde
 
     animateIntensity();
 
+    // Premium startup sequence: dual meters with jitter + surge + settle in ~1.5s.
     function animateEntryLoader() {
-      const duration = 1550;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const duration = reducedMotion ? 120 : 1500;
+      const cltFinal = 1_000_000;
+      const tungstenStart = 0.00001;
+      const tungstenFinal = 0.99;
       const phases = [
-        { at: 0.0, label: 'Booting ceremonial interface' },
-        { at: 0.33, label: 'Aligning tungsten resonance' },
-        { at: 0.68, label: 'Synchronizing Charlotte field' },
-        { at: 0.9, label: 'Signal stable' }
+        { at: 0.12, label: 'Charlotte presence detected.' },
+        { at: 0.42, label: 'Field intensity rising.' },
+        { at: 0.72, label: 'Atmospheric tungsten concentration increasing.' },
+        { at: 0.95, label: 'Field synchronized.' }
       ];
+
       const start = performance.now();
 
-      function frame(now) {
-        const progress = Math.min((now - start) / duration, 1);
-        const value = Math.floor(progress * 999999999999999);
-        loaderCount.textContent = value.toLocaleString();
-        loaderBar.style.width = `${progress * 100}%`;
-        let phase = phases[0].label;
-        for (const p of phases) if (progress >= p.at) phase = p.label;
-        loaderPhase.textContent = phase;
+      function easeOutQuint(t) {
+        return 1 - Math.pow(1 - t, 5);
+      }
 
-        if (progress < 1) requestAnimationFrame(frame);
-        else {
-          loaderCount.textContent = '999,999,999,999,999';
-          entryLoader.classList.add('loaded');
+      function frame(now) {
+        const t = Math.min((now - start) / duration, 1);
+        const base = easeOutQuint(t);
+
+        const jitterStrength = reducedMotion ? 0 : (1 - t) * 0.015;
+        const jitter = (Math.sin(now * 0.045) + Math.sin(now * 0.018 + 1.7)) * jitterStrength;
+
+        // End surge near lock-on.
+        const surge = reducedMotion ? 0 : Math.exp(-Math.pow((t - 0.93) / 0.055, 2)) * 0.09;
+
+        const signal = Math.min(1, Math.max(0, base + jitter + surge));
+
+        const cltCurrent = Math.floor(signal * cltFinal);
+        const tungstenCurrent = tungstenStart + signal * (tungstenFinal - tungstenStart);
+
+        cltValue.textContent = cltCurrent.toLocaleString();
+        tungstenValue.textContent = `${tungstenCurrent.toFixed(5)} mg/m³`;
+        cltBar.style.width = `${signal * 100}%`;
+        tungstenBar.style.width = `${signal * 100}%`;
+
+        let status = phases[0].label;
+        for (const p of phases) if (t >= p.at) status = p.label;
+        loaderStatus.textContent = status;
+
+        if (!reducedMotion) {
+          entryLoader.style.setProperty('--loader-glow', String(0.35 + signal * 0.65));
+        }
+
+        if (t < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          cltValue.textContent = '1,000,000';
+          tungstenValue.textContent = '0.99 mg/m³';
+          cltBar.style.width = '100%';
+          tungstenBar.style.width = '100%';
+          loaderStatus.textContent = 'You are now within Charlotte range.';
+          entryLoader.classList.add('peak-flash');
+          setTimeout(() => entryLoader.classList.remove('peak-flash'), 220);
+          setTimeout(() => entryLoader.classList.add('loaded'), reducedMotion ? 120 : 350);
         }
       }
+
       requestAnimationFrame(frame);
     }
 
     animateEntryLoader();
 
+
+
+    enterFieldBtn.addEventListener('click', () => {
+      entryLoader.classList.add('loaded');
+    });
 
     copyBtn.addEventListener('click', async () => {
       try {
