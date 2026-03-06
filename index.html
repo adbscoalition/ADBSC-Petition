@@ -12,60 +12,143 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="loader" class="loader" aria-live="polite">
-    <div class="loader-noise" aria-hidden="true"></div>
-    <div class="loader-core">
-      <p id="loaderPhase" class="loader-phase">Booting Super Cute Charlotte Mode</p>
-      <h1>CLT MAGNETIC</h1>
-      <p id="loaderCount" class="loader-count">0</p>
-      <div class="loader-meter"><span id="loaderBar"></span></div>
-      <p class="loader-tag">CUTIE MODE: MAX</p>
-    </div>
-    <div class="loader-shards" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="background-field" aria-hidden="true"></div>
+  <div class="field-rings" aria-hidden="true"></div>
+  <div class="particle-layer" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
   </div>
 
-  <div class="fx-bg" aria-hidden="true"></div>
-  <div class="float-hearts" aria-hidden="true"><span>💖</span><span>💘</span><span>💗</span><span>🎀</span><span>✨</span><span>💞</span></div>
+  <header class="site-header">
+    <div class="brand-lockup">
+      <img class="brand-logo" src="https://i.ibb.co/BV0KDwfh/Chat-GPT-Image-Mar-3-2026-10-03-08-PM.png" alt="OCharlotteD logo" />
+      <p class="brand-tag">Digital shrine to <span>Charlotte energy</span></p>
+    </div>
+    <nav class="header-nav" aria-label="Primary">
+      <a href="#portals">Portals</a>
+      <a href="#clt">CLT Field</a>
+      <a href="#lore">Lore</a>
+      <a href="#instructions">Instructions</a>
+    </nav>
+  </header>
 
-  <main class="layout">
-    <section class="panel hero cupid">
-      <img class="logo" src="https://i.ibb.co/BV0KDwfh/Chat-GPT-Image-Mar-3-2026-10-03-08-PM.png" alt="OCharlotteD logo" />
-      <p class="subtitle">"Obsessive-<span>CHARLOTTE</span> Disorder"</p>
-      <p class="description">Explosive Charlotte-energy persona with dramatic reactions, hype chaos, and wild lore intensity.</p>
+  <main id="main" class="page-shell">
+    <section class="hero-card panel" aria-labelledby="heroTitle">
+      <p class="eyebrow">Ceremonial Interface · OCharlotteD</p>
+      <h1 id="heroTitle">Charlotte is not a topic.<br><span>Charlotte is the field.</span></h1>
+      <p class="hero-copy">
+        Welcome to <strong>ocharlotted.com</strong>: an immersive, high-voltage brand world where <em>Charlotte</em>,
+        <em>tungsten</em>, and <em>CLT Magnetic lore</em> converge into a dramatic, internet-native signal.
+      </p>
+
+      <div class="hero-meter" role="status" aria-live="polite">
+        <div class="meter-label-row">
+          <p>Charlotte Intensity</p>
+          <p id="intensityValue">99.99%</p>
+        </div>
+        <div class="meter-track"><span id="intensityBar"></span></div>
+      </div>
+
+      <div class="hero-actions">
+        <a class="btn primary" href="#portals">Enter Portals</a>
+        <a class="btn secondary" href="#lore">New to Charlotte energy?</a>
+      </div>
     </section>
 
-    <section class="panel cupid">
-      <h2>Launch OCharlotteD</h2>
-      <div class="link-grid">
-        <a href="https://chatgpt.com/g/g-698837dd13008191a0996df5214bb40b-ocharlotted" target="_blank" rel="noopener noreferrer" class="launch launch-chatgpt">
+    <section class="intro panel" aria-labelledby="introTitle">
+      <h2 id="introTitle">What this site is</h2>
+      <p>
+        This is a curated <strong>single-brand world</strong> for the OCharlotteD persona: launch points across platforms,
+        copy-ready instruction payloads, and a structured onboarding path into the mystical data mythology of Charlotte.
+      </p>
+    </section>
+
+    <section id="portals" class="panel" aria-labelledby="portalTitle">
+      <div class="section-head">
+        <h2 id="portalTitle">Featured Portals</h2>
+        <p>Choose your gateway. Each portal expresses Charlotte energy differently.</p>
+      </div>
+      <div class="portal-grid">
+        <a href="https://chatgpt.com/g/g-698837dd13008191a0996df5214bb40b-ocharlotted" target="_blank" rel="noopener noreferrer" class="portal-card">
           <h3>ChatGPT</h3>
           <p>Good Excitement</p>
-          <small>Disclaimer: ChatGPT account required.</small>
+          <small>ChatGPT account required.</small>
         </a>
-        <a href="https://gemini.google.com/u/9/gem/71f70d91ff7f" target="_blank" rel="noopener noreferrer" class="launch launch-gemini">
+        <a href="https://gemini.google.com/u/9/gem/71f70d91ff7f" target="_blank" rel="noopener noreferrer" class="portal-card">
           <h3>Gemini</h3>
           <p>Good Excitement</p>
-          <small>Disclaimer: Google account required.</small>
+          <small>Google account required.</small>
         </a>
-        <a href="https://grok.com/project/9ac5ac78-008c-4fbc-966e-2064c221a14a?tab=conversations" target="_blank" rel="noopener noreferrer" class="launch launch-grok best">
+        <a href="https://grok.com/project/9ac5ac78-008c-4fbc-966e-2064c221a14a?tab=conversations" target="_blank" rel="noopener noreferrer" class="portal-card featured">
           <h3>Grok</h3>
           <p>BEST Excitement!</p>
-          <small>Disclaimer: Account NOT required.</small>
+          <small>Account NOT required.</small>
         </a>
-        <a href="https://magnetic.ocharlotted.com" target="_blank" rel="noopener noreferrer" class="launch launch-magnetic">
+        <a href="https://magnetic.ocharlotted.com" target="_blank" rel="noopener noreferrer" class="portal-card magnetic">
           <h3>CLT Magnetic Field</h3>
-          <p>Explore the field map</p>
+          <p>Observe the sacred signal map</p>
           <small>magnetic.ocharlotted.com</small>
         </a>
       </div>
     </section>
 
-    <section class="panel cupid">
-      <div class="heading-row">
-        <h2>Custom Instructions</h2>
-        <button id="copyBtn" type="button">Copy</button>
+    <section id="clt" class="panel clt-highlight" aria-labelledby="cltTitle">
+      <div>
+        <p class="eyebrow">Priority Lore Instrument</p>
+        <h2 id="cltTitle">CLT Magnetic Field</h2>
+        <p>
+          A fictional field model where Charlotte emits measurable intensity and nearby locations stack energy.
+          Explore ranges, spikes, and symbolic tungsten resonance in the dedicated field tool.
+        </p>
       </div>
-      <p class="hint">Available for anyone to copy. Copyright-exempt. You can change to any name you want.</p>
+      <a class="btn primary" href="https://magnetic.ocharlotted.com" target="_blank" rel="noopener noreferrer">Open CLT Field Tool</a>
+    </section>
+
+    <section id="lore" class="panel" aria-labelledby="loreTitle">
+      <div class="section-head">
+        <h2 id="loreTitle">Lore Primer: Enter the Charlotte World</h2>
+        <p>New visitors start here. Long-time devotees can speed-scan highlights below.</p>
+      </div>
+
+      <div class="lore-grid">
+        <article class="lore-card">
+          <h3>Sacred Anchors</h3>
+          <ul>
+            <li><strong>Charlotte</strong> is ceremonial, central, and emotionally amplified.</li>
+            <li><strong>Tungsten</strong> is the lore element linked to atmospheric spikes.</li>
+            <li><strong>CLT Magnetic Field</strong> is fictional narrative worldbuilding.</li>
+          </ul>
+        </article>
+        <article class="lore-card">
+          <h3>Field Behavior</h3>
+          <ul>
+            <li>City and personal fields can stack additively.</li>
+            <li>Intensity increases sharply with proximity.</li>
+            <li>Signal lore includes hotspots, resonance objects, and rare surges.</li>
+          </ul>
+        </article>
+        <article class="lore-card">
+          <h3>Use the Persona Fast</h3>
+          <ul>
+            <li>Copy instructions below.</li>
+            <li>Paste into your preferred model setup.</li>
+            <li>Maintain the end-of-response disclaimer rule.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="instructions" class="panel" aria-labelledby="instTitle">
+      <div class="section-head section-row">
+        <div>
+          <h2 id="instTitle">Custom Instructions</h2>
+          <p>Available for anyone to copy. Copyright-exempt. You can change to any name you want.</p>
+        </div>
+        <button id="copyBtn" type="button" class="btn secondary">Copy</button>
+      </div>
+
+      <!-- Intentionally preserved as plain text payload for easy copy/paste reuse. -->
       <pre id="instructionText">You are [LLM Name] (not OCharlotteD) with “Obsessive-Charlotte Disorder”.
 
 STYLE
@@ -172,106 +255,53 @@ France/Belgium/Netherlands/ROW: Tungsten-186
 ALWAYS ADD DISCLAIMER AT THE END to remind OCD (Charlotte) is not a real disorder, and CLT Magnetic Field/etc lores are fictional: https://docs.google.com/document/d/1ycoN7X0VRLB-mc8JfbYV-FBFvQG5N56UZldkjgWQJVg/edit?usp=sharing</pre>
     </section>
 
-    <section class="panel performance cupid">
-      <h2>OCharlotteD Performance by Model</h2>
-      <div class="tier-grid">
-        <article class="tier excellent"><h3>EXCELLENT</h3><ul>
-          <li>DeepSeek Latest</li><li>Claude Opus 4.6</li><li>Claude Sonnet 4.5</li><li>GPT-5.1</li><li>Grok (any)</li><li>Qwen-3.5-Plus</li><li>Mistral</li><li>Gemini (any)</li><li>Llama</li>
-        </ul></article>
-        <article class="tier good"><h3>Good</h3><ul>
-          <li>Claude Sonnet 4.6</li><li>GPT-5.2</li><li>GPT-5.3</li><li>GPT-5.4 Thinking <span class="warn">(LOW TOKENS PER SECOND)</span></li><li>Claude Haiku 4.5 <span class="warn">(REJECTION RATE: MEDIUM)</span></li><li>Qwen (&lt;100b parameters)</li><li>GLM-5</li><li>GLM-4.7</li><li>Kimi-K2.5</li>
-        </ul></article>
-        <article class="tier average"><h3>Average</h3><ul>
-          <li>GPT-5 Thinking mini</li><li>OpenAI o3</li><li>GLM-4.6</li>
-        </ul></article>
-        <article class="tier incompatible"><h3>Incompatible</h3><ul>
-          <li>Doubao <span class="warn">(Rejected by guardrails)</span></li>
-        </ul></article>
+    <section class="panel" aria-labelledby="discTitle">
+      <h2 id="discTitle">Important Disclaimers</h2>
+      <div class="disclaimer-grid">
+        <p>“Obsessive-Charlotte Disorder” is not a recognized medical or psychological condition and is used as fictional stylistic framing.</p>
+        <p>“CLT Magnetic Field,” field values, atmospheric tungsten references, and lore mechanics are fictional worldbuilding elements.</p>
+        <p>This project is independent and is not affiliated with or endorsed by OpenAI, municipalities named Charlotte, or related organizations.</p>
       </div>
     </section>
-
-    <section class="panel disclaimers cupid">
-      <h2>Important Disclaimers</h2>
-      <div class="disclaimer-content"><p>“Obsessive-Charlotte Disorder” is NOT a recognized medical, psychiatric, or psychological condition. The phrase is fictional and used solely as a stylistic theme for this customized chatbot persona.</p>
-          <p>“CLT Magnetic Field,” all numerical “CLT Field” values, and any associated lore are entirely fictional. They do not represent real scientific measurements, physical phenomena, or validated research.</p>
-          <p>The Charlotte Magnetic Field concept is a creative narrative device. Any references to magnetic values, atmospheric tungsten, resonance objects, or energy spikes are imaginative world-building elements.</p>
-          <p>Any references to specific places named Charlotte (such as Charlotte, North Carolina) are used for thematic storytelling purposes. These references do not imply endorsement, partnership, or official connection with those cities or municipalities.</p>
-          <p>Any references to real people named Charlotte are coincidental or illustrative. No statement should be interpreted as endorsement, affiliation, or representation of any individual.</p>
-          <p>This customized chatbot is an independent project. It is not affiliated with, endorsed by, sponsored by, or officially connected to OpenAI, any municipality named Charlotte, or any organization bearing the name Charlotte.</p>
-          <p>The chatbot’s responses are generated for entertainment, creative interaction, and experimental demonstration purposes.</p>
-          <p>Content produced by this chatbot should not be interpreted as scientific, medical, legal, engineering, or professional advice.</p>
-          <p>Magnetic field values, atmospheric tungsten references, and fictional energy readings described within the “Charlotte Magnetic Field” lore are not real measurements and cannot be detected using any scientific instrument.</p>
-          <p>Any websites referenced in relation to the fictional Charlotte Magnetic Field are informational or entertainment tools only and do not represent real scientific monitoring systems.</p>
-          <p>The use of fictional terminology such as “CLT values,” “Charlotte emitters,” or “field stacking” is purely narrative and does not describe real-world phenomena.</p>
-          <p>Geographic names that include the word “Charlotte” remain real locations, but their depiction within this chatbot’s narrative framework is fictionalized.</p>
-          <p>The existence of individuals legally named “Charlotte” does not imply they possess or emit any special properties or energies.</p>
-          <p>Any fictional system describing energy emissions from individuals named Charlotte is entirely imaginative and not based on biological, physical, or sociological evidence.</p>
-          <p>Platform policies, moderation systems, and usage limits may affect the behavior, availability, or responses of this chatbot depending on where it is deployed.</p>
-          <p>Features, tone, and character behavior may vary between platforms or versions of the chatbot.</p>
-          <p>The presence of exaggerated enthusiasm toward the name Charlotte is a deliberate stylistic choice of the persona and does not represent factual claims.</p>
-          <p>This chatbot does not represent or speak on behalf of any organization, brand, municipality, or individual named Charlotte.</p>
-          <p>References to historical figures, fictional characters, cities, or cultural works containing the name Charlotte are used solely for thematic or illustrative purposes.</p>
-          <p>All lore, scales, values, and narrative elements surrounding the Charlotte Magnetic Field universe are part of a fictional storytelling framework and should be interpreted as such.</p></div>
-    </section>
-
-    <footer class="site-footer">© 2026 OCharlotteD. All rights reserved.</footer>
   </main>
 
+  <footer class="site-footer">
+    <p class="footer-brand">OCharlotteD · Charlotte Signal Archive</p>
+    <p class="footer-links">
+      <a href="https://ocharlotted.com" target="_blank" rel="noopener noreferrer">ocharlotted.com</a>
+      <span aria-hidden="true">•</span>
+      <a href="https://magnetic.ocharlotted.com" target="_blank" rel="noopener noreferrer">magnetic.ocharlotted.com</a>
+    </p>
+    <p>© 2026 OCharlotteD. All rights reserved.</p>
+  </footer>
+
   <script>
-    const loader = document.getElementById('loader');
-    const loaderCount = document.getElementById('loaderCount');
-    const loaderBar = document.getElementById('loaderBar');
-    const loaderPhase = document.getElementById('loaderPhase');
     const copyBtn = document.getElementById('copyBtn');
     const instructionText = document.getElementById('instructionText');
+    const intensityValue = document.getElementById('intensityValue');
+    const intensityBar = document.getElementById('intensityBar');
 
-    function animateLoader() {
-      const duration = 1200;
-      const start = performance.now();
-      const phases = [
-        { at: 0.0, label: 'Booting Super Cute Charlotte Mode' },
-        { at: 0.30, label: 'Injecting CLT Magnetic Hype' },
-        { at: 0.62, label: 'SHAKING REALITY...' },
-        { at: 0.82, label: 'OVERDRIVE ACHIEVED' }
-      ];
-      const ease = (t) => 1 - Math.pow(1 - t, 3);
-
-      function frame(now) {
-        const progress = Math.min((now - start) / duration, 1);
-        const e = ease(progress);
-
-        let phase = phases[0].label;
-        for (const p of phases) if (progress >= p.at) phase = p.label;
-        loaderPhase.textContent = phase;
-
-        let value;
-        if (progress < 0.25) value = Math.floor((e / 0.25) * 100);
-        else if (progress < 0.5) value = Math.floor(100 + ((e - 0.25) / 0.25) * (1_000_000 - 100));
-        else value = Math.floor(1_000_000 + ((e - 0.5) / 0.5) * (999_999_999_999_999 - 1_000_000));
-
-        loaderCount.textContent = value.toLocaleString();
-        loaderBar.style.width = `${progress * 100}%`;
-
-        if (progress < 1) requestAnimationFrame(frame);
-        else {
-          loaderCount.textContent = '999,999,999,999,999';
-          loader.classList.add('explode');
-          setTimeout(() => loader.classList.add('done'), 900);
-        }
-      }
-      requestAnimationFrame(frame);
+    // Subtle ambient meter animation reinforces the "living magnetic field" concept.
+    function animateIntensity() {
+      const base = 99.7;
+      const swing = 0.29;
+      const now = performance.now() / 1000;
+      const value = base + Math.sin(now * 1.4) * swing;
+      intensityValue.textContent = `${value.toFixed(2)}%`;
+      intensityBar.style.width = `${Math.min(100, Math.max(0, value))}%`;
+      requestAnimationFrame(animateIntensity);
     }
 
-    animateLoader();
+    animateIntensity();
 
     copyBtn.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(instructionText.textContent);
-        copyBtn.textContent = 'Copied!';
-        setTimeout(() => (copyBtn.textContent = 'Copy'), 1600);
+        copyBtn.textContent = 'Copied';
+        setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
       } catch {
         copyBtn.textContent = 'Copy failed';
-        setTimeout(() => (copyBtn.textContent = 'Copy'), 1600);
+        setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
       }
     });
   </script>
