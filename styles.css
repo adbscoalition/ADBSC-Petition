@@ -146,11 +146,17 @@ body {
 .layout {
   position: relative;
   z-index: 3;
+  width: min(100%, 1080px);
   max-width: 1080px;
   margin: 0 auto;
   padding: 1.25rem clamp(0.75rem, 3vw, 1.25rem) 2rem;
   display: grid;
   gap: 1rem;
+  justify-items: center;
+}
+
+.layout > * {
+  width: 100%;
 }
 
 .panel {
@@ -185,7 +191,9 @@ body {
 .hero { text-align: center; }
 
 .logo {
-  width: min(520px, 95vw);
+  display: block;
+  width: min(100%, 520px);
+  margin: 0 auto;
   border: 3px solid rgba(255,255,255,0.8);
   border-radius: 22px;
   box-shadow: 0 0 0 11px rgba(255, 107, 193, 0.24), 0 22px 60px rgba(0,0,0,0.55);
@@ -303,6 +311,13 @@ pre {
 }
 
 @media (max-width: 768px) {
+  .layout {
+    width: min(100%, 680px);
+    margin-inline: auto;
+    padding-left: clamp(0.75rem, 4vw, 1rem);
+    padding-right: clamp(0.75rem, 4vw, 1rem);
+  }
+
   body {
     background-attachment: scroll;
   }
