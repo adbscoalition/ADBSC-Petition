@@ -17,7 +17,7 @@
 html, body { margin: 0; padding: 0; }
 
 body {
-  font-family: 'Lisu Bosa', system-ui, sans-serif;
+  font-family: 'Zen Antique Soft', system-ui, sans-serif;
   color: var(--text);
   background:
     radial-gradient(circle at 20% -10%, #261a4b 0%, transparent 44%),
@@ -303,7 +303,7 @@ body {
   background: rgba(22,26,40,.75);
   color: var(--text);
   padding: .45rem .9rem;
-  font-family: 'Lisu Bosa', system-ui, sans-serif;
+  font-family: 'Zen Antique Soft', system-ui, sans-serif;
   font-weight: 700;
 }
 
@@ -351,7 +351,7 @@ p { color: var(--text-soft); line-height: 1.58; }
   color: var(--text);
   background: linear-gradient(160deg, rgba(42,47,72,.96), rgba(25,29,46,.96));
   cursor: pointer;
-  font-family: 'Lisu Bosa', system-ui, sans-serif;
+  font-family: 'Zen Antique Soft', system-ui, sans-serif;
   font-weight: 700;
   box-shadow: 0 6px 18px rgba(0,0,0,.32);
   transition: transform .2s ease,border-color .2s ease,box-shadow .2s ease,filter .2s ease;
