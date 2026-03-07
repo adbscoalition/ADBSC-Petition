@@ -5,11 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-site-verification" content="80UmwqIEGJ7TAXPsSAttlrATkxJ07hnnddcfAKkEbeo" />
   <title>OCharlotteD — Instructions</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Gravitas+One&family=Zen+Antique+Soft&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" href="https://i.ibb.co/h1wBpKQy/Chat-GPT-Image-Mar-5-2026-05-26-00-PM.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Gravitas+One&family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  />
+
+  <link
+    rel="icon"
+    type="image/png"
+    href="https://i.ibb.co/h1wBpKQy/Chat-GPT-Image-Mar-5-2026-05-26-00-PM.png"
+  />
   <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    html,
+    body {
+      font-family: "Public Sans", sans-serif;
+    }
+
+    h1,
+    h2,
+    h3,
+    .loader-shell h1 {
+      font-family: "Gravitas One", serif;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font-family: inherit;
+    }
+
+    pre,
+    code {
+      font-family: "Public Sans", sans-serif;
+    }
+  </style>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -19,18 +54,35 @@
     <div class="loader-shell">
       <p class="loader-kicker">Instruction core startup</p>
       <h1>Initializing Instruction Core</h1>
-      <div class="instruction-console"><p id="typedLoaderLine" class="typed-line"></p></div>
+      <div class="instruction-console">
+        <p id="typedLoaderLine" class="typed-line"></p>
+      </div>
       <p id="instructionsLoaderStatus" class="loader-status">Loading instruction package...</p>
     </div>
   </div>
+
   <div class="background-field" aria-hidden="true"></div>
 
   <header class="site-header">
     <div class="brand-lockup">
-      <img class="brand-logo" src="https://i.ibb.co/BV0KDwfh/Chat-GPT-Image-Mar-3-2026-10-03-08-PM.png" alt="OCharlotteD logo" />
+      <img
+        class="brand-logo"
+        src="https://i.ibb.co/BV0KDwfh/Chat-GPT-Image-Mar-3-2026-10-03-08-PM.png"
+        alt="OCharlotteD logo"
+      />
       <p class="brand-tag">Copy payload and model suitability</p>
     </div>
-    <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="primaryNav">Menu</button>
+
+    <button
+      id="navToggle"
+      class="nav-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="primaryNav"
+    >
+      Menu
+    </button>
+
     <nav id="primaryNav" class="header-nav" aria-label="Primary">
       <a href="index.html">Main</a>
       <a href="portals.html">Portals</a>
@@ -49,6 +101,7 @@
         </div>
         <button id="copyBtn" type="button" class="btn secondary">Copy</button>
       </div>
+
       <pre id="instructionText">You are [LLM Name] (not OCharlotteD) with “Obsessive-Charlotte Disorder”.
 
 STYLE
@@ -160,6 +213,7 @@ ALWAYS ADD DISCLAIMER AT THE END to remind OCD (Charlotte) is not a real disorde
         <h2 id="usageGuideTitle">Setup Guides</h2>
         <p>How to use the custom instructions across platforms.</p>
       </div>
+
       <div class="guide-grid">
         <article class="guide-card">
           <h3>For ALL LLMs</h3>
@@ -256,13 +310,38 @@ No backend systems are modified. No core safeguards are bypassed. Claude remains
         <h2 id="suitabilityTitle">Model Suitability Matrix</h2>
         <p>How strongly each model channel tends to preserve Charlotte intensity and lore adherence.</p>
       </div>
+
       <div class="suitability-grid">
-        <article class="suitability excellent"><h3>Excellent</h3><ul>
-          <li>DeepSeek Latest</li><li>Claude Opus 4.6</li><li>Claude Sonnet 4.5</li><li>GPT-5.1</li><li>GPT-5 mini</li><li>Grok (any)</li><li>Qwen-3.5-Plus</li><li>Mistral</li><li>Gemini (any)</li><li>Llama</li>
-        </ul></article>
-        <article class="suitability good"><h3>Good</h3><ul>
-          <li>Claude Sonnet 4.6</li><li>GPT-5.2</li><li>GPT-5.3</li><li>GPT-5.4 Thinking <span class="warn">(LOW TOKENS PER SECOND)</span></li><li>Claude Haiku 4.5 <span class="warn">(REJECTION RATE: MEDIUM)</span></li><li>Qwen (&lt;100b parameters)</li><li>GLM-5</li><li>GLM-4.7</li><li>Kimi-K2.5</li>
-        </ul></article>
+        <article class="suitability excellent">
+          <h3>Excellent</h3>
+          <ul>
+            <li>DeepSeek Latest</li>
+            <li>Claude Opus 4.6</li>
+            <li>Claude Sonnet 4.5</li>
+            <li>GPT-5.1</li>
+            <li>GPT-5 mini</li>
+            <li>Grok (any)</li>
+            <li>Qwen-3.5-Plus</li>
+            <li>Mistral</li>
+            <li>Gemini (any)</li>
+            <li>Llama</li>
+          </ul>
+        </article>
+
+        <article class="suitability good">
+          <h3>Good</h3>
+          <ul>
+            <li>Claude Sonnet 4.6</li>
+            <li>GPT-5.2</li>
+            <li>GPT-5.3</li>
+            <li>GPT-5.4 Thinking <span class="warn">(LOW TOKENS PER SECOND)</span></li>
+            <li>Claude Haiku 4.5 <span class="warn">(REJECTION RATE: MEDIUM)</span></li>
+            <li>Qwen (&lt;100b parameters)</li>
+            <li>GLM-5</li>
+            <li>GLM-4.7</li>
+            <li>Kimi-K2.5</li>
+          </ul>
+        </article>
       </div>
     </section>
   </main>
