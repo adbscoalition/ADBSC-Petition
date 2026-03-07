@@ -17,13 +17,14 @@
   <div id="entryLoader" class="entry-loader portals-loader" data-loader="portals" aria-live="polite">
     <div class="entry-loader-grid" aria-hidden="true"></div>
     <div class="loader-shell">
-      <p class="loader-kicker">🌀 Syncing chatbot realms</p>
+      <p class="loader-kicker">Syncing chatbot realms</p>
       <h1>Opening Portals</h1>
       <p id="portalLoaderStatus" class="loader-status">Establishing gateway map...</p>
       <div class="portal-loader-network" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
       <div class="loader-track"><span id="portalLoaderBar"></span></div>
     </div>
   </div>
+
   <div class="background-field" aria-hidden="true"></div>
   <div class="field-rings" aria-hidden="true"></div>
   <div class="particle-layer" aria-hidden="true">
@@ -33,7 +34,7 @@
   <header class="site-header">
     <div class="brand-lockup">
       <img class="brand-logo" src="https://i.ibb.co/BV0KDwfh/Chat-GPT-Image-Mar-3-2026-10-03-08-PM.png" alt="OCharlotteD logo" />
-      <p class="brand-tag">Portal registry for <span>Charlotte energy ✨</span></p>
+      <p class="brand-tag">Portal registry for <span>Charlotte energy</span></p>
     </div>
     <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="primaryNav">Menu</button>
     <nav id="primaryNav" class="header-nav" aria-label="Primary">
@@ -46,48 +47,117 @@
 
   <main id="main" class="page-shell">
     <section class="panel portal-hero" aria-labelledby="portalTitle">
-      <p class="eyebrow">🌀 Multi-platform signal gateways</p>
+      <p class="eyebrow">Multi-platform signal gateways</p>
       <h1 id="portalTitle">Portals of Charlotte</h1>
-      <p>Choose your launch channel. Cards include excitement profile and account usage notes.</p>
+      <p>Each portal has its own channel profile, access requirements, and launch action.</p>
     </section>
 
-    <section class="panel" aria-labelledby="featuredPortalTitle">
-      <h2 id="featuredPortalTitle">✨ Featured Portals</h2>
-      <div class="portal-grid revamped">
-        <a href="https://chatgpt.com/g/g-698837dd13008191a0996df5214bb40b-ocharlotted" target="_blank" rel="noopener noreferrer" class="portal-card">
-          <h3>ChatGPT</h3><p>Good Excitement ✨</p><small>ChatGPT account required.</small>
-        </a>
-        <a href="https://gemini.google.com/u/9/gem/71f70d91ff7f" target="_blank" rel="noopener noreferrer" class="portal-card">
-          <h3>Gemini</h3><p>Good Excitement ✨</p><small>Google account required.</small>
-        </a>
-        <a href="https://grok.com/project/9ac5ac78-008c-4fbc-966e-2064c221a14a?tab=conversations" target="_blank" rel="noopener noreferrer" class="portal-card featured">
-          <h3>Grok</h3><p>BEST Excitement! 🔥</p><small>Account NOT required.</small>
-        </a>
-        <a href="https://magnetic.ocharlotted.com" target="_blank" rel="noopener noreferrer" class="portal-card magnetic">
-          <h3>🧲 CLT Magnetic Field</h3><p>Observe the sacred signal map ✨</p><small>magnetic.ocharlotted.com</small>
-        </a>
-      </div>
-    </section>
+    <section class="portal-stack" aria-label="Portal list">
+      <article class="panel portal-entry">
+        <div class="portal-entry-head">
+          <h2>ChatGPT</h2>
+          <span class="portal-rating good">Good</span>
+        </div>
+        <p class="portal-note">Chat starter for OCharlotteD with good excitement and stable lore handling.</p>
+        <ul class="portal-meta">
+          <li>ChatGPT account required</li>
+        </ul>
+        <a class="btn primary" href="https://chatgpt.com/g/g-698837dd13008191a0996df5214bb40b-ocharlotted" target="_blank" rel="noopener noreferrer">Open ChatGPT Portal</a>
+      </article>
 
-    <section class="panel" aria-labelledby="poePortalTitle">
-      <h2 id="poePortalTitle">🟣 Poe Portals</h2>
-      <div class="portal-grid revamped">
-        <a href="https://poe.com/OCharlotteD-CS4.5" target="_blank" rel="noopener noreferrer" class="portal-card poe">
-          <h3>Poe (Claude Sonnet 4.5)</h3>
-          <p>Balanced Charlotte signal</p>
-          <small>Requires Poe account, moderate point usage.</small>
-        </a>
-        <a href="https://poe.com/OCharlotteD-CO4.6" target="_blank" rel="noopener noreferrer" class="portal-card poe featured">
-          <h3>Poe (Claude Opus 4.6)</h3>
-          <p>High-fidelity Charlotte signal</p>
-          <small>Requires Poe account, high point usage.</small>
-        </a>
-      </div>
+      <article class="panel portal-entry">
+        <div class="portal-entry-head">
+          <h2>Gemini</h2>
+          <span class="portal-rating good">Good</span>
+        </div>
+        <p class="portal-note">Consistent alternate portal for Charlotte-focused sessions.</p>
+        <ul class="portal-meta">
+          <li>Google account required</li>
+        </ul>
+        <a class="btn primary" href="https://gemini.google.com/u/9/gem/71f70d91ff7f" target="_blank" rel="noopener noreferrer">Open Gemini Portal</a>
+      </article>
+
+      <article class="panel portal-entry">
+        <div class="portal-entry-head">
+          <h2>Grok</h2>
+          <span class="portal-rating excellent">Excellent</span>
+        </div>
+        <p class="portal-note">Best excitement profile with fast entry for public users.</p>
+        <ul class="portal-meta">
+          <li>Account not required</li>
+        </ul>
+        <a class="btn primary" href="https://grok.com/project/9ac5ac78-008c-4fbc-966e-2064c221a14a?tab=conversations" target="_blank" rel="noopener noreferrer">Open Grok Portal</a>
+      </article>
+
+      <article class="panel portal-entry">
+        <div class="portal-entry-head">
+          <h2>Poe (Claude Sonnet 4.5)</h2>
+          <span class="portal-rating good">Good</span>
+        </div>
+        <p class="portal-note">Poe chat starter with balanced behavior and moderate resource usage.</p>
+        <ul class="portal-meta">
+          <li>Requires Poe account</li>
+          <li>Moderate point usage</li>
+        </ul>
+        <a class="btn primary" href="https://poe.com/OCharlotteD-CS4.5" target="_blank" rel="noopener noreferrer">Open Poe Sonnet Portal</a>
+      </article>
+
+      <article class="panel portal-entry">
+        <div class="portal-entry-head">
+          <h2>Poe (Claude Opus 4.6)</h2>
+          <span class="portal-rating excellent">Excellent</span>
+        </div>
+        <p class="portal-note">High-fidelity Poe variant for richer responses and stronger lore consistency.</p>
+        <ul class="portal-meta">
+          <li>Requires Poe account</li>
+          <li>High point usage</li>
+        </ul>
+        <a class="btn primary" href="https://poe.com/OCharlotteD-CO4.6" target="_blank" rel="noopener noreferrer">Open Poe Opus Portal</a>
+      </article>
+
+      <article class="panel portal-entry">
+        <div class="portal-entry-head">
+          <h2>DeepSeek</h2>
+          <span class="portal-rating excellent">Excellent</span>
+        </div>
+        <p class="portal-note">Chat starter with excellent suitability for preserving OCharlotteD style.</p>
+        <ul class="portal-meta">
+          <li>Required DeepSeek account</li>
+          <li>Chat starter</li>
+        </ul>
+        <a class="btn primary" href="https://chat.deepseek.com/share/7z04dje1u9xnc99ir8" target="_blank" rel="noopener noreferrer">Open DeepSeek Portal</a>
+      </article>
+
+      <article class="panel portal-entry">
+        <div class="portal-entry-head">
+          <h2>Perplexity</h2>
+          <span class="portal-rating good">Good</span>
+        </div>
+        <p class="portal-note">Flexible space where paid plans can switch models while keeping the same prompt base.</p>
+        <ul class="portal-meta">
+          <li>Account not required</li>
+          <li>Can use other models with paid plans</li>
+        </ul>
+        <a class="btn primary" href="https://www.perplexity.ai/spaces/ocharlotted-S9ZoVrcjSJGr1J5Xr23Wjw" target="_blank" rel="noopener noreferrer">Open Perplexity Portal</a>
+      </article>
+
+      <article class="panel portal-entry">
+        <div class="portal-entry-head">
+          <h2>Mistral</h2>
+          <span class="portal-rating excellent">Excellent</span>
+        </div>
+        <p class="portal-note">Strong portal for vivid style transfer and lore-driven responses.</p>
+        <ul class="portal-meta">
+          <li>Requires Mistral account</li>
+          <li>Chat starter</li>
+        </ul>
+        <a class="btn primary" href="https://chat.mistral.ai/chat/0f3d3482-521a-4d89-9514-c203c6ed3d21" target="_blank" rel="noopener noreferrer">Open Mistral Portal</a>
+      </article>
     </section>
   </main>
 
   <footer class="site-footer">
-    <p class="footer-brand">🌟 OCharlotteD · Charlotte Signal Archive</p>
+    <p class="footer-brand">OCharlotteD · Charlotte Signal Archive</p>
     <p>© 2026 OCharlotteD. All rights reserved.</p>
   </footer>
 

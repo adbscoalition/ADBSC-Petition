@@ -48,10 +48,10 @@ if (entryLoader) {
     const tungstenStart = 0.00001;
     const tungstenFinal = 0.99;
     const phases = [
-      { at: 0.12, label: '🔮 Charlotte presence detected.' },
-      { at: 0.42, label: '⚡ Field intensity rising.' },
-      { at: 0.72, label: '🩶 Atmospheric tungsten concentration increasing.' },
-      { at: 0.95, label: '✅ Field synchronized.' }
+      { at: 0.12, label: 'Charlotte presence detected.' },
+      { at: 0.42, label: 'Field intensity rising.' },
+      { at: 0.72, label: 'Atmospheric tungsten concentration increasing.' },
+      { at: 0.95, label: 'Field synchronized.' }
     ];
 
     const start = performance.now();
@@ -83,7 +83,7 @@ if (entryLoader) {
       } else {
         cltValue.textContent = '1,000,000';
         tungstenValue.textContent = '0.99 mg/m³';
-        loaderStatus.textContent = '✨ You are now within Charlotte range.';
+        loaderStatus.textContent = 'You are now within Charlotte range.';
         finalizeLoader();
       }
     }
@@ -96,9 +96,9 @@ if (entryLoader) {
     const status = document.getElementById('mainLoaderStatus');
     const phases = [
       { at: 0.1, label: 'Waking the realm...' },
-      { at: 0.35, label: '✨ Aligning celestial noise...' },
-      { at: 0.65, label: '🧲 Home field ignition...' },
-      { at: 0.92, label: '✅ Ocharlotted online.' }
+      { at: 0.35, label: 'Aligning celestial noise...' },
+      { at: 0.65, label: 'Home field ignition...' },
+      { at: 0.92, label: 'Ocharlotted online.' }
     ];
     const start = performance.now();
 
@@ -125,7 +125,7 @@ if (entryLoader) {
       { at: 0.1, label: 'Opening portal rings...' },
       { at: 0.35, label: 'Routing branching paths...' },
       { at: 0.66, label: 'Syncing chatbot realms...' },
-      { at: 0.92, label: '✅ Gateways live.' }
+      { at: 0.92, label: 'Gateways live.' }
     ];
     const start = performance.now();
 
@@ -169,7 +169,7 @@ if (entryLoader) {
           ? 'Loading custom instructions...'
           : t < 0.9
             ? 'Injecting dramatic response style...'
-            : '✅ Personality synchronized.';
+            : 'Personality synchronized.';
       }
 
       if (t < 1) requestAnimationFrame(frame);
@@ -193,11 +193,11 @@ if (copyBtn && instructionText) {
   copyBtn.addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(instructionText.textContent);
-      copyBtn.textContent = '✅ Copied';
-      setTimeout(() => (copyBtn.textContent = '📋 Copy'), 1500);
+      copyBtn.textContent = 'Copied';
+      setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
     } catch {
-      copyBtn.textContent = '📋 Copy failed';
-      setTimeout(() => (copyBtn.textContent = '📋 Copy'), 1500);
+      copyBtn.textContent = 'Copy failed';
+      setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
     }
   });
 }
