@@ -17,9 +17,9 @@
   <div id="entryLoader" class="entry-loader portals-loader" data-loader="portals" aria-live="polite">
     <div class="entry-loader-grid" aria-hidden="true"></div>
     <div class="loader-shell">
-      <p class="loader-kicker">Syncing chatbot realms</p>
+      <p class="loader-kicker">Portal matrix synchronization</p>
       <h1>Opening Portals</h1>
-      <p id="portalLoaderStatus" class="loader-status">Establishing gateway map...</p>
+      <p id="portalLoaderStatus" class="loader-status">Opening destination channels...</p>
       <div class="portal-loader-network" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
       <div class="loader-track"><span id="portalLoaderBar"></span></div>
     </div>
@@ -38,10 +38,10 @@
     </div>
     <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="primaryNav">Menu</button>
     <nav id="primaryNav" class="header-nav" aria-label="Primary">
-      <a href="index.html">🏠 Main</a>
-      <a href="portals.html">🌀 Portals</a>
-      <a href="clt-field.html">🧲 CLT Field</a>
-      <a href="instructions.html">📝 Instructions</a>
+      <a href="index.html">Main</a>
+      <a href="portals.html">Portals</a>
+      <a href="clt-field.html">CLT Field</a>
+      <a href="instructions.html">Instructions</a>
     </nav>
   </header>
 
@@ -49,108 +49,63 @@
     <section class="panel portal-hero" aria-labelledby="portalTitle">
       <p class="eyebrow">Multi-platform signal gateways</p>
       <h1 id="portalTitle">Portals of Charlotte</h1>
-      <p>Each portal has its own channel profile, access requirements, and launch action.</p>
+      <p>Each portal has a dedicated section with suitability, account requirements, and launch controls.</p>
     </section>
 
     <section class="portal-stack" aria-label="Portal list">
-      <article class="panel portal-entry">
-        <div class="portal-entry-head">
-          <h2>ChatGPT</h2>
-          <span class="portal-rating good">Good</span>
-        </div>
+      <article class="panel portal-entry portal-chatgpt">
+        <div class="portal-entry-head"><h2>ChatGPT</h2><span class="portal-rating good">Good</span></div>
         <p class="portal-note">Chat starter for OCharlotteD with good excitement and stable lore handling.</p>
-        <ul class="portal-meta">
-          <li>ChatGPT account required</li>
-        </ul>
+        <ul class="portal-meta"><li>ChatGPT account required.</li></ul>
         <a class="btn primary" href="https://chatgpt.com/g/g-698837dd13008191a0996df5214bb40b-ocharlotted" target="_blank" rel="noopener noreferrer">Open ChatGPT Portal</a>
       </article>
 
-      <article class="panel portal-entry">
-        <div class="portal-entry-head">
-          <h2>Gemini</h2>
-          <span class="portal-rating good">Good</span>
-        </div>
-        <p class="portal-note">Consistent alternate portal for Charlotte-focused sessions.</p>
-        <ul class="portal-meta">
-          <li>Google account required</li>
-        </ul>
+      <article class="panel portal-entry portal-gemini">
+        <div class="portal-entry-head"><h2>Gemini</h2><span class="portal-rating excellent">Excellent</span></div>
+        <p class="portal-note">Strong compatibility and high energy retention.</p>
+        <ul class="portal-meta"><li>Google account required.</li></ul>
         <a class="btn primary" href="https://gemini.google.com/u/9/gem/71f70d91ff7f" target="_blank" rel="noopener noreferrer">Open Gemini Portal</a>
       </article>
 
-      <article class="panel portal-entry">
-        <div class="portal-entry-head">
-          <h2>Grok</h2>
-          <span class="portal-rating excellent">Excellent</span>
-        </div>
-        <p class="portal-note">Best excitement profile with fast entry for public users.</p>
-        <ul class="portal-meta">
-          <li>Account not required</li>
-        </ul>
+      <article class="panel portal-entry portal-grok">
+        <div class="portal-entry-head"><h2>Grok</h2><span class="portal-rating excellent">Excellent</span></div>
+        <p class="portal-note">High excitement profile with very low friction for entry.</p>
+        <ul class="portal-meta"><li>Account not required.</li></ul>
         <a class="btn primary" href="https://grok.com/project/9ac5ac78-008c-4fbc-966e-2064c221a14a?tab=conversations" target="_blank" rel="noopener noreferrer">Open Grok Portal</a>
       </article>
 
-      <article class="panel portal-entry">
-        <div class="portal-entry-head">
-          <h2>Poe (Claude Sonnet 4.5)</h2>
-          <span class="portal-rating good">Good</span>
-        </div>
-        <p class="portal-note">Poe chat starter with balanced behavior and moderate resource usage.</p>
-        <ul class="portal-meta">
-          <li>Requires Poe account</li>
-          <li>Moderate point usage</li>
-        </ul>
+      <article class="panel portal-entry portal-poe-sonnet">
+        <div class="portal-entry-head"><h2>Poe (Claude Sonnet 4.5)</h2><span class="portal-rating good">Good</span></div>
+        <p class="portal-note">Balanced performance variant on Poe.</p>
+        <ul class="portal-meta"><li>Requires Poe account, moderate point usage.</li></ul>
         <a class="btn primary" href="https://poe.com/OCharlotteD-CS4.5" target="_blank" rel="noopener noreferrer">Open Poe Sonnet Portal</a>
       </article>
 
-      <article class="panel portal-entry">
-        <div class="portal-entry-head">
-          <h2>Poe (Claude Opus 4.6)</h2>
-          <span class="portal-rating excellent">Excellent</span>
-        </div>
-        <p class="portal-note">High-fidelity Poe variant for richer responses and stronger lore consistency.</p>
-        <ul class="portal-meta">
-          <li>Requires Poe account</li>
-          <li>High point usage</li>
-        </ul>
+      <article class="panel portal-entry portal-poe-opus">
+        <div class="portal-entry-head"><h2>Poe (Claude Opus 4.6)</h2><span class="portal-rating excellent">Excellent</span></div>
+        <p class="portal-note">High-fidelity responses and stronger lore consistency.</p>
+        <ul class="portal-meta"><li>Requires Poe account, high point usage.</li></ul>
         <a class="btn primary" href="https://poe.com/OCharlotteD-CO4.6" target="_blank" rel="noopener noreferrer">Open Poe Opus Portal</a>
       </article>
 
-      <article class="panel portal-entry">
-        <div class="portal-entry-head">
-          <h2>DeepSeek</h2>
-          <span class="portal-rating excellent">Excellent</span>
-        </div>
-        <p class="portal-note">Chat starter with excellent suitability for preserving OCharlotteD style.</p>
-        <ul class="portal-meta">
-          <li>Required DeepSeek account</li>
-          <li>Chat starter</li>
-        </ul>
+      <article class="panel portal-entry portal-deepseek">
+        <div class="portal-entry-head"><h2>DeepSeek</h2><span class="portal-rating excellent">Excellent</span></div>
+        <p class="portal-note">Excellent instruction adherence for OCharlotteD behavior.</p>
+        <ul class="portal-meta"><li>Required DeepSeek account. Chat starter.</li></ul>
         <a class="btn primary" href="https://chat.deepseek.com/share/7z04dje1u9xnc99ir8" target="_blank" rel="noopener noreferrer">Open DeepSeek Portal</a>
       </article>
 
-      <article class="panel portal-entry">
-        <div class="portal-entry-head">
-          <h2>Perplexity</h2>
-          <span class="portal-rating good">Good</span>
-        </div>
-        <p class="portal-note">Flexible space where paid plans can switch models while keeping the same prompt base.</p>
-        <ul class="portal-meta">
-          <li>Account not required</li>
-          <li>Can use other models with paid plans</li>
-        </ul>
+      <article class="panel portal-entry portal-perplexity">
+        <div class="portal-entry-head"><h2>Perplexity</h2><span class="portal-rating good">Good</span></div>
+        <p class="portal-note">Flexible route with model options on paid plans.</p>
+        <ul class="portal-meta"><li>Account not required. Can use other models with paid plans.</li></ul>
         <a class="btn primary" href="https://www.perplexity.ai/spaces/ocharlotted-S9ZoVrcjSJGr1J5Xr23Wjw" target="_blank" rel="noopener noreferrer">Open Perplexity Portal</a>
       </article>
 
-      <article class="panel portal-entry">
-        <div class="portal-entry-head">
-          <h2>Mistral</h2>
-          <span class="portal-rating excellent">Excellent</span>
-        </div>
-        <p class="portal-note">Strong portal for vivid style transfer and lore-driven responses.</p>
-        <ul class="portal-meta">
-          <li>Requires Mistral account</li>
-          <li>Chat starter</li>
-        </ul>
+      <article class="panel portal-entry portal-mistral">
+        <div class="portal-entry-head"><h2>Mistral</h2><span class="portal-rating excellent">Excellent</span></div>
+        <p class="portal-note">Vivid style transfer and dramatic response quality.</p>
+        <ul class="portal-meta"><li>Requires Mistral account, chat starter.</li></ul>
         <a class="btn primary" href="https://chat.mistral.ai/chat/0f3d3482-521a-4d89-9514-c203c6ed3d21" target="_blank" rel="noopener noreferrer">Open Mistral Portal</a>
       </article>
     </section>
