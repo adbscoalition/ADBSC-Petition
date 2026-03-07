@@ -20,17 +20,30 @@ if (navToggle && primaryNav) {
 }
 
 const entryLoader = document.getElementById('entryLoader');
-const cltValue = document.getElementById('cltValue');
-const cltBar = document.getElementById('cltBar');
-const tungstenValue = document.getElementById('tungstenValue');
-const tungstenBar = document.getElementById('tungstenBar');
-const loaderStatus = document.getElementById('loaderStatus');
 
-if (entryLoader && cltValue && cltBar && tungstenValue && tungstenBar && loaderStatus) {
-  // Premium startup sequence: dual meters with jitter + surge + settle in ~1.5s.
-  function animateEntryLoader() {
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const duration = reducedMotion ? 120 : 1500;
+if (entryLoader) {
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const duration = reducedMotion ? 120 : 1500;
+
+  function finalizeLoader() {
+    entryLoader.classList.add('peak-flash');
+    setTimeout(() => entryLoader.classList.remove('peak-flash'), reducedMotion ? 40 : 200);
+    entryLoader.classList.add('loaded');
+  }
+
+  // CLT dual-meter loader (used on CLT Field page)
+  function runCltLoader() {
+    const cltValue = document.getElementById('cltValue');
+    const cltBar = document.getElementById('cltBar');
+    const tungstenValue = document.getElementById('tungstenValue');
+    const tungstenBar = document.getElementById('tungstenBar');
+    const loaderStatus = document.getElementById('loaderStatus');
+
+    if (!(cltValue && cltBar && tungstenValue && tungstenBar && loaderStatus)) {
+      finalizeLoader();
+      return;
+    }
+
     const cltFinal = 1_000_000;
     const tungstenStart = 0.00001;
     const tungstenFinal = 0.99;
@@ -63,7 +76,6 @@ if (entryLoader && cltValue && cltBar && tungstenValue && tungstenBar && loaderS
       let status = phases[0].label;
       for (const p of phases) if (t >= p.at) status = p.label;
       loaderStatus.textContent = status;
-
       if (!reducedMotion) entryLoader.style.setProperty('--loader-glow', String(0.35 + signal * 0.65));
 
       if (t < 1) {
@@ -72,16 +84,106 @@ if (entryLoader && cltValue && cltBar && tungstenValue && tungstenBar && loaderS
         cltValue.textContent = '1,000,000';
         tungstenValue.textContent = '0.99 mg/m³';
         loaderStatus.textContent = '✨ You are now within Charlotte range.';
-        entryLoader.classList.add('peak-flash');
-        setTimeout(() => entryLoader.classList.remove('peak-flash'), 220);
-        setTimeout(() => entryLoader.classList.add('loaded'), reducedMotion ? 120 : 350);
+        finalizeLoader();
       }
     }
 
     requestAnimationFrame(frame);
   }
 
-  animateEntryLoader();
+  // Main page cosmic wake-up loader
+  function runMainLoader() {
+    const status = document.getElementById('mainLoaderStatus');
+    const phases = [
+      { at: 0.1, label: 'Waking the realm...' },
+      { at: 0.35, label: '✨ Aligning celestial noise...' },
+      { at: 0.65, label: '🧲 Home field ignition...' },
+      { at: 0.92, label: '✅ Ocharlotted online.' }
+    ];
+    const start = performance.now();
+
+    function frame(now) {
+      const t = Math.min((now - start) / duration, 1);
+      entryLoader.style.setProperty('--loader-glow', String(0.32 + t * 0.7));
+      let label = phases[0].label;
+      for (const p of phases) if (t >= p.at) label = p.label;
+      if (status) status.textContent = label;
+
+      if (t < 1) requestAnimationFrame(frame);
+      else finalizeLoader();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  // Portals page gateway-sync loader
+  function runPortalsLoader() {
+    const status = document.getElementById('portalLoaderStatus');
+    const bar = document.getElementById('portalLoaderBar');
+    const nodes = Array.from(document.querySelectorAll('.portal-loader-network span'));
+    const phases = [
+      { at: 0.1, label: 'Opening portal rings...' },
+      { at: 0.35, label: 'Routing branching paths...' },
+      { at: 0.66, label: 'Syncing chatbot realms...' },
+      { at: 0.92, label: '✅ Gateways live.' }
+    ];
+    const start = performance.now();
+
+    function frame(now) {
+      const t = Math.min((now - start) / duration, 1);
+      if (bar) bar.style.width = `${t * 100}%`;
+      entryLoader.style.setProperty('--loader-glow', String(0.32 + t * 0.7));
+
+      const activeCount = Math.floor(t * nodes.length);
+      nodes.forEach((node, i) => node.classList.toggle('active', i <= activeCount));
+
+      let label = phases[0].label;
+      for (const p of phases) if (t >= p.at) label = p.label;
+      if (status) status.textContent = label;
+
+      if (t < 1) requestAnimationFrame(frame);
+      else finalizeLoader();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  // Instructions page typed boot-message loader
+  function runInstructionsLoader() {
+    const status = document.getElementById('instructionsLoaderStatus');
+    const typedLine = document.getElementById('typedLoaderLine');
+    const target = 'Synchronizing assistant personality...';
+    const start = performance.now();
+
+    function frame(now) {
+      const t = Math.min((now - start) / duration, 1);
+      entryLoader.style.setProperty('--loader-glow', String(0.35 + t * 0.65));
+
+      if (typedLine) {
+        const count = Math.floor(target.length * t);
+        typedLine.textContent = target.slice(0, count);
+      }
+
+      if (status) {
+        status.textContent = t < 0.55
+          ? 'Loading custom instructions...'
+          : t < 0.9
+            ? 'Injecting dramatic response style...'
+            : '✅ Personality synchronized.';
+      }
+
+      if (t < 1) requestAnimationFrame(frame);
+      else finalizeLoader();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  const type = entryLoader.dataset.loader;
+  if (type === 'clt') runCltLoader();
+  else if (type === 'portals') runPortalsLoader();
+  else if (type === 'instructions') runInstructionsLoader();
+  else runMainLoader();
 }
 
 const copyBtn = document.getElementById('copyBtn');

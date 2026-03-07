@@ -13,6 +13,16 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
+
+  <div id="entryLoader" class="entry-loader instructions-loader" data-loader="instructions" aria-live="polite">
+    <div class="entry-loader-grid" aria-hidden="true"></div>
+    <div class="loader-shell">
+      <p class="loader-kicker">🧠 Assistant boot sequence</p>
+      <h1>Initializing Instruction Core</h1>
+      <div class="instruction-console"><p id="typedLoaderLine" class="typed-line"></p></div>
+      <p id="instructionsLoaderStatus" class="loader-status">Loading custom instructions...</p>
+    </div>
+  </div>
   <div class="background-field" aria-hidden="true"></div>
 
   <header class="site-header">
