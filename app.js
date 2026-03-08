@@ -1,3 +1,6 @@
+const tabTitle = document.body?.dataset?.tabTitle;
+if (tabTitle) document.title = tabTitle;
+
 const navToggle = document.getElementById('navToggle');
 const primaryNav = document.getElementById('primaryNav');
 
