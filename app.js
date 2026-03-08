@@ -1,3 +1,14 @@
+
+const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+const navLinks = document.querySelectorAll('.header-nav a');
+navLinks.forEach((link) => {
+  const href = link.getAttribute('href');
+  if (href === currentPage) {
+    link.classList.add('active');
+    link.setAttribute('aria-current', 'page');
+  }
+});
+
 const navToggle = document.getElementById('navToggle');
 const primaryNav = document.getElementById('primaryNav');
 
