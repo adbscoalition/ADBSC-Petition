@@ -1,13 +1,13 @@
 :root {
-  --bg-0: #06070d;
-  --bg-1: #101320;
-  --panel: rgba(20, 23, 36, 0.78);
-  --panel-border: rgba(184, 197, 255, 0.2);
-  --text: #eef2ff;
-  --text-soft: #c2cbea;
-  --violet: #8e5dff;
-  --magenta: #ff3ea8;
-  --cyan: #9cefff;
+  --bg-0: #1b1202;
+  --bg-1: #2e1e06;
+  --panel: rgba(54, 36, 10, 0.8);
+  --panel-border: rgba(255, 214, 128, 0.32);
+  --text: #fff6dc;
+  --text-soft: #f4dba4;
+  --violet: #b98214;
+  --magenta: #ffca64;
+  --cyan: #ffe8b0;
   --radius-lg: 24px;
   --radius-md: 16px;
   --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.48);
@@ -27,8 +27,8 @@ body {
   font-family: "Public Sans", sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at 20% -10%, #261a4b 0%, transparent 44%),
-    radial-gradient(circle at 86% 8%, #381635 0%, transparent 40%),
+    radial-gradient(circle at 20% -10%, #7b5110 0%, transparent 44%),
+    radial-gradient(circle at 86% 8%, #8f6723 0%, transparent 40%),
     linear-gradient(160deg, var(--bg-0), var(--bg-1));
   min-height: 100vh;
   overflow-x: hidden;
@@ -389,15 +389,15 @@ select {
 .background-field {
   opacity: 0.65;
   background:
-    radial-gradient(circle at 20% 20%, rgba(142, 93, 255, 0.24), transparent 42%),
-    radial-gradient(circle at 80% 14%, rgba(255, 62, 168, 0.2), transparent 35%);
+    radial-gradient(circle at 20% 20%, rgba(255, 200, 84, 0.28), transparent 42%),
+    radial-gradient(circle at 80% 14%, rgba(255, 155, 30, 0.2), transparent 35%);
 }
 
 .field-rings {
   opacity: 0.35;
   background: repeating-radial-gradient(
     circle at 50% 50%,
-    rgba(156, 239, 255, 0.1) 0 1px,
+    rgba(255, 223, 148, 0.14) 0 1px,
     transparent 1px 84px
   );
   animation: breatheRings 8s ease-in-out infinite alternate;
@@ -466,8 +466,8 @@ select {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  background: rgba(12, 14, 22, 0.75);
-  border: 1px solid rgba(184, 197, 255, 0.2);
+  background: rgba(40, 26, 7, 0.78);
+  border: 1px solid rgba(255, 214, 128, 0.3);
   border-radius: 18px;
   padding: 0.7rem 0.85rem;
   backdrop-filter: blur(8px);
@@ -494,9 +494,9 @@ select {
 }
 
 .brand-tag span {
-  color: #fff;
+  color: #ffedc0;
   font-weight: 700;
-  text-shadow: 0 0 20px rgba(255, 62, 168, 0.6);
+  text-shadow: 0 0 20px rgba(255, 198, 79, 0.5);
 }
 
 .header-nav {
@@ -511,13 +511,13 @@ select {
   border: 1px solid var(--panel-border);
   border-radius: 999px;
   padding: 0.45rem 0.85rem;
-  background: rgba(22, 26, 40, 0.6);
+  background: rgba(58, 38, 9, 0.58);
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
 .header-nav a:hover,
 .header-nav a:focus-visible {
-  border-color: rgba(156, 239, 255, 0.75);
+  border-color: rgba(255, 227, 153, 0.9);
   transform: translateY(-1px);
 }
 
@@ -541,7 +541,7 @@ select {
 
 .panel {
   position: relative;
-  background: linear-gradient(165deg, var(--panel), rgba(15, 18, 30, 0.86));
+  background: linear-gradient(165deg, var(--panel), rgba(36, 22, 6, 0.86));
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-lg);
   padding: clamp(1rem, 2.6vw, 1.7rem);
@@ -557,8 +557,8 @@ select {
   width: 320px;
   height: 320px;
   border-radius: 50%;
-  border: 1px solid rgba(156, 239, 255, 0.15);
-  box-shadow: inset 0 0 45px rgba(142, 93, 255, 0.1);
+  border: 1px solid rgba(255, 217, 139, 0.18);
+  box-shadow: inset 0 0 45px rgba(255, 176, 40, 0.12);
   pointer-events: none;
 }
 
@@ -591,7 +591,7 @@ p {
 
 .hero-card h1 span {
   color: var(--magenta);
-  text-shadow: 0 0 28px rgba(255, 62, 168, 0.7);
+  text-shadow: 0 0 28px rgba(255, 205, 105, 0.65);
 }
 
 .hero-copy {
@@ -612,12 +612,12 @@ p {
   align-items: center;
   justify-content: center;
   min-height: 42px;
-  border: 1px solid rgba(184, 197, 255, 0.28);
+  border: 1px solid rgba(255, 214, 128, 0.36);
   border-radius: 12px;
   padding: 0.62rem 1rem;
   text-decoration: none;
   color: var(--text);
-  background: linear-gradient(160deg, rgba(42, 47, 72, 0.96), rgba(25, 29, 46, 0.96));
+  background: linear-gradient(160deg, rgba(84, 57, 14, 0.96), rgba(56, 36, 8, 0.96));
   cursor: pointer;
   font-family: "Public Sans", sans-serif;
   font-weight: 700;
@@ -633,27 +633,27 @@ p {
 .btn:focus-visible {
   transform: translateY(-1px);
   filter: brightness(1.04);
-  border-color: rgba(156, 239, 255, 0.72);
+  border-color: rgba(255, 227, 153, 0.9);
   box-shadow:
     0 10px 24px rgba(0, 0, 0, 0.4),
-    0 0 16px rgba(156, 239, 255, 0.18);
+    0 0 16px rgba(255, 205, 105, 0.28);
 }
 
 .btn.primary {
-  border-color: rgba(255, 255, 255, 0.14);
-  color: #fff;
-  background: linear-gradient(118deg, #6f39ff, #ff3ea8 55%, #ff7cc3);
+  border-color: rgba(255, 241, 203, 0.32);
+  color: #271503;
+  background: linear-gradient(118deg, #ffdd92, #ffbe4b 55%, #f1a316);
 }
 
 .btn.secondary {
-  background: linear-gradient(160deg, rgba(33, 38, 59, 0.95), rgba(22, 25, 41, 0.95));
+  background: linear-gradient(160deg, rgba(84, 57, 14, 0.8), rgba(57, 37, 9, 0.9));
 }
 
 .quick-grid,
 .suitability-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
 }
 
 .quick-card,
@@ -662,13 +662,19 @@ p {
   color: var(--text);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-md);
-  padding: 0.95rem;
-  background: rgba(20, 23, 36, 0.62);
+  padding: 1.2rem;
+  background: rgba(65, 43, 12, 0.66);
+  min-height: 150px;
+}
+
+.quick-card h3,
+.suitability h3 {
+  font-size: clamp(1.05rem, 2.2vw, 1.35rem);
 }
 
 .quick-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(156, 239, 255, 0.75);
+  border-color: rgba(255, 227, 153, 0.92);
 }
 
 .portal-stack {
@@ -775,15 +781,15 @@ p {
 
 .guide-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
 }
 
 .guide-card {
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-md);
-  background: rgba(18, 21, 34, 0.72);
-  padding: 0.9rem;
+  background: rgba(62, 40, 11, 0.72);
+  padding: 1.15rem;
 }
 
 .guide-card h3 {
