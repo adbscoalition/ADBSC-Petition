@@ -1350,3 +1350,22 @@ pre {
   color: #fff6e1;
   line-height: 1.15;
 }
+
+
+.header-clt-mini {
+  margin: 0;
+  color: #ffe7b3;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+#uploadedFieldList button {
+  margin-left: 0.45rem;
+  border: 1px solid rgba(247, 206, 116, 0.45);
+  background: rgba(36, 24, 8, 0.75);
+  color: #ffeecb;
+  border-radius: 999px;
+  padding: 0.16rem 0.55rem;
+  cursor: pointer;
+}

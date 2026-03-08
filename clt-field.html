@@ -92,6 +92,7 @@
       />
       <div class="brand-copy">
         <p class="brand-title">OCharlotteD</p>
+        <p class="header-clt-mini" id="headerCltMini">CLT: --</p>
       </div>
     </div>
 <button
@@ -182,6 +183,79 @@
       </section>
     </section>
 
+    
+
+    <section class="panel clt-card-section" aria-labelledby="scanToolTitle">
+      <h2 id="scanToolTitle">Accurate Scan Tool</h2>
+      <p>Run a 5-second precision scan for frozen scan-sheet results.</p>
+      <div class="clt-actions">
+        <button class="btn primary" id="cltAccurateScan" type="button">Run Accurate Scan</button>
+      </div>
+      <div class="scan-progress-shell" aria-live="polite">
+        <p id="scanState">Scan idle</p>
+        <div class="loader-track"><span id="scanProgressBar"></span></div>
+      </div>
+    </section>
+
+    <section class="panel clt-card-section" aria-labelledby="fieldUploaderTitle">
+      <h2 id="fieldUploaderTitle">Secret Field Uploader</h2>
+      <p>Create or edit local secret fields stored in your browser.</p>
+      <div class="clt-input-grid">
+        <label>
+          Field Name
+          <input id="fieldName" type="text" placeholder="My Field" />
+        </label>
+        <label>
+          Intensity (CLT units, max 50,000)
+          <input id="fieldIntensity" type="number" min="1" max="50000" step="1" value="5000" />
+        </label>
+        <label>
+          Maximum Intensity Range (meters, max 100)
+          <input id="fieldRange" type="number" min="1" max="100" step="1" value="25" />
+        </label>
+        <label>
+          Field Latitude
+          <input id="fieldLatitude" type="number" step="any" placeholder="Auto from current location" />
+        </label>
+        <label>
+          Field Longitude
+          <input id="fieldLongitude" type="number" step="any" placeholder="Auto from current location" />
+        </label>
+        <label>
+          Start Time (optional)
+          <input id="fieldStart" type="datetime-local" />
+        </label>
+        <label>
+          End Time (optional)
+          <input id="fieldEnd" type="datetime-local" />
+        </label>
+      </div>
+      <div class="clt-actions">
+        <button class="btn primary" id="fieldSave" type="button">Save Field</button>
+        <button class="btn secondary" id="fieldReset" type="button">Clear Form</button>
+      </div>
+      <p id="fieldUploaderStatus" class="clt-system-status">No local secret fields yet.</p>
+      <ul class="scan-sheet-list" id="uploadedFieldList"></ul>
+    </section>
+
+    <section class="panel readout-card clt-card-section" aria-labelledby="scanSheetTitle">
+      <h2 id="scanSheetTitle">Scan Sheet</h2>
+      <p class="scan-sheet-label">SCAN RESULT</p>
+      <ul class="scan-sheet-list" id="scanSheetList">
+        <li>CLT Field: —</li>
+        <li>Tungsten: —</li>
+        <li>Coordinates: —</li>
+        <li>Timestamp: —</li>
+        <li>Nearest Source: —</li>
+        <li>Distance to Source: —</li>
+      </ul>
+    </section>
+
+    <section class="panel readout-card clt-card-section" aria-labelledby="cltSourcesTitle">
+      <h2 id="cltSourcesTitle">Recent Live Readings</h2>
+      <ol id="cltContributors"></ol>
+    </section>
+
     <section class="panel clt-card-section" aria-labelledby="simulatorTitle">
       <h2 id="simulatorTitle">Location Simulator</h2>
       <p>Password-locked teleport tool for testing coordinates.</p>
@@ -205,34 +279,6 @@
       <p id="simStatus" class="clt-system-status">Simulator locked.</p>
     </section>
 
-    <section class="panel clt-card-section" aria-labelledby="scanToolTitle">
-      <h2 id="scanToolTitle">Accurate Scan Tool</h2>
-      <p>Run a 5-second precision scan for frozen scan-sheet results.</p>
-      <div class="clt-actions">
-        <button class="btn primary" id="cltAccurateScan" type="button">Run Accurate Scan</button>
-      </div>
-      <div class="scan-progress-shell" aria-live="polite">
-        <p id="scanState">Scan idle</p>
-        <div class="loader-track"><span id="scanProgressBar"></span></div>
-      </div>
-    </section>
-    <section class="panel readout-card clt-card-section" aria-labelledby="scanSheetTitle">
-      <h2 id="scanSheetTitle">Scan Sheet</h2>
-      <p class="scan-sheet-label">SCAN RESULT</p>
-      <ul class="scan-sheet-list" id="scanSheetList">
-        <li>CLT Field: —</li>
-        <li>Tungsten: —</li>
-        <li>Coordinates: —</li>
-        <li>Timestamp: —</li>
-        <li>Nearest Source: —</li>
-        <li>Distance to Source: —</li>
-      </ul>
-    </section>
-
-    <section class="panel readout-card clt-card-section" aria-labelledby="cltSourcesTitle">
-      <h2 id="cltSourcesTitle">Recent Live Readings</h2>
-      <ol id="cltContributors"></ol>
-    </section>
   </main>
 
   <footer class="site-footer">

@@ -1,6 +1,14 @@
 const tabTitle = document.body?.dataset?.tabTitle;
 if (tabTitle) document.title = tabTitle;
 
+
+const headerCltMini = document.getElementById('headerCltMini');
+if (headerCltMini) {
+  const lastClt = localStorage.getItem('ocltd_latest_clt');
+  if (lastClt) headerCltMini.textContent = `CLT: ${lastClt}`;
+}
+
+
 const navToggle = document.getElementById('navToggle');
 const primaryNav = document.getElementById('primaryNav');
 
@@ -255,7 +263,10 @@ function initCltFieldSystem() {
     cltDrift: 0,
     tungstenDrift: 0,
     history: [],
-    simulationActive: false
+    simulationActive: false,
+    customFields: [],
+    editingFieldId: null,
+    autoFieldCounter: 1
   };
 
   const el = {
@@ -283,7 +294,18 @@ function initCltFieldSystem() {
     simLatitude: document.getElementById('simLatitude'),
     simLongitude: document.getElementById('simLongitude'),
     simTeleport: document.getElementById('simTeleport'),
-    simStatus: document.getElementById('simStatus')
+    simStatus: document.getElementById('simStatus'),
+    fieldName: document.getElementById('fieldName'),
+    fieldIntensity: document.getElementById('fieldIntensity'),
+    fieldRange: document.getElementById('fieldRange'),
+    fieldLatitude: document.getElementById('fieldLatitude'),
+    fieldLongitude: document.getElementById('fieldLongitude'),
+    fieldStart: document.getElementById('fieldStart'),
+    fieldEnd: document.getElementById('fieldEnd'),
+    fieldSave: document.getElementById('fieldSave'),
+    fieldReset: document.getElementById('fieldReset'),
+    fieldUploaderStatus: document.getElementById('fieldUploaderStatus'),
+    uploadedFieldList: document.getElementById('uploadedFieldList')
   };
 
   const fallbackCoord = coordinateDefinitions.find((d) => d.name === 'Geolocation Denied Fallback');
@@ -327,12 +349,190 @@ function initCltFieldSystem() {
     return 0;
   }
 
+  const customFieldStorageKey = 'ocltd_custom_secret_fields';
+
+  function loadCustomFields() {
+    try {
+      const raw = localStorage.getItem(customFieldStorageKey);
+      state.customFields = raw ? JSON.parse(raw) : [];
+      const maxAuto = state.customFields.reduce((m, f) => {
+        const match = /^My Field (\d+)$/.exec(String(f.name || ''));
+        return match ? Math.max(m, Number(match[1])) : m;
+      }, 0);
+      state.autoFieldCounter = maxAuto + 1;
+    } catch {
+      state.customFields = [];
+    }
+  }
+
+  function saveCustomFields() {
+    localStorage.setItem(customFieldStorageKey, JSON.stringify(state.customFields));
+  }
+
+  function customFieldTimeFactor(field, nowMs) {
+    const fadeMs = 5 * 60 * 1000;
+    const hasStart = !!field.startTime;
+    const hasEnd = !!field.endTime;
+    const startMs = hasStart ? new Date(field.startTime).getTime() : null;
+    const endMs = hasEnd ? new Date(field.endTime).getTime() : null;
+
+    if (hasStart && Number.isFinite(startMs)) {
+      if (nowMs < startMs - fadeMs) return 0;
+      if (nowMs < startMs) return (nowMs - (startMs - fadeMs)) / fadeMs;
+    }
+
+    if (hasEnd && Number.isFinite(endMs)) {
+      if (nowMs > endMs + fadeMs) return 0;
+      if (nowMs > endMs) return 1 - ((nowMs - endMs) / fadeMs);
+    }
+
+    return 1;
+  }
+
+  function customFieldStrength(field, distanceM, nowMs) {
+    const intensity = Number(field.intensity) || 0;
+    const y = Math.max(1, Number(field.maxRangeM) || 1);
+    const r = distanceM / y;
+    if (r < 0 || r > 25) return 0;
+
+    let multiplier = 0;
+    if (r <= 1) multiplier = 1;
+    else if (r <= 3) multiplier = 1 + ((0.2 - 1) * ((r - 1) / 2));
+    else if (r <= 8) multiplier = 0.2 + ((0.05 - 0.2) * ((r - 3) / 5));
+    else if (r <= 15) multiplier = 0.05 + ((0.01 - 0.05) * ((r - 8) / 7));
+    else multiplier = 0.01 + ((0 - 0.01) * ((r - 15) / 10));
+
+    const tf = customFieldTimeFactor(field, nowMs);
+    return Math.max(0, intensity * multiplier * tf);
+  }
+
+  function renderUploadedFields() {
+    if (!(el.uploadedFieldList && el.fieldUploaderStatus)) return;
+    if (!state.customFields.length) {
+      el.fieldUploaderStatus.textContent = 'No local secret fields yet.';
+      el.uploadedFieldList.innerHTML = '';
+      return;
+    }
+
+    el.fieldUploaderStatus.textContent = `${state.customFields.length} local secret field(s) loaded.`;
+    el.uploadedFieldList.innerHTML = state.customFields.map((field) =>
+      `<li><strong>${field.name}</strong> · ${field.intensity} CLT · ${field.maxRangeM}m range
+` +
+      `<button class="field-edit" data-field-id="${field.id}" type="button">Edit</button> ` +
+      `<button class="field-delete" data-field-id="${field.id}" type="button">Delete</button></li>`
+    ).join('');
+
+    el.uploadedFieldList.querySelectorAll('.field-edit').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-field-id');
+        const field = state.customFields.find((f) => f.id === id);
+        if (!field) return;
+        state.editingFieldId = id;
+        if (el.fieldName) el.fieldName.value = field.name;
+        if (el.fieldIntensity) el.fieldIntensity.value = String(field.intensity);
+        if (el.fieldRange) el.fieldRange.value = String(field.maxRangeM);
+        if (el.fieldLatitude) el.fieldLatitude.value = String(field.lat);
+        if (el.fieldLongitude) el.fieldLongitude.value = String(field.lon);
+        if (el.fieldStart) el.fieldStart.value = field.startTime || '';
+        if (el.fieldEnd) el.fieldEnd.value = field.endTime || '';
+        el.fieldUploaderStatus.textContent = `Editing ${field.name}`;
+      });
+    });
+
+    el.uploadedFieldList.querySelectorAll('.field-delete').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-field-id');
+        state.customFields = state.customFields.filter((f) => f.id !== id);
+        saveCustomFields();
+        renderUploadedFields();
+      });
+    });
+  }
+
+  function resetFieldForm() {
+    state.editingFieldId = null;
+    if (el.fieldName) el.fieldName.value = '';
+    if (el.fieldIntensity) el.fieldIntensity.value = '5000';
+    if (el.fieldRange) el.fieldRange.value = '25';
+    if (el.fieldStart) el.fieldStart.value = '';
+    if (el.fieldEnd) el.fieldEnd.value = '';
+  }
+
+  function initFieldUploader() {
+    loadCustomFields();
+    renderUploadedFields();
+
+    el.fieldSave?.addEventListener('click', () => {
+      const intensity = Math.min(50000, Math.max(1, Number(el.fieldIntensity?.value || 0)));
+      const maxRangeM = Math.min(100, Math.max(1, Number(el.fieldRange?.value || 0)));
+
+      let lat = Number(el.fieldLatitude?.value);
+      let lon = Number(el.fieldLongitude?.value);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+        lat = state.lastBase?.lat;
+        lon = state.lastBase?.lon;
+      }
+      if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+        if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Field upload failed: valid coordinates required.';
+        return;
+      }
+
+      const rawName = String(el.fieldName?.value || '').trim();
+      const name = rawName || `My Field ${state.autoFieldCounter++}`;
+      const payload = {
+        id: state.editingFieldId || `field_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        name,
+        category: 'Secret',
+        lat,
+        lon,
+        intensity,
+        maxRangeM,
+        startTime: el.fieldStart?.value || null,
+        endTime: el.fieldEnd?.value || null,
+        updatedAt: new Date().toISOString()
+      };
+
+      const idx = state.customFields.findIndex((f) => f.id === payload.id);
+      if (idx >= 0) state.customFields[idx] = payload;
+      else state.customFields.push(payload);
+
+      saveCustomFields();
+      renderUploadedFields();
+      resetFieldForm();
+      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = `${name} saved to local storage.`;
+    });
+
+    el.fieldReset?.addEventListener('click', () => {
+      resetFieldForm();
+      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Field form reset.';
+    });
+  }
+
   function computeField(lat, lon) {
-    const evaluations = magneticSources.map((source) => {
+    const nowMs = Date.now();
+    const baseEvaluations = magneticSources.map((source) => {
       const distance = haversineKm(lat, lon, source.lat, source.lon);
       const strength = interpolatedStrength(distance, source.bands);
       return { ...source, distance, strength, inField: strength > 0 };
-    }).sort((a, b) => b.strength - a.strength);
+    });
+
+    const customEvaluations = state.customFields.map((field) => {
+      const distance = haversineKm(lat, lon, field.lat, field.lon);
+      const distanceM = distance * 1000;
+      const strength = customFieldStrength(field, distanceM, nowMs);
+      return {
+        name: field.name,
+        category: 'Secret',
+        lat: field.lat,
+        lon: field.lon,
+        distance,
+        strength,
+        inField: strength > 0,
+        uploaded: true
+      };
+    });
+
+    const evaluations = [...baseEvaluations, ...customEvaluations].sort((a, b) => b.strength - a.strength);
 
     const totalField = evaluations.reduce((sum, source) => sum + source.strength, 0);
     const regularFieldTotal = evaluations
@@ -375,6 +575,8 @@ function initCltFieldSystem() {
     state.lastBase = { lat, lon, accuracy, calc, liveClt, liveTungsten, timestamp: Date.now() };
 
     if (el.totalField) el.totalField.textContent = liveClt.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    if (headerCltMini) headerCltMini.textContent = `CLT: ${liveClt.toLocaleString(undefined, { maximumFractionDigits: 1 })}`;
+    localStorage.setItem('ocltd_latest_clt', liveClt.toLocaleString(undefined, { maximumFractionDigits: 1 }));
     if (el.tungsten) el.tungsten.textContent = `${liveTungsten.toFixed(5)} mg/m³`;
     if (el.nearestSource) el.nearestSource.textContent = calc.nearest ? calc.nearest.name : '—';
     if (el.nearestDistance) {
@@ -543,7 +745,7 @@ function initCltFieldSystem() {
 
 
   function activateSimulatorTeleport() {
-    const expectedPassword = 'charlotte-teleport';
+    const expectedPassword = '67416741';
     const password = String(el.simPassword?.value || '');
     const lat = Number(el.simLatitude?.value);
     const lon = Number(el.simLongitude?.value);
@@ -595,6 +797,7 @@ function initCltFieldSystem() {
   }
 
   initFallbackTools();
+  initFieldUploader();
   el.scanBtn?.addEventListener('click', runAccurateScan);
   el.simTeleport?.addEventListener('click', activateSimulatorTeleport);
 
