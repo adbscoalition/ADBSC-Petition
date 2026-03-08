@@ -1339,3 +1339,17 @@ pre {
   display: grid;
   gap: 0.3rem;
 }
+
+
+.tungsten-anomaly-note {
+  margin: 0.6rem 0 0.75rem;
+  color: #ffe4aa;
+  font-weight: 600;
+}
+
+.tungsten-particles {
+  margin: 0.5rem 0 0;
+  color: var(--text-soft);
+  line-height: 1.45;
+  font-size: 0.95rem;
+}
