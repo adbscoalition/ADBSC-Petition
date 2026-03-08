@@ -37,6 +37,18 @@ body {
   overflow-x: hidden;
 }
 
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, transparent 18%, rgba(255, 255, 255, 0.04) 50%, transparent 82%);
+  transform: translateX(-120%);
+  animation: pageShine 9s ease-in-out infinite;
+  z-index: 0;
+}
+
 button,
 input,
 textarea,
@@ -633,6 +645,17 @@ select {
   pointer-events: none;
 }
 
+.panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(130deg, transparent 30%, rgba(255, 248, 214, 0.08) 50%, transparent 70%);
+  opacity: 0;
+  transform: translateX(-35%);
+  animation: panelShimmer 6s ease-in-out infinite;
+}
+
 h1,
 h2,
 h3 {
@@ -981,6 +1004,78 @@ pre {
   text-decoration: none;
 }
 
+.site-header {
+  box-shadow: 0 0 0 1px rgba(247, 206, 116, 0.12), 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+.brand-logo {
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.36), 0 0 16px rgba(247, 206, 116, 0.22);
+}
+
+.quick-card,
+.portal-entry,
+.guide-card,
+.disclaimer-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.quick-card::after,
+.portal-entry::after,
+.guide-card::after,
+.disclaimer-card::after {
+  content: "";
+  position: absolute;
+  top: -120%;
+  left: -80%;
+  width: 60%;
+  height: 250%;
+  background: linear-gradient(120deg, transparent 0%, rgba(255, 245, 214, 0.18) 55%, transparent 100%);
+  transform: rotate(18deg);
+  animation: cardSweep 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.portal-entry::after { animation-delay: 0.6s; }
+.guide-card::after { animation-delay: 1.2s; }
+.disclaimer-card::after { animation-delay: 1.8s; }
+
+@keyframes pageShine {
+  0%, 30% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  48% {
+    opacity: 1;
+  }
+  65%, 100% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+@keyframes panelShimmer {
+  0%, 65%, 100% {
+    opacity: 0;
+    transform: translateX(-35%);
+  }
+  25% {
+    opacity: 1;
+    transform: translateX(35%);
+  }
+}
+
+@keyframes cardSweep {
+  0%, 70%, 100% {
+    transform: translateX(-140%) rotate(18deg);
+    opacity: 0;
+  }
+  28% {
+    transform: translateX(240%) rotate(18deg);
+    opacity: 1;
+  }
+}
+
 @keyframes breatheRings {
   from {
     transform: scale(1);
@@ -1118,7 +1213,14 @@ pre {
   .main-loader-lights span,
   .background-field,
   .field-rings,
-  .particle-layer span {
+  .particle-layer span,
+  .main-loader-orbit span,
+  .quick-card::after,
+  .portal-entry::after,
+  .guide-card::after,
+  .disclaimer-card::after,
+  body::before,
+  .panel::after {
     animation: none !important;
     transition-duration: 0.01ms !important;
   }
