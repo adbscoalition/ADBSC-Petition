@@ -1352,13 +1352,6 @@ pre {
 }
 
 
-.header-clt-mini {
-  margin: 0;
-  color: #ffe7b3;
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
 
 #uploadedFieldList button {
   margin-left: 0.45rem;
@@ -1368,4 +1361,13 @@ pre {
   border-radius: 999px;
   padding: 0.16rem 0.55rem;
   cursor: pointer;
+}
+
+
+.uploader-grid {
+  grid-template-columns: 1fr !important;
+}
+
+#simCoordinateBlock {
+  margin-top: 0.7rem;
 }

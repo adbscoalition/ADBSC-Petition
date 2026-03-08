@@ -2,12 +2,6 @@ const tabTitle = document.body?.dataset?.tabTitle;
 if (tabTitle) document.title = tabTitle;
 
 
-const headerCltMini = document.getElementById('headerCltMini');
-if (headerCltMini) {
-  const lastClt = localStorage.getItem('ocltd_latest_clt');
-  if (lastClt) headerCltMini.textContent = `CLT: ${lastClt}`;
-}
-
 
 const navToggle = document.getElementById('navToggle');
 const primaryNav = document.getElementById('primaryNav');
@@ -266,7 +260,8 @@ function initCltFieldSystem() {
     simulationActive: false,
     customFields: [],
     editingFieldId: null,
-    autoFieldCounter: 1
+    autoFieldCounter: 1,
+    simulatorUnlocked: false
   };
 
   const el = {
@@ -291,6 +286,8 @@ function initCltFieldSystem() {
     scanBar: document.getElementById('scanProgressBar'),
     scanSheet: document.getElementById('scanSheetList'),
     simPassword: document.getElementById('simPassword'),
+    simUnlock: document.getElementById('simUnlock'),
+    simCoordinateBlock: document.getElementById('simCoordinateBlock'),
     simLatitude: document.getElementById('simLatitude'),
     simLongitude: document.getElementById('simLongitude'),
     simTeleport: document.getElementById('simTeleport'),
@@ -458,6 +455,11 @@ function initCltFieldSystem() {
     if (el.fieldEnd) el.fieldEnd.value = '';
   }
 
+  function applySecretCltDamping(rawStrength) {
+    if (rawStrength <= 1000) return rawStrength;
+    return 1000 + Math.pow(rawStrength - 1000, 0.62) * 8;
+  }
+
   function initFieldUploader() {
     loadCustomFields();
     renderUploadedFields();
@@ -512,14 +514,16 @@ function initCltFieldSystem() {
     const nowMs = Date.now();
     const baseEvaluations = magneticSources.map((source) => {
       const distance = haversineKm(lat, lon, source.lat, source.lon);
-      const strength = interpolatedStrength(distance, source.bands);
+      let strength = interpolatedStrength(distance, source.bands);
+      if (source.category === 'Secret') strength = applySecretCltDamping(strength);
       return { ...source, distance, strength, inField: strength > 0 };
     });
 
     const customEvaluations = state.customFields.map((field) => {
       const distance = haversineKm(lat, lon, field.lat, field.lon);
       const distanceM = distance * 1000;
-      const strength = customFieldStrength(field, distanceM, nowMs);
+      let strength = customFieldStrength(field, distanceM, nowMs);
+      strength = applySecretCltDamping(strength);
       return {
         name: field.name,
         category: 'Secret',
@@ -541,7 +545,9 @@ function initCltFieldSystem() {
     const secretFieldTotal = evaluations
       .filter((source) => source.category === 'Secret')
       .reduce((sum, source) => sum + source.strength, 0);
-    const tungstenBase = 0.000001 + (regularFieldTotal / 1000) * 0.05 + (secretFieldTotal / 1000) * 0.13;
+    const tungstenRegular = (regularFieldTotal / 1000) * 0.05;
+    const tungstenSecret = 0.95 * (1 - Math.exp(-Math.max(secretFieldTotal, 0) / 6000));
+    const tungstenBase = 0.000001 + tungstenRegular + tungstenSecret;
 
     const nearest = [...evaluations].sort((a, b) => a.distance - b.distance)[0];
 
@@ -575,8 +581,6 @@ function initCltFieldSystem() {
     state.lastBase = { lat, lon, accuracy, calc, liveClt, liveTungsten, timestamp: Date.now() };
 
     if (el.totalField) el.totalField.textContent = liveClt.toLocaleString(undefined, { maximumFractionDigits: 2 });
-    if (headerCltMini) headerCltMini.textContent = `CLT: ${liveClt.toLocaleString(undefined, { maximumFractionDigits: 1 })}`;
-    localStorage.setItem('ocltd_latest_clt', liveClt.toLocaleString(undefined, { maximumFractionDigits: 1 }));
     if (el.tungsten) el.tungsten.textContent = `${liveTungsten.toFixed(5)} mg/m³`;
     if (el.nearestSource) el.nearestSource.textContent = calc.nearest ? calc.nearest.name : '—';
     if (el.nearestDistance) {
@@ -672,7 +676,7 @@ function initCltFieldSystem() {
   function startDriftTicker() {
     if (state.driftTick) window.clearInterval(state.driftTick);
     state.driftTick = window.setInterval(() => {
-      if (!state.liveMode || !state.lastBase) return;
+      if ((!state.liveMode && !state.simulationActive) || !state.lastBase) return;
       const base = state.lastBase;
       renderLiveTelemetry(base.lat, base.lon, base.accuracy, base.calc);
     }, 2400);
@@ -745,15 +749,13 @@ function initCltFieldSystem() {
 
 
   function activateSimulatorTeleport() {
-    const expectedPassword = '67416741';
-    const password = String(el.simPassword?.value || '');
-    const lat = Number(el.simLatitude?.value);
-    const lon = Number(el.simLongitude?.value);
-
-    if (password !== expectedPassword) {
-      if (el.simStatus) el.simStatus.textContent = 'Simulator access denied: invalid password.';
+    if (!state.simulatorUnlocked) {
+      if (el.simStatus) el.simStatus.textContent = 'Unlock simulator first.';
       return;
     }
+
+    const lat = Number(el.simLatitude?.value);
+    const lon = Number(el.simLongitude?.value);
 
     if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
       if (el.simStatus) el.simStatus.textContent = 'Simulator input invalid: latitude [-90, 90], longitude [-180, 180].';
@@ -762,10 +764,27 @@ function initCltFieldSystem() {
 
     stopLiveTracking();
     state.simulationActive = true;
+    state.liveMode = false;
     const calc = computeField(lat, lon);
     renderLiveTelemetry(lat, lon, NaN, calc);
+    startDriftTicker();
     setStatus('Simulator teleport active. Live GPS paused.', 'TRACKING PAUSED');
-    if (el.simStatus) el.simStatus.textContent = `Teleported to ${lat.toFixed(6)}, ${lon.toFixed(6)}.`;
+    if (el.simStatus) el.simStatus.textContent = `Teleported to ${lat.toFixed(6)}, ${lon.toFixed(6)} (live simulated tracking active).`;
+  }
+
+  function unlockSimulator() {
+    const expectedPassword = '67416741';
+    const password = String(el.simPassword?.value || '');
+    if (password !== expectedPassword) {
+      state.simulatorUnlocked = false;
+      if (el.simCoordinateBlock) el.simCoordinateBlock.hidden = true;
+      if (el.simStatus) el.simStatus.textContent = 'Simulator access denied: invalid password.';
+      return;
+    }
+
+    state.simulatorUnlocked = true;
+    if (el.simCoordinateBlock) el.simCoordinateBlock.hidden = false;
+    if (el.simStatus) el.simStatus.textContent = 'Simulator unlocked. Enter teleport coordinates.';
   }
 
   function initFallbackTools() {
@@ -799,6 +818,7 @@ function initCltFieldSystem() {
   initFallbackTools();
   initFieldUploader();
   el.scanBtn?.addEventListener('click', runAccurateScan);
+  el.simUnlock?.addEventListener('click', unlockSimulator);
   el.simTeleport?.addEventListener('click', activateSimulatorTeleport);
 
   if (el.scanBtn) el.scanBtn.disabled = true;
