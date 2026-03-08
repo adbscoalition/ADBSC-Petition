@@ -254,13 +254,8 @@ function initCltFieldSystem() {
   const status = document.getElementById('cltSystemStatus');
   const totalFieldEl = document.getElementById('cltTotalField');
   const tungstenEl = document.getElementById('cltTungsten');
-  const dominantEl = document.getElementById('cltDominant');
-  const dominantDistanceEl = document.getElementById('cltDominantDistance');
-  const locationEl = document.getElementById('cltActiveLocation');
-  const coordsEl = document.getElementById('cltActiveCoords');
   const contributorsEl = document.getElementById('cltContributors');
-  const coordinatesTbody = document.querySelector('#coordinateTable tbody');
-  const sourceBands = document.getElementById('sourceBands');
+  const nearestFieldDistanceEl = document.getElementById('cltNearestFieldDistance');
 
   const fallback = coordinateDefinitions.find((d) => d.name === 'Geolocation Denied Fallback');
 
@@ -285,47 +280,7 @@ function initCltFieldSystem() {
     return 0;
   }
 
-  function nearestCoordinateName(lat, lon) {
-    let best = coordinateDefinitions[0];
-    let bestDistance = Infinity;
-    for (const point of coordinateDefinitions) {
-      const dist = haversineKm(lat, lon, point.lat, point.lon);
-      if (dist < bestDistance) {
-        bestDistance = dist;
-        best = point;
-      }
-    }
-    return best.name;
-  }
-
   function renderStaticTables() {
-    if (coordinatesTbody) {
-      coordinatesTbody.innerHTML = coordinateDefinitions.map((point) => `
-        <tr>
-          <td>${point.name}</td>
-          <td>${point.lat}</td>
-          <td>${point.lon}</td>
-        </tr>
-      `).join('');
-    }
-
-    if (sourceBands) {
-      sourceBands.innerHTML = magneticSources.map((source) => {
-        const bands = source.bands.map((band) => {
-          const [startKm, endKm, startV, endV] = band;
-          return `<li>${startKm}–${endKm} km : ${startV} → ${endV}</li>`;
-        }).join('');
-
-        return `
-          <article class="source-card">
-            <h3>${source.name}</h3>
-            <p class="source-category">Category: ${source.category}</p>
-            <ul>${bands}</ul>
-          </article>
-        `;
-      }).join('');
-    }
-
     if (preset) {
       preset.innerHTML = coordinateDefinitions
         .filter((point) => point.name !== 'Geolocation Denied Fallback')
@@ -338,27 +293,41 @@ function initCltFieldSystem() {
     const evaluations = magneticSources.map((source) => {
       const distance = haversineKm(lat, lon, source.lat, source.lon);
       const strength = interpolatedStrength(distance, source.bands);
-      return { ...source, distance, strength };
+      const inField = strength > 0;
+      return { ...source, distance, strength, inField };
     }).sort((a, b) => b.strength - a.strength);
 
     const totalField = evaluations.reduce((sum, source) => sum + source.strength, 0);
     const tungsten = Math.min(0.99, 0.00001 + totalField / 12000);
-    const dominant = evaluations[0];
-    const nearestName = nearestCoordinateName(lat, lon);
+
+    const activeSecretSources = evaluations.filter((source) => source.category === 'Secret' && source.inField);
+    const regularSources = evaluations.filter((source) => source.category !== 'Secret');
+    const nearestRegular = [...regularSources].sort((a, b) => a.distance - b.distance)[0];
+    const nearestActiveSecret = [...activeSecretSources].sort((a, b) => a.distance - b.distance)[0];
+    const nearestTarget = nearestActiveSecret || nearestRegular;
 
     if (totalFieldEl) totalFieldEl.textContent = totalField.toLocaleString(undefined, { maximumFractionDigits: 2 });
     if (tungstenEl) tungstenEl.textContent = `${tungsten.toFixed(5)} mg/m³`;
-    if (dominantEl) dominantEl.textContent = dominant ? dominant.name : 'None';
-    if (dominantDistanceEl) dominantDistanceEl.textContent = dominant
-      ? `Distance: ${dominant.distance.toFixed(3)} km · Category: ${dominant.category}`
-      : 'Distance: —';
-    if (locationEl) locationEl.textContent = nearestName;
-    if (coordsEl) coordsEl.textContent = `Lat/Lon: ${lat.toFixed(8)}, ${lon.toFixed(8)}`;
-    if (contributorsEl) {
-      contributorsEl.innerHTML = evaluations.slice(0, 5).map((source) => `
-        <li><strong>${source.name}</strong> — ${source.strength.toFixed(2)} units @ ${source.distance.toFixed(3)} km</li>
-      `).join('');
+
+    if (nearestFieldDistanceEl) {
+      if (!nearestTarget) {
+        nearestFieldDistanceEl.innerHTML = '<strong>Distance to nearest CLT Field:</strong> —';
+      } else {
+        const dist = nearestTarget.distance;
+        const unit = dist < 1 ? `${(dist * 1000).toFixed(1)} m` : `${dist.toFixed(3)} km`;
+        nearestFieldDistanceEl.innerHTML = `<strong>Distance to nearest CLT Field:</strong> ${unit} (${nearestTarget.name})`;
+      }
     }
+
+    if (contributorsEl) {
+      contributorsEl.innerHTML = evaluations.slice(0, 5).map((source) => {
+        if (source.category === 'Secret' && !source.inField) {
+          return '<li><strong>???</strong> — secret field outside active range</li>';
+        }
+        return `<li><strong>${source.name}</strong> — ${source.strength.toFixed(2)} units @ ${source.distance.toFixed(3)} km</li>`;
+      }).join('');
+    }
+
     if (status) status.textContent = statusText;
   }
 

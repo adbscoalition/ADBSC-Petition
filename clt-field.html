@@ -155,72 +155,30 @@
 
       <div class="clt-readout-grid" aria-label="CLT computed readouts">
         <article class="panel readout-card">
-          <p class="eyebrow">Primary Signal</p>
-          <h3 id="cltTotalField">0</h3>
-          <p>Integrated CLT Field Units</p>
+          <p class="eyebrow">Card 1</p>
+          <h3>CLT Field Indicators</h3>
+          <p><strong>Current CLT Value:</strong> <span id="cltTotalField">0</span></p>
+          <p id="cltNearestFieldDistance"><strong>Distance to nearest CLT Field:</strong> —</p>
         </article>
         <article class="panel readout-card">
-          <p class="eyebrow">Tungsten</p>
-          <h3 id="cltTungsten">0.00001 mg/m³</h3>
-          <p>Atmospheric concentration estimate</p>
+          <p class="eyebrow">Card 2</p>
+          <h3>Other Specifications</h3>
+          <p><strong>Tungsten Concentration in Atmosphere:</strong></p>
+          <p id="cltTungsten">0.00001 mg/m³</p>
         </article>
-        <article class="panel readout-card">
-          <p class="eyebrow">Dominant Source</p>
-          <h3 id="cltDominant">—</h3>
-          <p id="cltDominantDistance">Distance: —</p>
+        <article class="panel readout-card clt-sources-card">
+          <p class="eyebrow">Card 3</p>
+          <h3>Sources (Top)</h3>
+          <ol id="cltContributors"></ol>
         </article>
-        <article class="panel readout-card">
-          <p class="eyebrow">Location</p>
-          <h3 id="cltActiveLocation">—</h3>
-          <p id="cltActiveCoords">Lat/Lon: —</p>
-        </article>
-      </div>
-
-      <article class="panel clt-nearest">
-        <h3>Top Magnetic Contributors</h3>
-        <ol id="cltContributors"></ol>
-      </article>
-    </section>
-
-    <section class="panel" aria-labelledby="fieldLocationTitle">
-      <h2 id="fieldLocationTitle">Primary Field Locations</h2>
-      <div class="table-wrap">
-        <table class="clt-table">
-          <thead>
-            <tr><th>Field</th><th>Name</th><th>Coordinates</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Pacific Field</td>
-              <td>Haida Gwaii Islands</td>
-              <td>53.255510249854304, -132.08947116604432</td>
-            </tr>
-            <tr>
-              <td>Caribbean Field</td>
-              <td>Charlotte Amalie, US Virgin Islands</td>
-              <td>18.34185490966226, -64.9316281681369</td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </section>
 
-    <section class="panel" aria-labelledby="coordinateTitle">
-      <h2 id="coordinateTitle">Coordinate Definitions</h2>
-      <div class="table-wrap">
-        <table class="clt-table" id="coordinateTable">
-          <thead>
-            <tr><th>Location</th><th>Latitude</th><th>Longitude</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
+    
 
-    <section class="panel" aria-labelledby="sourceTitle">
-      <h2 id="sourceTitle">Magnetic Sources and Bands</h2>
-      <div id="sourceBands" class="source-band-grid"></div>
-    </section>
+    
+
+    
   </main>
 
   <footer class="site-footer">
