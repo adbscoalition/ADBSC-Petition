@@ -298,7 +298,13 @@ function initCltFieldSystem() {
     }).sort((a, b) => b.strength - a.strength);
 
     const totalField = evaluations.reduce((sum, source) => sum + source.strength, 0);
-    const tungsten = Math.min(0.99, 0.00001 + totalField / 12000);
+    const regularFieldTotal = evaluations
+      .filter((source) => source.category !== 'Secret')
+      .reduce((sum, source) => sum + source.strength, 0);
+    const secretFieldTotal = evaluations
+      .filter((source) => source.category === 'Secret')
+      .reduce((sum, source) => sum + source.strength, 0);
+    const tungsten = (regularFieldTotal / 1000) * 0.05 + (secretFieldTotal / 1000) * 0.13;
 
     const activeSecretSources = evaluations.filter((source) => source.category === 'Secret' && source.inField);
     const regularSources = evaluations.filter((source) => source.category !== 'Secret');
@@ -320,12 +326,17 @@ function initCltFieldSystem() {
     }
 
     if (contributorsEl) {
-      contributorsEl.innerHTML = evaluations.slice(0, 5).map((source) => {
-        if (source.category === 'Secret' && !source.inField) {
-          return '<li><strong>???</strong> — secret field outside active range</li>';
-        }
-        return `<li><strong>${source.name}</strong> — ${source.strength.toFixed(2)} units @ ${source.distance.toFixed(3)} km</li>`;
-      }).join('');
+      const visibleSources = evaluations
+        .filter((source) => source.category !== 'Secret' || source.inField)
+        .slice(0, 5);
+
+      contributorsEl.innerHTML = visibleSources
+        .map((source) => `<li><strong>${source.name}</strong> — ${source.strength.toFixed(2)} units @ ${source.distance.toFixed(3)} km</li>`)
+        .join('');
+
+      if (!visibleSources.length) {
+        contributorsEl.innerHTML = '<li>No active sources available.</li>';
+      }
     }
 
     if (status) status.textContent = statusText;
