@@ -584,22 +584,10 @@ select {
 .brand-title {
   margin: 0;
   font-family: "Gravitas One", serif;
-  font-size: clamp(1.05rem, 2.1vw, 1.28rem);
+  font-size: clamp(1.14rem, 2.35vw, 1.42rem);
   color: #fff6dd;
   letter-spacing: 0.01em;
   text-shadow: 0 0 18px rgba(247, 206, 116, 0.45);
-}
-
-.brand-tag {
-  margin: 0;
-  color: var(--text-soft);
-  font-size: 0.94rem;
-}
-
-.brand-tag span {
-  color: #fff8e5;
-  font-weight: 700;
-  text-shadow: 0 0 20px rgba(247, 206, 116, 0.58);
 }
 
 .header-nav {
