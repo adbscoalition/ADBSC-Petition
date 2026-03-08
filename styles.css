@@ -1,16 +1,17 @@
 :root {
-  --bg-0: #06070d;
-  --bg-1: #101320;
-  --panel: rgba(20, 23, 36, 0.78);
-  --panel-border: rgba(184, 197, 255, 0.2);
-  --text: #eef2ff;
-  --text-soft: #c2cbea;
-  --violet: #8e5dff;
-  --magenta: #ff3ea8;
-  --cyan: #9cefff;
+  --bg-0: #090704;
+  --bg-1: #1b1407;
+  --panel: rgba(38, 29, 12, 0.82);
+  --panel-border: rgba(255, 214, 134, 0.3);
+  --text: #fff6df;
+  --text-soft: #e8d7af;
+  --violet: #b7862f;
+  --magenta: #f4c254;
+  --cyan: #ffe39a;
+  --feature-scale: 1.08;
   --radius-lg: 24px;
   --radius-md: 16px;
-  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.48);
+  --shadow-lg: 0 22px 62px rgba(0, 0, 0, 0.52);
 }
 
 * {
@@ -27,8 +28,8 @@ body {
   font-family: "Public Sans", sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at 20% -10%, #261a4b 0%, transparent 44%),
-    radial-gradient(circle at 86% 8%, #381635 0%, transparent 40%),
+    radial-gradient(circle at 20% -10%, #533411 0%, transparent 44%),
+    radial-gradient(circle at 86% 8%, #6f4b17 0%, transparent 40%),
     linear-gradient(160deg, var(--bg-0), var(--bg-1));
   min-height: 100vh;
   overflow-x: hidden;
@@ -66,7 +67,7 @@ select {
   place-items: center;
   background: radial-gradient(
     circle at 50% 18%,
-    rgba(146, 96, 255, calc(0.22 + var(--loader-glow) * 0.25)),
+    rgba(255, 197, 80, calc(0.22 + var(--loader-glow) * 0.25)),
     rgba(8, 10, 16, 0.99)
   );
   backdrop-filter: blur(8px);
@@ -97,10 +98,10 @@ select {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 50% 36%, rgba(156, 239, 255, 0.1), transparent 46%),
+    radial-gradient(circle at 50% 36%, rgba(255, 227, 154, 0.14), transparent 46%),
     repeating-radial-gradient(
       circle at 50% 40%,
-      rgba(156, 239, 255, 0.06) 0 1px,
+      rgba(255, 227, 154, 0.08) 0 1px,
       transparent 1px 44px
     );
   opacity: calc(0.55 + var(--loader-glow) * 0.3);
@@ -109,11 +110,11 @@ select {
 .loader-shell {
   width: min(760px, calc(100% - 2rem));
   border-radius: 24px;
-  border: 1px solid rgba(184, 197, 255, 0.45);
-  background: linear-gradient(160deg, rgba(26, 31, 52, 0.94), rgba(15, 18, 30, 0.95));
+  border: 1px solid rgba(255, 216, 141, 0.45);
+  background: linear-gradient(160deg, rgba(57, 42, 18, 0.94), rgba(25, 19, 10, 0.95));
   box-shadow:
     0 25px 90px rgba(0, 0, 0, 0.65),
-    0 0 45px rgba(142, 93, 255, calc(0.15 + var(--loader-glow) * 0.25));
+    0 0 45px rgba(247, 191, 74, calc(0.2 + var(--loader-glow) * 0.25));
   padding: 1.2rem;
   text-align: center;
 }
@@ -149,7 +150,7 @@ select {
 }
 
 .main-loader .loader-shell {
-  background: linear-gradient(160deg, rgba(31, 25, 60, 0.95), rgba(17, 22, 38, 0.95));
+  background: linear-gradient(160deg, rgba(58, 41, 14, 0.95), rgba(28, 20, 8, 0.95));
 }
 
 .main-loader-lights {
@@ -164,9 +165,9 @@ select {
   border-radius: 999px;
   background: linear-gradient(
     90deg,
-    rgba(142, 93, 255, 0.2),
-    rgba(255, 62, 168, 0.6),
-    rgba(156, 239, 255, 0.2)
+    rgba(185, 136, 47, 0.2),
+    rgba(244, 194, 84, 0.65),
+    rgba(255, 227, 154, 0.28)
   );
   animation: pulseStrip 1s ease-in-out infinite;
 }
@@ -198,14 +199,14 @@ select {
 .portal-loader-network span {
   height: 34px;
   border-radius: 10px;
-  border: 1px solid rgba(184, 197, 255, 0.24);
-  background: rgba(143, 93, 255, 0.12);
+  border: 1px solid rgba(255, 214, 134, 0.32);
+  background: rgba(185, 136, 47, 0.18);
   transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .portal-loader-network span.active {
-  background: linear-gradient(145deg, rgba(111, 57, 255, 0.7), rgba(255, 62, 168, 0.7));
-  box-shadow: 0 0 16px rgba(156, 239, 255, 0.35);
+  background: linear-gradient(145deg, rgba(185, 136, 47, 0.7), rgba(244, 194, 84, 0.82));
+  box-shadow: 0 0 16px rgba(255, 227, 154, 0.42);
   transform: translateY(-2px);
 }
 
@@ -215,8 +216,8 @@ select {
 
 .instruction-console {
   margin-top: 0.75rem;
-  border: 1px solid rgba(184, 197, 255, 0.25);
-  background: rgba(8, 12, 22, 0.66);
+  border: 1px solid rgba(255, 214, 134, 0.3);
+  background: rgba(23, 17, 8, 0.74);
   border-radius: 14px;
   padding: 0.75rem;
   text-align: left;
@@ -225,7 +226,7 @@ select {
 .typed-line {
   margin: 0;
   min-height: 4.9em;
-  color: #dff6ff;
+  color: #ffecc0;
   font-weight: 700;
   white-space: pre-line;
 }
@@ -254,7 +255,7 @@ select {
   align-items: center;
   gap: 0.55rem;
   color: var(--text-soft);
-  border: 1px solid rgba(184, 197, 255, 0.22);
+  border: 1px solid rgba(255, 214, 134, 0.24);
   border-radius: 10px;
   padding: 0.5rem 0.65rem;
   background: rgba(10, 13, 23, 0.62);
@@ -265,7 +266,7 @@ select {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 1px solid rgba(184, 197, 255, 0.35);
+  border: 1px solid rgba(255, 214, 134, 0.38);
   display: inline-grid;
   place-items: center;
   background: rgba(255, 255, 255, 0.04);
@@ -389,15 +390,15 @@ select {
 .background-field {
   opacity: 0.65;
   background:
-    radial-gradient(circle at 20% 20%, rgba(142, 93, 255, 0.24), transparent 42%),
-    radial-gradient(circle at 80% 14%, rgba(255, 62, 168, 0.2), transparent 35%);
+    radial-gradient(circle at 20% 20%, rgba(185, 136, 47, 0.28), transparent 42%),
+    radial-gradient(circle at 80% 14%, rgba(244, 194, 84, 0.2), transparent 35%);
 }
 
 .field-rings {
   opacity: 0.35;
   background: repeating-radial-gradient(
     circle at 50% 50%,
-    rgba(156, 239, 255, 0.1) 0 1px,
+    rgba(255, 227, 154, 0.1) 0 1px,
     transparent 1px 84px
   );
   animation: breatheRings 8s ease-in-out infinite alternate;
@@ -466,8 +467,8 @@ select {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  background: rgba(12, 14, 22, 0.75);
-  border: 1px solid rgba(184, 197, 255, 0.2);
+  background: rgba(31, 24, 10, 0.78);
+  border: 1px solid rgba(255, 214, 134, 0.28);
   border-radius: 18px;
   padding: 0.7rem 0.85rem;
   backdrop-filter: blur(8px);
@@ -481,7 +482,7 @@ select {
 }
 
 .brand-logo {
-  width: 72px;
+  width: calc(72px * var(--feature-scale));
   max-width: 100%;
   border-radius: 14px;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.42);
@@ -494,9 +495,9 @@ select {
 }
 
 .brand-tag span {
-  color: #fff;
+  color: #fff9ec;
   font-weight: 700;
-  text-shadow: 0 0 20px rgba(255, 62, 168, 0.6);
+  text-shadow: 0 0 20px rgba(248, 196, 85, 0.55);
 }
 
 .header-nav {
@@ -511,13 +512,13 @@ select {
   border: 1px solid var(--panel-border);
   border-radius: 999px;
   padding: 0.45rem 0.85rem;
-  background: rgba(22, 26, 40, 0.6);
+  background: rgba(39, 28, 10, 0.7);
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
 .header-nav a:hover,
 .header-nav a:focus-visible {
-  border-color: rgba(156, 239, 255, 0.75);
+  border-color: rgba(255, 220, 148, 0.9);
   transform: translateY(-1px);
 }
 
@@ -526,7 +527,7 @@ select {
   appearance: none;
   border: 1px solid var(--panel-border);
   border-radius: 999px;
-  background: rgba(22, 26, 40, 0.75);
+  background: rgba(39, 28, 10, 0.8);
   color: var(--text);
   padding: 0.45rem 0.9rem;
   font-family: "Public Sans", sans-serif;
@@ -557,8 +558,8 @@ select {
   width: 320px;
   height: 320px;
   border-radius: 50%;
-  border: 1px solid rgba(156, 239, 255, 0.15);
-  box-shadow: inset 0 0 45px rgba(142, 93, 255, 0.1);
+  border: 1px solid rgba(255, 214, 134, 0.2);
+  box-shadow: inset 0 0 45px rgba(185, 136, 47, 0.12);
   pointer-events: none;
 }
 
@@ -590,8 +591,8 @@ p {
 }
 
 .hero-card h1 span {
-  color: var(--magenta);
-  text-shadow: 0 0 28px rgba(255, 62, 168, 0.7);
+  color: #ffd45f;
+  text-shadow: 0 0 28px rgba(248, 196, 85, 0.75);
 }
 
 .hero-copy {
@@ -611,13 +612,13 @@ p {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
+  min-height: calc(42px * var(--feature-scale));
   border: 1px solid rgba(184, 197, 255, 0.28);
-  border-radius: 12px;
-  padding: 0.62rem 1rem;
+  border-radius: 14px;
+  padding: 0.72rem 1.15rem;
   text-decoration: none;
   color: var(--text);
-  background: linear-gradient(160deg, rgba(42, 47, 72, 0.96), rgba(25, 29, 46, 0.96));
+  background: linear-gradient(160deg, rgba(66, 49, 22, 0.96), rgba(38, 27, 10, 0.96));
   cursor: pointer;
   font-family: "Public Sans", sans-serif;
   font-weight: 700;
@@ -640,13 +641,13 @@ p {
 }
 
 .btn.primary {
-  border-color: rgba(255, 255, 255, 0.14);
-  color: #fff;
-  background: linear-gradient(118deg, #6f39ff, #ff3ea8 55%, #ff7cc3);
+  border-color: rgba(255, 240, 205, 0.22);
+  color: #2d1f06;
+  background: linear-gradient(118deg, #b9872e, #f4c154 55%, #ffe39a);
 }
 
 .btn.secondary {
-  background: linear-gradient(160deg, rgba(33, 38, 59, 0.95), rgba(22, 25, 41, 0.95));
+  background: linear-gradient(160deg, rgba(60, 45, 19, 0.95), rgba(36, 26, 10, 0.95));
 }
 
 .quick-grid,
@@ -662,8 +663,8 @@ p {
   color: var(--text);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-md);
-  padding: 0.95rem;
-  background: rgba(20, 23, 36, 0.62);
+  padding: 1.1rem;
+  background: rgba(39, 28, 10, 0.7);
 }
 
 .quick-card:hover {
@@ -678,7 +679,8 @@ p {
 
 .portal-entry {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.88rem;
+  padding: 1.15rem;
 }
 
 .portal-entry-head {
@@ -690,7 +692,7 @@ p {
 }
 
 .portal-entry-head h2 {
-  font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+  font-size: clamp(1.15rem, 2.55vw, 1.55rem);
 }
 
 .portal-note {
@@ -711,9 +713,9 @@ p {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 92px;
+  min-width: 108px;
   border-radius: 999px;
-  padding: 0.28rem 0.72rem;
+  padding: 0.38rem 0.82rem;
   border: 1px solid rgba(184, 197, 255, 0.34);
   background: rgba(20, 23, 36, 0.85);
   font-size: 0.79rem;
@@ -783,7 +785,7 @@ p {
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-md);
   background: rgba(18, 21, 34, 0.72);
-  padding: 0.9rem;
+  padding: 1.05rem;
 }
 
 .guide-card h3 {
@@ -816,7 +818,7 @@ p {
   border: 1px solid rgba(184, 197, 255, 0.24);
   border-radius: var(--radius-md);
   background: rgba(16, 20, 32, 0.74);
-  padding: 0.9rem;
+  padding: 1.05rem;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
 }
 
@@ -888,7 +890,7 @@ pre {
   margin: 0;
   font-family: "Gravitas One", serif;
   color: #fff;
-  text-shadow: 0 0 22px rgba(142, 93, 255, 0.45);
+  text-shadow: 0 0 22px rgba(248, 196, 85, 0.45);
 }
 
 .footer-links {
@@ -901,7 +903,7 @@ pre {
 }
 
 .footer-links a {
-  color: var(--cyan);
+  color: #ffd45f;
   text-decoration: none;
 }
 
@@ -1000,7 +1002,7 @@ pre {
   }
 
   .brand-logo {
-    width: 66px;
+    width: calc(64px * var(--feature-scale));
   }
 
   .loader-shell {
