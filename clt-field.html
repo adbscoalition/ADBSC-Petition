@@ -121,11 +121,6 @@
         Real-time CLT field estimation from fixed magnetic sources, banded decay profiles, and
         coordinate-aware interpolation.
       </p>
-      <ul class="clt-hero-tags" aria-label="Field specification highlights">
-        <li>Pacific Field: Haida Gwaii Islands</li>
-        <li>Caribbean Field: Charlotte Amalie, USVI</li>
-        <li>Supports geolocation + manual coordinates</li>
-      </ul>
     </section>
 
     <section class="panel clt-system-controls" aria-labelledby="cltControlTitle" id="cltSystemApp">
@@ -153,32 +148,27 @@
       </div>
       <p id="cltSystemStatus" class="clt-system-status" role="status">System ready.</p>
 
-      <div class="clt-readout-grid" aria-label="CLT computed readouts">
-        <article class="panel readout-card">
-          <p class="eyebrow">Card 1</p>
-          <h3>CLT Field Indicators</h3>
-          <p><strong>Current CLT Value:</strong> <span id="cltTotalField">0</span></p>
-          <p id="cltNearestFieldDistance"><strong>Distance to nearest CLT Field:</strong> —</p>
-        </article>
-        <article class="panel readout-card">
-          <p class="eyebrow">Card 2</p>
-          <h3>Other Specifications</h3>
-          <p><strong>Tungsten Concentration in Atmosphere:</strong></p>
-          <p id="cltTungsten">0.00001 mg/m³</p>
-        </article>
-        <article class="panel readout-card clt-sources-card">
-          <p class="eyebrow">Card 3</p>
-          <h3>Sources (Top)</h3>
-          <ol id="cltContributors"></ol>
-        </article>
-      </div>
     </section>
 
-    
+    <section class="panel readout-card clt-card-section" aria-labelledby="cltIndicatorsTitle">
+      <p class="eyebrow">Card 1</p>
+      <h2 id="cltIndicatorsTitle">CLT Field Indicators</h2>
+      <p><strong>Current CLT Value:</strong> <span id="cltTotalField">0</span></p>
+      <p id="cltNearestFieldDistance"><strong>Distance to nearest CLT Field:</strong> —</p>
+    </section>
 
-    
+    <section class="panel readout-card clt-card-section" aria-labelledby="cltSpecsTitle">
+      <p class="eyebrow">Card 2</p>
+      <h2 id="cltSpecsTitle">Other Specifications</h2>
+      <p><strong>Tungsten Concentration in Atmosphere:</strong></p>
+      <p id="cltTungsten">0.00001 mg/m³</p>
+    </section>
 
-    
+    <section class="panel readout-card clt-sources-card clt-card-section" aria-labelledby="cltSourcesTitle">
+      <p class="eyebrow">Card 3</p>
+      <h2 id="cltSourcesTitle">Sources (Top)</h2>
+      <ol id="cltContributors"></ol>
+    </section>
   </main>
 
   <footer class="site-footer">
