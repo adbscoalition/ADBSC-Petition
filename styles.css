@@ -1341,15 +1341,12 @@ pre {
 }
 
 
-.tungsten-anomaly-note {
-  margin: 0.6rem 0 0.75rem;
-  color: #ffe4aa;
-  font-weight: 600;
-}
 
-.tungsten-particles {
-  margin: 0.5rem 0 0;
-  color: var(--text-soft);
-  line-height: 1.45;
-  font-size: 0.95rem;
+
+.live-kpi-secondary {
+  margin: 0.2rem 0 0.55rem;
+  font-size: clamp(1.35rem, 3.4vw, 2.05rem);
+  font-weight: 750;
+  color: #fff6e1;
+  line-height: 1.15;
 }

@@ -254,7 +254,8 @@ function initCltFieldSystem() {
     lastBase: null,
     cltDrift: 0,
     tungstenDrift: 0,
-    history: []
+    history: [],
+    simulationActive: false
   };
 
   const el = {
@@ -278,8 +279,11 @@ function initCltFieldSystem() {
     scanState: document.getElementById('scanState'),
     scanBar: document.getElementById('scanProgressBar'),
     scanSheet: document.getElementById('scanSheetList'),
-    tungstenComposition: document.getElementById('tungstenCompositionList'),
-    tungstenAnomalyNote: document.getElementById('tungstenAnomalyNote')
+    simPassword: document.getElementById('simPassword'),
+    simLatitude: document.getElementById('simLatitude'),
+    simLongitude: document.getElementById('simLongitude'),
+    simTeleport: document.getElementById('simTeleport'),
+    simStatus: document.getElementById('simStatus')
   };
 
   const fallbackCoord = coordinateDefinitions.find((d) => d.name === 'Geolocation Denied Fallback');
@@ -339,11 +343,7 @@ function initCltFieldSystem() {
       .reduce((sum, source) => sum + source.strength, 0);
     const tungstenBase = 0.000001 + (regularFieldTotal / 1000) * 0.05 + (secretFieldTotal / 1000) * 0.13;
 
-    const activeSecret = evaluations.filter((source) => source.category === 'Secret' && source.inField);
-    const regular = evaluations.filter((source) => source.category !== 'Secret');
-    const nearestRegular = [...regular].sort((a, b) => a.distance - b.distance)[0];
-    const nearestSecret = [...activeSecret].sort((a, b) => a.distance - b.distance)[0];
-    const nearest = nearestSecret || nearestRegular || evaluations[0];
+    const nearest = [...evaluations].sort((a, b) => a.distance - b.distance)[0];
 
     return { evaluations, totalField, tungstenBase, nearest };
   }
@@ -351,37 +351,6 @@ function initCltFieldSystem() {
   function formatDistance(distanceKm) {
     if (!Number.isFinite(distanceKm)) return '—';
     return distanceKm < 1 ? `${(distanceKm * 1000).toFixed(1)} m` : `${distanceKm.toFixed(3)} km`;
-  }
-
-  function detectRegionAnomalyIsotope(lat, lon) {
-    if (lat >= 5 && lat <= 84 && lon >= -170 && lon <= -52) return '¹⁸²W'; // USA + territories bucket
-    if ((lat >= -50 && lat <= 72 && lon >= -170 && lon <= -45) || (lat >= -50 && lat <= 60 && lon >= 110 && lon <= 180)) return '¹⁸³W'; // Canada/UK/AU/NZ/Africa/Oceania bucket
-    if (lat >= 44 && lat <= 56 && lon >= 2 && lon <= 18) return '¹⁸⁴W'; // DE/AT/CH/LI/NL/LU bucket
-    return '¹⁸⁶W'; // France/Belgium/ROW bucket
-  }
-
-  function renderTungstenComposition(lat, lon, calc) {
-    if (!(el.tungstenComposition && el.tungstenAnomalyNote)) return;
-
-    const baseline = [
-      '¹⁸⁰W ~0.12%',
-      '¹⁸²W ~26.5%',
-      '¹⁸³W ~14.3%',
-      '¹⁸⁴W ~30.6%',
-      '¹⁸⁶W ~28.4%'
-    ];
-
-    const hasSecretAnomaly = calc.evaluations.some((source) => source.category === 'Secret' && source.inField);
-    if (!hasSecretAnomaly) {
-      el.tungstenComposition.innerHTML = baseline.map((line) => `<li>${line}</li>`).join('');
-      el.tungstenAnomalyNote.textContent = 'No secret-field anomaly active.';
-      return;
-    }
-
-    const isotope = detectRegionAnomalyIsotope(lat, lon);
-    const upgraded = baseline.map((line) => line.startsWith(isotope) ? `${isotope} 99.9%+ (secret anomaly)` : line);
-    el.tungstenComposition.innerHTML = upgraded.map((line) => `<li>${line}</li>`).join('');
-    el.tungstenAnomalyNote.textContent = `Secret-field anomaly active: ${isotope} designated isotope spike detected.`;
   }
 
   function renderHistory() {
@@ -416,7 +385,6 @@ function initCltFieldSystem() {
     }
     if (el.liveCoords) el.liveCoords.textContent = `Lat/Lon: ${lat.toFixed(8)}, ${lon.toFixed(8)}`;
     if (el.accuracy) el.accuracy.textContent = `Accuracy: ${Number.isFinite(accuracy) ? `${Math.round(accuracy)} m` : '—'}`;
-    renderTungstenComposition(lat, lon, calc);
 
     const stamp = new Date().toLocaleTimeString();
     if (el.lastUpdate) el.lastUpdate.textContent = `Last update: ${stamp}`;
@@ -549,6 +517,7 @@ function initCltFieldSystem() {
         const calc = computeField(lat, lon);
 
         state.liveMode = true;
+        state.simulationActive = false;
         setStatus('Live tracking active and streaming sensor telemetry.', 'LIVE TRACKING');
         renderLiveTelemetry(lat, lon, accuracy, calc);
         startDriftTicker();
@@ -570,6 +539,31 @@ function initCltFieldSystem() {
       return null;
     }
     return { lat, lon };
+  }
+
+
+  function activateSimulatorTeleport() {
+    const expectedPassword = 'charlotte-teleport';
+    const password = String(el.simPassword?.value || '');
+    const lat = Number(el.simLatitude?.value);
+    const lon = Number(el.simLongitude?.value);
+
+    if (password !== expectedPassword) {
+      if (el.simStatus) el.simStatus.textContent = 'Simulator access denied: invalid password.';
+      return;
+    }
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+      if (el.simStatus) el.simStatus.textContent = 'Simulator input invalid: latitude [-90, 90], longitude [-180, 180].';
+      return;
+    }
+
+    stopLiveTracking();
+    state.simulationActive = true;
+    const calc = computeField(lat, lon);
+    renderLiveTelemetry(lat, lon, NaN, calc);
+    setStatus('Simulator teleport active. Live GPS paused.', 'TRACKING PAUSED');
+    if (el.simStatus) el.simStatus.textContent = `Teleported to ${lat.toFixed(6)}, ${lon.toFixed(6)}.`;
   }
 
   function initFallbackTools() {
@@ -602,6 +596,7 @@ function initCltFieldSystem() {
 
   initFallbackTools();
   el.scanBtn?.addEventListener('click', runAccurateScan);
+  el.simTeleport?.addEventListener('click', activateSimulatorTeleport);
 
   if (el.scanBtn) el.scanBtn.disabled = true;
   renderHistory();
