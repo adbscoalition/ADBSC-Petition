@@ -272,7 +272,7 @@ function initCltFieldSystem() {
     tungsten: document.getElementById('cltTungsten'),
     nearestDistance: document.getElementById('cltNearestFieldDistance'),
     nearestSource: document.getElementById('cltNearestSource'),
-    liveCoords: document.getElementById('cltLiveCoords'),
+    knownFieldDistance: document.getElementById('cltKnownFieldDistance'),
     accuracy: document.getElementById('cltAccuracy'),
     contributors: document.getElementById('cltContributors'),
     fallback: document.getElementById('cltFallback'),
@@ -297,12 +297,13 @@ function initCltFieldSystem() {
     fieldRange: document.getElementById('fieldRange'),
     fieldLatitude: document.getElementById('fieldLatitude'),
     fieldLongitude: document.getElementById('fieldLongitude'),
-    fieldStart: document.getElementById('fieldStart'),
-    fieldEnd: document.getElementById('fieldEnd'),
+    fieldStartTime: document.getElementById('fieldStartTime'),
+    fieldEndTime: document.getElementById('fieldEndTime'),
     fieldSave: document.getElementById('fieldSave'),
     fieldReset: document.getElementById('fieldReset'),
     fieldUploaderStatus: document.getElementById('fieldUploaderStatus'),
-    uploadedFieldList: document.getElementById('uploadedFieldList')
+    uploadedFieldList: document.getElementById('uploadedFieldList'),
+    fieldDayInputs: Array.from(document.querySelectorAll('.field-day'))
   };
 
   const fallbackCoord = coordinateDefinitions.find((d) => d.name === 'Geolocation Denied Fallback');
@@ -368,22 +369,39 @@ function initCltFieldSystem() {
 
   function customFieldTimeFactor(field, nowMs) {
     const fadeMs = 5 * 60 * 1000;
-    const hasStart = !!field.startTime;
-    const hasEnd = !!field.endTime;
-    const startMs = hasStart ? new Date(field.startTime).getTime() : null;
-    const endMs = hasEnd ? new Date(field.endTime).getTime() : null;
+    const now = new Date(nowMs);
+    const today = now.getDay();
+    const selectedDays = Array.isArray(field.daysOfWeek) ? field.daysOfWeek : [];
 
-    if (hasStart && Number.isFinite(startMs)) {
-      if (nowMs < startMs - fadeMs) return 0;
-      if (nowMs < startMs) return (nowMs - (startMs - fadeMs)) / fadeMs;
+    if (selectedDays.length && !selectedDays.includes(today)) return 0;
+
+    const hasStart = !!field.startClock;
+    const hasEnd = !!field.endClock;
+    if (!hasStart && !hasEnd) return 1;
+
+    const mins = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+
+    function parseClock(v) {
+      const [h, m] = String(v).split(':').map(Number);
+      if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
+      return h * 60 + m;
     }
 
-    if (hasEnd && Number.isFinite(endMs)) {
-      if (nowMs > endMs + fadeMs) return 0;
-      if (nowMs > endMs) return 1 - ((nowMs - endMs) / fadeMs);
-    }
+    const startM = hasStart ? parseClock(field.startClock) : null;
+    const endM = hasEnd ? parseClock(field.endClock) : null;
+    if ((hasStart && startM === null) || (hasEnd && endM === null)) return 1;
 
-    return 1;
+    if (hasStart && mins < startM - (fadeMs / 60000)) return 0;
+    if (hasEnd && mins > endM + (fadeMs / 60000)) return 0;
+
+    let factor = 1;
+    if (hasStart && mins < startM) {
+      factor = Math.min(factor, Math.max(0, (mins - (startM - (fadeMs / 60000))) / (fadeMs / 60000)));
+    }
+    if (hasEnd && mins > endM) {
+      factor = Math.min(factor, Math.max(0, 1 - ((mins - endM) / (fadeMs / 60000))));
+    }
+    return factor;
   }
 
   function customFieldStrength(field, distanceM, nowMs) {
@@ -413,7 +431,7 @@ function initCltFieldSystem() {
 
     el.fieldUploaderStatus.textContent = `${state.customFields.length} local secret field(s) loaded.`;
     el.uploadedFieldList.innerHTML = state.customFields.map((field) =>
-      `<li><strong>${field.name}</strong> · ${field.intensity} CLT · ${field.maxRangeM}m range
+      `<li><strong>${field.name}</strong> · ${field.intensity} CLT · ${field.maxRangeM}m range · Days: ${(field.daysOfWeek?.length ? field.daysOfWeek.join(',') : 'All')}
 ` +
       `<button class="field-edit" data-field-id="${field.id}" type="button">Edit</button> ` +
       `<button class="field-delete" data-field-id="${field.id}" type="button">Delete</button></li>`
@@ -430,8 +448,11 @@ function initCltFieldSystem() {
         if (el.fieldRange) el.fieldRange.value = String(field.maxRangeM);
         if (el.fieldLatitude) el.fieldLatitude.value = String(field.lat);
         if (el.fieldLongitude) el.fieldLongitude.value = String(field.lon);
-        if (el.fieldStart) el.fieldStart.value = field.startTime || '';
-        if (el.fieldEnd) el.fieldEnd.value = field.endTime || '';
+        if (el.fieldStartTime) el.fieldStartTime.value = field.startClock || '';
+        if (el.fieldEndTime) el.fieldEndTime.value = field.endClock || '';
+        el.fieldDayInputs?.forEach((input) => {
+          input.checked = Array.isArray(field.daysOfWeek) && field.daysOfWeek.includes(Number(input.value));
+        });
         el.fieldUploaderStatus.textContent = `Editing ${field.name}`;
       });
     });
@@ -451,8 +472,9 @@ function initCltFieldSystem() {
     if (el.fieldName) el.fieldName.value = '';
     if (el.fieldIntensity) el.fieldIntensity.value = '5000';
     if (el.fieldRange) el.fieldRange.value = '25';
-    if (el.fieldStart) el.fieldStart.value = '';
-    if (el.fieldEnd) el.fieldEnd.value = '';
+    if (el.fieldStartTime) el.fieldStartTime.value = '';
+    if (el.fieldEndTime) el.fieldEndTime.value = '';
+    el.fieldDayInputs?.forEach((input) => { input.checked = false; });
   }
 
   function applySecretCltDamping(rawStrength) {
@@ -479,6 +501,7 @@ function initCltFieldSystem() {
         return;
       }
 
+      const daysOfWeek = (el.fieldDayInputs || []).filter((i) => i.checked).map((i) => Number(i.value));
       const rawName = String(el.fieldName?.value || '').trim();
       const name = rawName || `My Field ${state.autoFieldCounter++}`;
       const payload = {
@@ -489,8 +512,9 @@ function initCltFieldSystem() {
         lon,
         intensity,
         maxRangeM,
-        startTime: el.fieldStart?.value || null,
-        endTime: el.fieldEnd?.value || null,
+        startClock: el.fieldStartTime?.value || null,
+        endClock: el.fieldEndTime?.value || null,
+        daysOfWeek,
         updatedAt: new Date().toISOString()
       };
 
@@ -550,8 +574,14 @@ function initCltFieldSystem() {
     const tungstenBase = 0.000001 + tungstenRegular + tungstenSecret;
 
     const nearest = [...evaluations].sort((a, b) => a.distance - b.distance)[0];
+    const nearestGeo = [...baseEvaluations]
+      .filter((s) => s.category !== 'Secret')
+      .sort((a, b) => a.distance - b.distance)[0];
+    const nearestUploaded = [...customEvaluations].sort((a, b) => a.distance - b.distance)[0];
+    const nearestKnown = [...baseEvaluations.filter((s) => s.category !== 'Secret'), ...customEvaluations]
+      .sort((a, b) => a.distance - b.distance)[0];
 
-    return { evaluations, totalField, tungstenBase, nearest };
+    return { evaluations, totalField, tungstenBase, nearest, nearestGeo, nearestUploaded, nearestKnown };
   }
 
   function formatDistance(distanceKm) {
@@ -582,14 +612,34 @@ function initCltFieldSystem() {
 
     if (el.totalField) el.totalField.textContent = liveClt.toLocaleString(undefined, { maximumFractionDigits: 2 });
     if (el.tungsten) el.tungsten.textContent = `${liveTungsten.toFixed(5)} mg/m³`;
-    if (el.nearestSource) el.nearestSource.textContent = calc.nearest ? calc.nearest.name : '—';
+    let nearestDisplay = '—';
+    const nearestGeoLabel = calc.nearestGeo ? `${calc.nearestGeo.name} (${formatDistance(calc.nearestGeo.distance)})` : '—';
+    const nearestUploadedLabel = calc.nearestUploaded ? `${calc.nearestUploaded.name} (${formatDistance(calc.nearestUploaded.distance)})` : 'None';
+    const easterEgg = calc.evaluations.find((s) => s.name === 'Vancouver Easter Egg');
+    const easterEligible = !easterEgg || easterEgg.strength >= 100;
+
+    if (calc.nearest) {
+      if (calc.nearest.name === 'Vancouver Easter Egg' && !easterEligible) {
+        nearestDisplay = `Geo: ${nearestGeoLabel} · Uploaded: ${nearestUploadedLabel}`;
+      } else {
+        nearestDisplay = `${calc.nearest.name} (${formatDistance(calc.nearest.distance)}) | Geo: ${nearestGeoLabel} | Uploaded: ${nearestUploadedLabel}`;
+      }
+    } else {
+      nearestDisplay = `Geo: ${nearestGeoLabel} · Uploaded: ${nearestUploadedLabel}`;
+    }
+
+    if (el.nearestSource) el.nearestSource.textContent = nearestDisplay;
     if (el.nearestDistance) {
-      const label = calc.nearest
-        ? `<strong>Distance to nearest CLT Field:</strong> ${formatDistance(calc.nearest.distance)} (${calc.nearest.name})`
+      const label = calc.nearestKnown
+        ? `<strong>Distance to nearest CLT Field:</strong> ${formatDistance(calc.nearestKnown.distance)} (${calc.nearestKnown.name})`
         : '<strong>Distance to nearest CLT Field:</strong> —';
       el.nearestDistance.innerHTML = label;
     }
-    if (el.liveCoords) el.liveCoords.textContent = `Lat/Lon: ${lat.toFixed(8)}, ${lon.toFixed(8)}`;
+    if (el.knownFieldDistance) {
+      el.knownFieldDistance.textContent = calc.nearestKnown
+        ? `Nearest known field distance: ${formatDistance(calc.nearestKnown.distance)} (${calc.nearestKnown.name})`
+        : 'Nearest known field distance: —';
+    }
     if (el.accuracy) el.accuracy.textContent = `Accuracy: ${Number.isFinite(accuracy) ? `${Math.round(accuracy)} m` : '—'}`;
 
     const stamp = new Date().toLocaleTimeString();
@@ -599,7 +649,7 @@ function initCltFieldSystem() {
       time: stamp,
       clt: liveClt,
       tungsten: liveTungsten,
-      source: calc.nearest ? calc.nearest.name : 'Unknown source'
+      source: calc.nearestKnown ? calc.nearestKnown.name : 'Unknown source'
     });
     state.history = state.history.slice(0, 8);
     renderHistory();

@@ -172,7 +172,7 @@
     <section class="clt-dashboard-grid">
       <section class="panel readout-card clt-card-section" aria-labelledby="cltLocationTitle">
         <h2 id="cltLocationTitle">Current Location</h2>
-        <p class="live-kpi-secondary" id="cltLiveCoords">Lat/Lon: —</p>
+        <p class="live-kpi-secondary" id="cltKnownFieldDistance">Nearest known field distance: —</p>
         <p id="cltAccuracy">Accuracy: —</p>
       </section>
 
@@ -236,13 +236,23 @@
           Field Longitude
           <input id="fieldLongitude" type="number" step="any" placeholder="Auto from current location" />
         </label>
+        <fieldset class="uploader-days">
+          <legend>Active Days (optional)</legend>
+          <label><input type="checkbox" class="field-day" value="0" /> Sun</label>
+          <label><input type="checkbox" class="field-day" value="1" /> Mon</label>
+          <label><input type="checkbox" class="field-day" value="2" /> Tue</label>
+          <label><input type="checkbox" class="field-day" value="3" /> Wed</label>
+          <label><input type="checkbox" class="field-day" value="4" /> Thu</label>
+          <label><input type="checkbox" class="field-day" value="5" /> Fri</label>
+          <label><input type="checkbox" class="field-day" value="6" /> Sat</label>
+        </fieldset>
         <label>
-          Start Time (optional)
-          <input id="fieldStart" type="datetime-local" />
+          Daily Start Time (optional)
+          <input id="fieldStartTime" type="time" />
         </label>
         <label>
-          End Time (optional)
-          <input id="fieldEnd" type="datetime-local" />
+          Daily End Time (optional)
+          <input id="fieldEndTime" type="time" />
         </label>
       </div>
       <div class="clt-actions">
