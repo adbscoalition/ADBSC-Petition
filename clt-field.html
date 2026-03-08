@@ -115,55 +115,100 @@
 
   <main id="main" class="page-shell">
     <section class="panel clt-system-hero" aria-labelledby="cltPageTitle">
-      <p class="eyebrow">Priority Lore Instrument</p>
-      <h1 id="cltPageTitle">CLT Magnetic Field System</h1>
+      <p class="eyebrow">Live Instrument Console</p>
+      <h1 id="cltPageTitle">CLT Magnetic Field Tracker</h1>
       <p>
-        Real-time CLT field estimation from fixed magnetic sources, banded decay profiles, and
-        coordinate-aware interpolation.
+        Real-time Charlotte magnetic telemetry using live geolocation watch, drifting sensor values,
+        and precision scan instrumentation.
       </p>
     </section>
 
     <section class="panel clt-system-controls" aria-labelledby="cltControlTitle" id="cltSystemApp">
       <div class="section-head">
-        <h2 id="cltControlTitle">Field Console</h2>
-        <p>Input coordinates to compute CLT field intensity and tungsten concentration.</p>
+        <h2 id="cltControlTitle">Live Tracking Status</h2>
+        <p id="cltSystemStatus" class="clt-system-status" role="status">Initializing geolocation tracker...</p>
       </div>
-      <div class="clt-input-grid">
-        <label>
-          Latitude
-          <input id="cltLatitude" type="number" step="any" value="35.22867647481079" />
-        </label>
-        <label>
-          Longitude
-          <input id="cltLongitude" type="number" step="any" value="-80.84490976473366" />
-        </label>
-        <label>
-          Preset Location
-          <select id="cltPreset"></select>
-        </label>
+      <div class="clt-status-pill-row">
+        <p class="clt-status-pill" id="cltTrackingBadge">LOCATION ACCESS REQUIRED</p>
+        <p class="clt-status-meta" id="cltLastUpdate">Last update: —</p>
       </div>
-      <div class="clt-actions">
-        <button class="btn primary" id="cltRun" type="button">Run Field Scan</button>
-        <button class="btn secondary" id="cltUseGeo" type="button">Use My Location</button>
-      </div>
-      <p id="cltSystemStatus" class="clt-system-status" role="status">System ready.</p>
 
+      <div class="clt-fallback" id="cltFallback" hidden>
+        <h3>Fallback Testing Mode</h3>
+        <p>Live location is unavailable. Use manual coordinates for testing only.</p>
+        <div class="clt-input-grid">
+          <label>
+            Latitude
+            <input id="cltLatitude" type="number" step="any" value="35.22867647481079" />
+          </label>
+          <label>
+            Longitude
+            <input id="cltLongitude" type="number" step="any" value="-80.84490976473366" />
+          </label>
+          <label>
+            Preset Location
+            <select id="cltPreset"></select>
+          </label>
+        </div>
+        <div class="clt-actions">
+          <button class="btn primary" id="cltRun" type="button">Run Fallback Scan</button>
+          <button class="btn secondary" id="cltRetryLive" type="button">Retry Live Tracking</button>
+        </div>
+      </div>
     </section>
 
-    <section class="panel readout-card clt-card-section" aria-labelledby="cltIndicatorsTitle">
-      <h2 id="cltIndicatorsTitle">CLT Field Indicators</h2>
-      <p><strong>Current CLT Value:</strong> <span id="cltTotalField">0</span></p>
+    <section class="panel readout-card clt-card-section" aria-labelledby="cltLiveTitle">
+      <h2 id="cltLiveTitle">Live Sensor Value</h2>
+      <p class="live-kpi-label">Current CLT Field</p>
+      <p class="live-kpi" id="cltTotalField">0</p>
       <p id="cltNearestFieldDistance"><strong>Distance to nearest CLT Field:</strong> —</p>
     </section>
 
-    <section class="panel readout-card clt-card-section" aria-labelledby="cltSpecsTitle">
-      <h2 id="cltSpecsTitle">Other Specifications</h2>
-      <p><strong>Tungsten Concentration in Atmosphere:</strong></p>
-      <p id="cltTungsten">0.00001 mg/m³</p>
+    <section class="clt-dashboard-grid">
+      <section class="panel readout-card clt-card-section" aria-labelledby="cltLocationTitle">
+        <h2 id="cltLocationTitle">Current Location</h2>
+        <p id="cltLiveCoords">Lat/Lon: —</p>
+        <p id="cltAccuracy">Accuracy: —</p>
+      </section>
+
+      <section class="panel readout-card clt-card-section" aria-labelledby="cltNearestTitle">
+        <h2 id="cltNearestTitle">Nearest CLT Source</h2>
+        <p id="cltNearestSource">—</p>
+      </section>
+
+      <section class="panel readout-card clt-card-section" aria-labelledby="cltSpecsTitle">
+        <h2 id="cltSpecsTitle">Tungsten Concentration</h2>
+        <p class="live-kpi" id="cltTungsten">0.00001 mg/m³</p>
+      </section>
     </section>
 
-    <section class="panel readout-card clt-sources-card clt-card-section" aria-labelledby="cltSourcesTitle">
-      <h2 id="cltSourcesTitle">Sources (Top)</h2>
+    <section class="panel clt-card-section" aria-labelledby="scanToolTitle">
+      <h2 id="scanToolTitle">Accurate Scan Tool</h2>
+      <p>Run a 5-second precision scan for frozen scan-sheet results.</p>
+      <div class="clt-actions">
+        <button class="btn primary" id="cltAccurateScan" type="button">Run Accurate Scan</button>
+      </div>
+      <div class="scan-progress-shell" aria-live="polite">
+        <p id="scanState">Scan idle</p>
+        <div class="loader-track"><span id="scanProgressBar"></span></div>
+      </div>
+    </section>
+
+    <section class="panel readout-card clt-card-section" aria-labelledby="scanSheetTitle">
+      <h2 id="scanSheetTitle">Scan Sheet</h2>
+      <p class="scan-sheet-label">SCAN RESULT</p>
+      <ul class="scan-sheet-list" id="scanSheetList">
+        <li>CLT Field: —</li>
+        <li>Tungsten: —</li>
+        <li>Coordinates: —</li>
+        <li>Timestamp: —</li>
+        <li>Nearest Source: —</li>
+        <li>Distance to Source: —</li>
+      </ul>
+    </section>
+
+    <section class="panel readout-card clt-card-section" aria-labelledby="cltSourcesTitle">
+      <h2 id="cltSourcesTitle">Recent Live Readings</h2>
       <ol id="cltContributors"></ol>
     </section>
   </main>
