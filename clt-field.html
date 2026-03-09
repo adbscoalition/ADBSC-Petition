@@ -111,6 +111,13 @@
       <div class="clt-status-pill-row">
         <p class="clt-status-pill" id="cltTrackingBadge">LOCATION ACCESS REQUIRED</p>
         <p class="clt-status-meta" id="cltLastUpdate">Last update: —</p>
+        <label class="unit-toggle" for="cltUnitSwitch">
+          Units
+          <select id="cltUnitSwitch" aria-label="Distance units">
+            <option value="metric">Metric (m/km)</option>
+            <option value="imperial">Imperial (ft/mi)</option>
+          </select>
+        </label>
       </div>
 
       <div class="clt-fallback" id="cltFallback" hidden>
@@ -163,7 +170,10 @@
     </section>
 
     <section class="panel readout-card clt-card-section" aria-labelledby="cltSourcesTitle">
-      <h2 id="cltSourcesTitle">Recent Live Readings</h2>
+      <div class="section-head section-head-inline">
+        <h2 id="cltSourcesTitle">Recent Live Readings</h2>
+        <button class="btn secondary" id="cltCopyLogs" type="button">Copy Logs</button>
+      </div>
       <pre id="cltContributors" class="clt-codebox">No live readings yet.</pre>
     </section>
 

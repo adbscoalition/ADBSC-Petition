@@ -230,7 +230,8 @@ function initCltFieldSystem() {
     customFields: [],
     editingFieldId: null,
     autoFieldCounter: 1,
-    simulatorUnlocked: false
+    simulatorUnlocked: false,
+    unitSystem: 'metric'
   };
 
   const el = {
@@ -244,6 +245,8 @@ function initCltFieldSystem() {
     geoName: document.getElementById('cltGeoName'),
     uploadedDistance: document.getElementById('cltUploadedDistance'),
     contributors: document.getElementById('cltContributors'),
+    unitSwitch: document.getElementById('cltUnitSwitch'),
+    copyLogs: document.getElementById('cltCopyLogs'),
     fallback: document.getElementById('cltFallback'),
     latInput: document.getElementById('cltLatitude'),
     lonInput: document.getElementById('cltLongitude'),
@@ -590,14 +593,19 @@ function initCltFieldSystem() {
     return { evaluations, totalField, tungstenBase, nearest, nearestGeo, nearestUploaded };
   }
 
-  function formatDistanceKm(distanceKm) {
+  function formatDistanceShort(distanceKm, unitSystem = state.unitSystem) {
     if (!Number.isFinite(distanceKm)) return '—';
-    return distanceKm.toFixed(3);
+    if (unitSystem === 'imperial') {
+      const miles = distanceKm * 0.621371;
+      return miles < 1 ? `${(miles * 5280).toFixed(1)} ft` : `${miles.toFixed(3)} mi`;
+    }
+    return distanceKm < 1 ? `${(distanceKm * 1000).toFixed(1)} m` : `${distanceKm.toFixed(3)} km`;
   }
 
-  function formatDistanceAdaptive(distanceKm) {
-    if (!Number.isFinite(distanceKm)) return '—';
-    return distanceKm < 1 ? `${(distanceKm * 1000).toFixed(1)} m` : `${distanceKm.toFixed(3)} km`;
+  function formatDistancePrimary(distanceKm, unitSystem = state.unitSystem) {
+    if (!Number.isFinite(distanceKm)) return unitSystem === 'imperial' ? '— mi' : '— km';
+    if (unitSystem === 'imperial') return `${(distanceKm * 0.621371).toFixed(3)} mi`;
+    return distanceKm >= 1 ? `${distanceKm.toFixed(3)} km` : `${(distanceKm * 1000).toFixed(1)} m`;
   }
 
   function formatHistoryTime(dateObj) {
@@ -611,10 +619,16 @@ function initCltFieldSystem() {
       return;
     }
 
-    el.contributors.textContent = state.history.map((item) => (
-      `${item.time} | ${item.clt.toLocaleString(undefined, { maximumFractionDigits: 2 })} CLT | ` +
-      `Tungsten ${item.tungsten.toFixed(5)} mg/m³ | Nearest GEO ${item.nearestGeo} | Nearest IDVL ${item.nearestIdvl}`
-    )).join('\n');
+    el.contributors.textContent = state.history.map((item) => {
+      const geoLabel = item.nearestGeoName
+        ? `${item.nearestGeoName} (${formatDistanceShort(item.nearestGeoDistanceKm)})`
+        : '—';
+      const idvlLabel = item.nearestIdvlName
+        ? `${item.nearestIdvlName} (${formatDistanceShort(item.nearestIdvlDistanceKm)})`
+        : 'None';
+      return `${item.time} | ${item.clt.toLocaleString(undefined, { maximumFractionDigits: 2 })} CLT | ` +
+        `Tungsten ${item.tungsten.toFixed(5)} mg/m³ | Nearest GEO ${geoLabel} | Nearest IDVL ${idvlLabel}`;
+    }).join('\n');
   }
 
   function renderLiveTelemetry(lat, lon, accuracy, calc) {
@@ -629,13 +643,13 @@ function initCltFieldSystem() {
     if (el.totalField) el.totalField.textContent = liveClt.toLocaleString(undefined, { maximumFractionDigits: 2 });
     if (el.tungsten) el.tungsten.textContent = `${liveTungsten.toFixed(5)} mg/m³`;
     if (el.geoDistance) {
-      el.geoDistance.textContent = calc.nearestGeo ? `${formatDistanceKm(calc.nearestGeo.distance)} km` : '— km';
+      el.geoDistance.textContent = calc.nearestGeo ? formatDistancePrimary(calc.nearestGeo.distance) : formatDistancePrimary(NaN);
     }
     if (el.geoName) {
       el.geoName.textContent = calc.nearestGeo ? calc.nearestGeo.name : '—';
     }
     if (el.uploadedDistance) {
-      el.uploadedDistance.textContent = calc.nearestUploaded ? `${formatDistanceKm(calc.nearestUploaded.distance)} km` : '— km';
+      el.uploadedDistance.textContent = calc.nearestUploaded ? formatDistancePrimary(calc.nearestUploaded.distance) : formatDistancePrimary(NaN);
     }
     if (el.nearestSource) {
       el.nearestSource.textContent = calc.nearestUploaded ? calc.nearestUploaded.name : 'None';
@@ -649,12 +663,10 @@ function initCltFieldSystem() {
       time: stamp,
       clt: liveClt,
       tungsten: liveTungsten,
-      nearestGeo: calc.nearestGeo
-        ? `${calc.nearestGeo.name} (${formatDistanceAdaptive(calc.nearestGeo.distance)})`
-        : '—',
-      nearestIdvl: calc.nearestUploaded
-        ? `${calc.nearestUploaded.name} (${formatDistanceAdaptive(calc.nearestUploaded.distance)})`
-        : 'None'
+      nearestGeoName: calc.nearestGeo ? calc.nearestGeo.name : null,
+      nearestGeoDistanceKm: calc.nearestGeo ? calc.nearestGeo.distance : NaN,
+      nearestIdvlName: calc.nearestUploaded ? calc.nearestUploaded.name : null,
+      nearestIdvlDistanceKm: calc.nearestUploaded ? calc.nearestUploaded.distance : NaN
     });
     state.history = state.history.slice(0, 50);
     renderHistory();
@@ -670,7 +682,7 @@ function initCltFieldSystem() {
       `Coordinates: ${result.lat.toFixed(8)}, ${result.lon.toFixed(8)}`,
       `Timestamp: ${new Date(result.timestamp).toLocaleString()}`,
       `Nearest Source: ${result.sourceName}`,
-      `Distance to Source: ${formatDistanceKm(result.distanceKm)} km`
+      `Distance to Source: ${formatDistanceShort(result.distanceKm)}`
     ].map((line) => `<li>${line}</li>`).join('');
   }
 
@@ -741,7 +753,7 @@ function initCltFieldSystem() {
     stopLiveTracking();
 
     if (error?.code === 1) {
-      document.body.innerHTML = '<main class="geo-denied-screen"><h1>Enable geolocation to continue.</h1></main>';
+      document.body.innerHTML = '<main class="geo-denied-screen"><div><h1>Enable geolocation to continue.</h1><p><a class="btn secondary" href="index.html">Return home</a></p></div></main>';
       return;
     }
 
@@ -878,6 +890,27 @@ function initCltFieldSystem() {
     coordEl?.addEventListener('input', () => {
       if (coordEl.value.includes(',')) coordEl.value = coordEl.value.replace(/,/g, '.');
     });
+  });
+
+  el.unitSwitch?.addEventListener('change', () => {
+    state.unitSystem = el.unitSwitch.value === 'imperial' ? 'imperial' : 'metric';
+    if (state.lastBase) {
+      const calc = state.lastBase.calc;
+      if (el.geoDistance) el.geoDistance.textContent = calc.nearestGeo ? formatDistancePrimary(calc.nearestGeo.distance) : formatDistancePrimary(NaN);
+      if (el.uploadedDistance) el.uploadedDistance.textContent = calc.nearestUploaded ? formatDistancePrimary(calc.nearestUploaded.distance) : formatDistancePrimary(NaN);
+      renderHistory();
+    }
+  });
+
+  el.copyLogs?.addEventListener('click', async () => {
+    if (!el.contributors) return;
+    try {
+      await navigator.clipboard.writeText(el.contributors.textContent || '');
+      el.copyLogs.textContent = 'Copied';
+    } catch {
+      el.copyLogs.textContent = 'Copy failed';
+    }
+    setTimeout(() => { if (el.copyLogs) el.copyLogs.textContent = 'Copy Logs'; }, 1500);
   });
 
   initFallbackTools();
