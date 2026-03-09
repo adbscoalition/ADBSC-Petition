@@ -3,8 +3,8 @@
   --bg-1: #230a39;
   --panel: rgba(45, 16, 72, 0.78);
   --panel-border: rgba(255, 79, 163, 0.36);
-  --text: #ffe8f5;
-  --text-soft: #dfc8ff;
+  --text: #fff2fb;
+  --text-soft: #f3dcff;
   --gold-0: #4a0d3f;
   --gold-1: #9a1f73;
   --gold-2: #ff4fa3;
@@ -141,7 +141,7 @@ select {
 
 .loader-subtitle {
   margin: 0 auto 0.8rem;
-  color: #e7dcc4;
+  color: #ffdff3;
   max-width: 58ch;
 }
 
@@ -285,7 +285,7 @@ select {
 .typed-line {
   margin: 0;
   min-height: 4.9em;
-  color: #ffd9ee;
+  color: #ffe6f7;
   font-weight: 700;
   white-space: pre-line;
 }
@@ -352,7 +352,7 @@ select {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  color: #ffdff0;
+  color: #ffe9f8;
   border: 1px solid rgba(255, 79, 163, 0.26);
   border-radius: 12px;
   padding: 0.56rem 0.72rem;
@@ -373,7 +373,7 @@ select {
 }
 
 .legal-checklist li.checked {
-  color: #ffdff0;
+  color: #ffe9f8;
   border-color: rgba(255, 79, 163, 0.74);
   box-shadow: 0 0 18px rgba(255, 79, 163, 0.22);
 }
@@ -385,7 +385,7 @@ select {
 
 .legal-checklist li.checked .check-icon::before {
   content: "✓";
-  color: #ffe6f6;
+  color: #fff0fb;
   font-weight: 800;
   font-size: 0.86rem;
   line-height: 1;
@@ -455,7 +455,7 @@ select {
 
 .meter-value.tungsten {
   font-size: clamp(1rem, 3.3vw, 1.5rem);
-  color: #ffd9ee;
+  color: #ffe6f7;
 }
 
 .loader-track {
@@ -612,7 +612,7 @@ select {
   margin: 0;
   font-family: "Gravitas One", serif;
   font-size: clamp(1.14rem, 2.35vw, 1.42rem);
-  color: #ffe2f2;
+  color: #fff0fb;
   letter-spacing: 0.01em;
   text-shadow: 0 0 18px rgba(255, 79, 163, 0.45);
 }
@@ -702,6 +702,7 @@ h3 {
   margin: 0;
   font-family: "Gravitas One", serif;
   letter-spacing: 0.01em;
+  color: #fff0fb;
 }
 
 p {
@@ -950,7 +951,7 @@ p {
 .panel select {
   border: 1px solid rgba(255, 79, 163, 0.5);
   background: rgba(76, 18, 90, 0.72);
-  color: #ffe2f2;
+  color: #fff0fb;
   border-radius: 10px;
 }
 
@@ -992,7 +993,7 @@ pre {
   border: 1px solid rgba(255, 79, 163, 0.46);
   background: linear-gradient(160deg, rgba(80, 20, 98, 0.8), rgba(22, 22, 22, 0.82));
   padding: 1rem;
-  color: #ffe2f2;
+  color: #fff0fb;
   line-height: 1.5;
   font-family: "Public Sans", sans-serif;
   box-shadow: inset 0 0 0 1px rgba(255, 79, 163, 0.12);
@@ -1079,7 +1080,7 @@ pre {
 .clt-card-section h2 {
   margin: 0.3rem 0 0.7rem;
   font-size: clamp(1.08rem, 2.2vw, 1.38rem);
-  color: #ffe8f5;
+  color: #fff2fb;
 }
 
 .clt-card-section p {
@@ -1105,7 +1106,7 @@ pre {
 .footer-brand {
   margin: 0;
   font-family: "Gravitas One", serif;
-  color: #ffe2f2;
+  color: #fff0fb;
   text-shadow: 0 0 22px rgba(106, 13, 173, 0.5);
 }
 
@@ -1405,7 +1406,7 @@ pre {
   margin: 0.2rem 0 0.55rem;
   font-size: clamp(1.9rem, 4.8vw, 3.2rem);
   font-weight: 800;
-  color: #ffe8f5;
+  color: #fff2fb;
   text-shadow: 0 0 30px rgba(255, 79, 163, 0.42);
   line-height: 1;
 }
