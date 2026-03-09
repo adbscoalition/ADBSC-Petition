@@ -16,7 +16,7 @@
   <link
     rel="icon"
     type="image/png"
-    href="https://i.ibb.co/WW3zCGQj/Chat-GPT-Image-Mar-7-2026-06-15-27-PM.png"
+    href="https://i.ibb.co/qM0Wfk1J/Chat-GPT-Image-Mar-8-2026-08-19-41-PM.png"
   />
   <link rel="stylesheet" href="styles.css" />
 
@@ -49,30 +49,10 @@
     <div class="entry-loader-grid" aria-hidden="true"></div>
     <div class="loader-shell loader-shell-clt">
       <p class="loader-kicker">Charlotte detection interface</p>
-      <h1>CLT Magnetic Lock Sequence</h1>
-      <p class="loader-subtitle">
-        Atmospheric and magnetic sensors synchronizing...
-      </p>
-
-      <div class="meter-panel clt-meter" role="status" aria-live="polite">
-        <div class="meter-head">
-          <p>CLT FIELD</p>
-          <p class="meter-unit">Charlotte Field Intensity</p>
-        </div>
-        <p id="cltValue" class="meter-value">0</p>
-        <div class="loader-track"><span id="cltBar"></span></div>
-      </div>
-
-      <div class="meter-panel tungsten-meter" role="status" aria-live="polite">
-        <div class="meter-head">
-          <p>TUNGSTEN CONCENTRATION</p>
-          <p class="meter-unit">mg/m³</p>
-        </div>
-        <p id="tungstenValue" class="meter-value tungsten">0.00001 mg/m³</p>
-        <div class="loader-track"><span id="tungstenBar"></span></div>
-      </div>
-
-      <p id="loaderStatus" class="loader-status">Scanning for Charlotte signatures...</p>
+      <h1 id="loaderStatus">Magnetometer calibration progress...</h1>
+      <p class="loader-subtitle">Calibrating CLT instruments and preparing live telemetry.</p>
+      <div class="loader-track clt-start-track" aria-hidden="true"><span id="cltStartBar"></span></div>
+      <div class="clt-loader-dots" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
     </div>
   </div>
 
@@ -87,7 +67,7 @@
     <div class="brand-lockup">
       <img
         class="brand-logo"
-        src="https://i.ibb.co/WW3zCGQj/Chat-GPT-Image-Mar-7-2026-06-15-27-PM.png"
+        src="https://i.ibb.co/qM0Wfk1J/Chat-GPT-Image-Mar-8-2026-08-19-41-PM.png"
         alt="OCharlotteD logo"
       />
       <div class="brand-copy">
@@ -131,6 +111,13 @@
       <div class="clt-status-pill-row">
         <p class="clt-status-pill" id="cltTrackingBadge">LOCATION ACCESS REQUIRED</p>
         <p class="clt-status-meta" id="cltLastUpdate">Last update: —</p>
+        <label class="unit-toggle" for="cltUnitSwitch">
+          Units
+          <select id="cltUnitSwitch" aria-label="Distance units">
+            <option value="metric">Metric (m/km)</option>
+            <option value="imperial">Imperial (ft/mi)</option>
+          </select>
+        </label>
       </div>
 
       <div class="clt-fallback" id="cltFallback" hidden>
@@ -139,11 +126,11 @@
         <div class="clt-input-grid">
           <label>
             Latitude
-            <input id="cltLatitude" type="number" step="any" value="35.22867647481079" />
+            <input id="cltLatitude" type="text" inputmode="decimal" placeholder="Latitude" />
           </label>
           <label>
             Longitude
-            <input id="cltLongitude" type="number" step="any" value="-80.84490976473366" />
+            <input id="cltLongitude" type="text" inputmode="decimal" placeholder="Longitude" />
           </label>
           <label>
             Preset Location
@@ -161,7 +148,6 @@
       <h2 id="cltLiveTitle">Live Sensor Value</h2>
       <p class="live-kpi-label">Current CLT Field</p>
       <p class="live-kpi" id="cltTotalField">0</p>
-      <p id="cltNearestFieldDistance"><strong>Distance to nearest CLT Field:</strong> —</p>
     </section>
 
     <section class="panel readout-card clt-card-section" aria-labelledby="cltSpecsTitle">
@@ -171,20 +157,24 @@
 
     <section class="clt-dashboard-grid">
       <section class="panel readout-card clt-card-section" aria-labelledby="cltLocationTitle">
-        <h2 id="cltLocationTitle">Current Location</h2>
-        <p class="live-kpi-secondary" id="cltKnownFieldDistance">Nearest known field distance: —</p>
-        <p id="cltAccuracy">Accuracy: —</p>
+        <h2 id="cltLocationTitle">Nearest Geographical Location</h2>
+        <p class="live-kpi-secondary" id="cltGeoDistance">— km</p>
+        <p id="cltGeoName">—</p>
       </section>
 
       <section class="panel readout-card clt-card-section" aria-labelledby="cltNearestTitle">
-        <h2 id="cltNearestTitle">Nearest CLT Source</h2>
-        <p class="live-kpi-secondary" id="cltNearestSource">—</p>
+        <h2 id="cltNearestTitle">Nearest Uploaded Field</h2>
+        <p class="live-kpi-secondary" id="cltUploadedDistance">— km</p>
+        <p id="cltNearestSource">—</p>
       </section>
     </section>
 
     <section class="panel readout-card clt-card-section" aria-labelledby="cltSourcesTitle">
-      <h2 id="cltSourcesTitle">Recent Live Readings</h2>
-      <ol id="cltContributors"></ol>
+      <div class="section-head section-head-inline">
+        <h2 id="cltSourcesTitle">Recent Live Readings</h2>
+        <button class="btn secondary" id="cltCopyLogs" type="button">Copy Logs</button>
+      </div>
+      <pre id="cltContributors" class="clt-codebox">No live readings yet.</pre>
     </section>
 
     <section class="panel clt-card-section" aria-labelledby="scanToolTitle">
@@ -230,21 +220,23 @@
         </label>
         <label>
           Field Latitude
-          <input id="fieldLatitude" type="number" step="any" placeholder="Auto from current location" />
+          <input id="fieldLatitude" type="text" inputmode="decimal" placeholder="Auto from current location" />
         </label>
         <label>
           Field Longitude
-          <input id="fieldLongitude" type="number" step="any" placeholder="Auto from current location" />
+          <input id="fieldLongitude" type="text" inputmode="decimal" placeholder="Auto from current location" />
         </label>
         <fieldset class="uploader-days">
           <legend>Active Days (optional)</legend>
-          <label><input type="checkbox" class="field-day" value="0" /> Sun</label>
-          <label><input type="checkbox" class="field-day" value="1" /> Mon</label>
-          <label><input type="checkbox" class="field-day" value="2" /> Tue</label>
-          <label><input type="checkbox" class="field-day" value="3" /> Wed</label>
-          <label><input type="checkbox" class="field-day" value="4" /> Thu</label>
-          <label><input type="checkbox" class="field-day" value="5" /> Fri</label>
-          <label><input type="checkbox" class="field-day" value="6" /> Sat</label>
+          <div class="day-toggle-row" role="group" aria-label="Active days toggle buttons">
+            <button type="button" class="field-day-toggle" data-day="0" aria-pressed="false">Sun · Off</button>
+            <button type="button" class="field-day-toggle" data-day="1" aria-pressed="false">Mon · Off</button>
+            <button type="button" class="field-day-toggle" data-day="2" aria-pressed="false">Tue · Off</button>
+            <button type="button" class="field-day-toggle" data-day="3" aria-pressed="false">Wed · Off</button>
+            <button type="button" class="field-day-toggle" data-day="4" aria-pressed="false">Thu · Off</button>
+            <button type="button" class="field-day-toggle" data-day="5" aria-pressed="false">Fri · Off</button>
+            <button type="button" class="field-day-toggle" data-day="6" aria-pressed="false">Sat · Off</button>
+          </div>
         </fieldset>
         <label>
           Daily Start Time (optional)
@@ -279,11 +271,11 @@
         <div class="clt-input-grid uploader-grid">
           <label>
             Teleport Latitude
-            <input id="simLatitude" type="number" step="any" placeholder="35.22867647" />
+            <input id="simLatitude" type="text" inputmode="decimal" placeholder="35.22867647" />
           </label>
           <label>
             Teleport Longitude
-            <input id="simLongitude" type="number" step="any" placeholder="-80.84490976" />
+            <input id="simLongitude" type="text" inputmode="decimal" placeholder="-80.84490976" />
           </label>
         </div>
         <div class="clt-actions">
