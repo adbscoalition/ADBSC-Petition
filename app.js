@@ -27,16 +27,28 @@ if (entryLoader) {
 
   function runCltLoader() {
     const loaderStatus = document.getElementById('loaderStatus');
+    const cltStartBar = document.getElementById('cltStartBar');
     if (!loaderStatus) {
       finalizeLoader();
       return;
     }
 
+    const phases = [
+      { at: 0.1, label: 'Magnetometer calibration progress...' },
+      { at: 0.45, label: 'Aligning CLT vector axes...' },
+      { at: 0.78, label: 'Finalizing instrument baseline...' }
+    ];
+
     const start = performance.now();
     function frame(now) {
       const t = Math.min((now - start) / duration, 1);
       if (!reducedMotion) entryLoader.style.setProperty('--loader-glow', String(0.35 + t * 0.65));
-      loaderStatus.textContent = 'Magnetometer calibration progress...';
+      if (cltStartBar) cltStartBar.style.width = `${t * 100}%`;
+
+      let label = phases[0].label;
+      for (const p of phases) if (t >= p.at) label = p.label;
+      loaderStatus.textContent = label;
+
       if (t < 1) requestAnimationFrame(frame);
       else finalizeLoader();
     }
@@ -310,6 +322,15 @@ function initCltFieldSystem() {
     try {
       const raw = localStorage.getItem(customFieldStorageKey);
       state.customFields = raw ? JSON.parse(raw) : [];
+      state.customFields = state.customFields.map((f) => {
+        const lat = Number.isFinite(Number(f.lat)) ? Number(f.lat) : Number(f.latitude);
+        const lon = Number.isFinite(Number(f.lon)) ? Number(f.lon) : Number(f.longitude);
+        return {
+          ...f,
+          lat: Number.isFinite(lat) ? lat : f.lat,
+          lon: Number.isFinite(lon) ? lon : f.lon
+        };
+      });
       const maxAuto = state.customFields.reduce((m, f) => {
         const match = /^My Field (\d+)$/.exec(String(f.name || ''));
         return match ? Math.max(m, Number(match[1])) : m;
@@ -403,8 +424,10 @@ function initCltFieldSystem() {
         if (el.fieldName) el.fieldName.value = field.name;
         if (el.fieldIntensity) el.fieldIntensity.value = String(field.intensity);
         if (el.fieldRange) el.fieldRange.value = String(field.maxRangeM);
-        if (el.fieldLatitude) el.fieldLatitude.value = String(field.lat);
-        if (el.fieldLongitude) el.fieldLongitude.value = String(field.lon);
+        const editLat = Number.isFinite(Number(field.lat)) ? Number(field.lat) : Number(field.latitude);
+        const editLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
+        if (el.fieldLatitude) el.fieldLatitude.value = Number.isFinite(editLat) ? String(editLat) : '';
+        if (el.fieldLongitude) el.fieldLongitude.value = Number.isFinite(editLon) ? String(editLon) : '';
         if (el.fieldStartTime) el.fieldStartTime.value = field.startClock || '';
         if (el.fieldEndTime) el.fieldEndTime.value = field.endClock || '';
         el.fieldDayInputs?.forEach((input) => {
@@ -467,6 +490,8 @@ function initCltFieldSystem() {
         category: 'Secret',
         lat,
         lon,
+        latitude: lat,
+        longitude: lon,
         intensity,
         maxRangeM,
         startClock: el.fieldStartTime?.value || null,
@@ -501,15 +526,17 @@ function initCltFieldSystem() {
     });
 
     const customEvaluations = state.customFields.map((field) => {
-      const distance = haversineKm(lat, lon, field.lat, field.lon);
+      const fieldLat = Number.isFinite(Number(field.lat)) ? Number(field.lat) : Number(field.latitude);
+      const fieldLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
+      const distance = haversineKm(lat, lon, fieldLat, fieldLon);
       const distanceM = distance * 1000;
       let strength = customFieldStrength(field, distanceM, nowMs);
       strength = applySecretCltDamping(strength);
       return {
         name: field.name,
         category: 'Secret',
-        lat: field.lat,
-        lon: field.lon,
+        lat: fieldLat,
+        lon: fieldLon,
         distance,
         strength,
         inField: strength > 0,
@@ -543,16 +570,26 @@ function initCltFieldSystem() {
     return distanceKm.toFixed(3);
   }
 
+  function formatDistanceAdaptive(distanceKm) {
+    if (!Number.isFinite(distanceKm)) return '—';
+    return distanceKm < 1 ? `${(distanceKm * 1000).toFixed(1)} m` : `${distanceKm.toFixed(3)} km`;
+  }
+
+  function formatHistoryTime(dateObj) {
+    return dateObj.toLocaleTimeString('en-US', { hour12: true, hour: 'numeric', minute: '2-digit', second: '2-digit' });
+  }
+
   function renderHistory() {
     if (!el.contributors) return;
     if (!state.history.length) {
-      el.contributors.innerHTML = '<li>No live readings yet.</li>';
+      el.contributors.textContent = 'No live readings yet.';
       return;
     }
 
-    el.contributors.innerHTML = state.history.map((item) =>
-      `<li><strong>${item.time}</strong> — CLT ${item.clt.toLocaleString(undefined, { maximumFractionDigits: 2 })} · Tungsten ${item.tungsten.toFixed(5)} mg/m³ · ${item.source}</li>`
-    ).join('');
+    el.contributors.textContent = state.history.map((item) => (
+      `${item.time} | ${item.clt.toLocaleString(undefined, { maximumFractionDigits: 2 })} CLT | ` +
+      `Tungsten ${item.tungsten.toFixed(5)} mg/m³ | Nearest GEO ${item.nearestGeo} | Nearest IDVL ${item.nearestIdvl}`
+    )).join('\n');
   }
 
   function renderLiveTelemetry(lat, lon, accuracy, calc) {
@@ -579,16 +616,21 @@ function initCltFieldSystem() {
       el.nearestSource.textContent = calc.nearestUploaded ? calc.nearestUploaded.name : 'None';
     }
 
-    const stamp = new Date().toLocaleTimeString();
+    const now = new Date();
+    const stamp = formatHistoryTime(now);
     if (el.lastUpdate) el.lastUpdate.textContent = `Last update: ${stamp}`;
 
     state.history.unshift({
       time: stamp,
       clt: liveClt,
       tungsten: liveTungsten,
-      source: calc.nearestGeo ? calc.nearestGeo.name : 'Unknown source'
+      nearestGeo: calc.nearestGeo
+        ? `${calc.nearestGeo.name} (${formatDistanceAdaptive(calc.nearestGeo.distance)})`
+        : '—',
+      nearestIdvl: calc.nearestUploaded
+        ? `${calc.nearestUploaded.name} (${formatDistanceAdaptive(calc.nearestUploaded.distance)})`
+        : 'None'
     });
-    state.history = state.history.slice(0, 8);
     renderHistory();
 
     if (el.scanBtn) el.scanBtn.disabled = false;

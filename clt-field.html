@@ -46,8 +46,13 @@
   <a class="skip-link" href="#main">Skip to content</a>
 
   <div id="entryLoader" class="entry-loader clt-loader" data-loader="clt" aria-live="polite">
+    <div class="entry-loader-grid" aria-hidden="true"></div>
     <div class="loader-shell loader-shell-clt">
+      <p class="loader-kicker">Charlotte detection interface</p>
       <h1 id="loaderStatus">Magnetometer calibration progress...</h1>
+      <p class="loader-subtitle">Calibrating CLT instruments and preparing live telemetry.</p>
+      <div class="loader-track clt-start-track" aria-hidden="true"><span id="cltStartBar"></span></div>
+      <div class="clt-loader-dots" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
     </div>
   </div>
 
@@ -159,7 +164,7 @@
 
     <section class="panel readout-card clt-card-section" aria-labelledby="cltSourcesTitle">
       <h2 id="cltSourcesTitle">Recent Live Readings</h2>
-      <ol id="cltContributors"></ol>
+      <pre id="cltContributors" class="clt-codebox">No live readings yet.</pre>
     </section>
 
     <section class="panel clt-card-section" aria-labelledby="scanToolTitle">
