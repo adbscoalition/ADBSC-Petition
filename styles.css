@@ -29,6 +29,7 @@ body {
 body {
   font-family: "Public Sans", sans-serif;
   color: var(--text);
+  font-weight: 550;
   background:
     radial-gradient(circle at 20% -10%, #7a1f69 0%, transparent 44%),
     radial-gradient(circle at 86% 8%, #b3257b 0%, transparent 40%),
@@ -710,6 +711,10 @@ p {
   line-height: 1.58;
 }
 
+li {
+  font-weight: 550;
+}
+
 .eyebrow {
   margin: 0;
   color: var(--gold-2);
@@ -993,7 +998,7 @@ pre {
   overflow: auto;
   border-radius: var(--radius-md);
   border: 1px solid rgba(255, 79, 163, 0.46);
-  background: linear-gradient(160deg, rgba(80, 20, 98, 0.8), rgba(22, 22, 22, 0.82));
+  background: #2a0c44;
   padding: 1rem;
   color: var(--text);
   line-height: 1.5;
@@ -1002,7 +1007,7 @@ pre {
 }
 
 .mini-pre {
-  background: linear-gradient(160deg, rgba(80, 20, 98, 0.82), rgba(24, 24, 24, 0.78));
+  background: #2a0c44;
 }
 
 .suitability ul {
@@ -1323,7 +1328,7 @@ pre {
   line-height: 1.5;
   border: 1px solid rgba(255, 79, 163, 0.35);
   border-radius: 12px;
-  background: rgba(34, 8, 48, 0.72);
+  background: #2a0c44;
 }
 
 
