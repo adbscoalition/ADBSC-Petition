@@ -290,6 +290,14 @@ function initCltFieldSystem() {
     return min + Math.random() * (max - min);
   }
 
+  function parseCoordinateInput(value) {
+    const raw = String(value ?? '').trim();
+    if (!raw) return NaN;
+    const normalized = raw.replace(/,/g, '.');
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : NaN;
+  }
+
   function smoothDrift(current, maxAbs, smoothing = 0.33) {
     const target = randomBetween(-maxAbs, maxAbs);
     return current + (target - current) * smoothing;
@@ -466,12 +474,29 @@ function initCltFieldSystem() {
     loadCustomFields();
     renderUploadedFields();
 
-    el.fieldSave?.addEventListener('click', () => {
+    el.fieldSave?.addEventListener('click', async () => {
       const intensity = Math.min(50000, Math.max(1, Number(el.fieldIntensity?.value || 0)));
       const maxRangeM = Math.min(100, Math.max(1, Number(el.fieldRange?.value || 0)));
 
-      let lat = Number(el.fieldLatitude?.value);
-      let lon = Number(el.fieldLongitude?.value);
+      let lat = parseCoordinateInput(el.fieldLatitude?.value);
+      let lon = parseCoordinateInput(el.fieldLongitude?.value);
+      const fieldLatBlank = String(el.fieldLatitude?.value ?? '').trim() === '';
+      const fieldLonBlank = String(el.fieldLongitude?.value ?? '').trim() === '';
+
+      if ((!Number.isFinite(lat) || !Number.isFinite(lon)) && fieldLatBlank && fieldLonBlank && navigator.geolocation) {
+        try {
+          const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+          });
+          lat = position.coords.latitude;
+          lon = position.coords.longitude;
+          if (el.fieldLatitude) el.fieldLatitude.value = String(lat);
+          if (el.fieldLongitude) el.fieldLongitude.value = String(lon);
+        } catch {
+          // fall through to existing fallback behavior
+        }
+      }
+
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
         lat = state.lastBase?.lat;
         lon = state.lastBase?.lon;
@@ -631,6 +656,7 @@ function initCltFieldSystem() {
         ? `${calc.nearestUploaded.name} (${formatDistanceAdaptive(calc.nearestUploaded.distance)})`
         : 'None'
     });
+    state.history = state.history.slice(0, 50);
     renderHistory();
 
     if (el.scanBtn) el.scanBtn.disabled = false;
@@ -770,8 +796,8 @@ function initCltFieldSystem() {
   }
 
   function readFallbackInputs() {
-    const lat = Number(el.latInput?.value);
-    const lon = Number(el.lonInput?.value);
+    const lat = parseCoordinateInput(el.latInput?.value);
+    const lon = parseCoordinateInput(el.lonInput?.value);
     if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
       setStatus('Invalid fallback coordinates. Latitude [-90, 90], longitude [-180, 180].', 'TRACKING PAUSED');
       return null;
@@ -786,8 +812,8 @@ function initCltFieldSystem() {
       return;
     }
 
-    const lat = Number(el.simLatitude?.value);
-    const lon = Number(el.simLongitude?.value);
+    const lat = parseCoordinateInput(el.simLatitude?.value);
+    const lon = parseCoordinateInput(el.simLongitude?.value);
 
     if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
       if (el.simStatus) el.simStatus.textContent = 'Simulator input invalid: latitude [-90, 90], longitude [-180, 180].';
@@ -846,6 +872,13 @@ function initCltFieldSystem() {
       startLiveTracking();
     });
   }
+
+
+  [el.latInput, el.lonInput, el.fieldLatitude, el.fieldLongitude, el.simLatitude, el.simLongitude].forEach((coordEl) => {
+    coordEl?.addEventListener('input', () => {
+      if (coordEl.value.includes(',')) coordEl.value = coordEl.value.replace(/,/g, '.');
+    });
+  });
 
   initFallbackTools();
   initFieldUploader();
