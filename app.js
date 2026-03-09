@@ -26,62 +26,19 @@ if (entryLoader) {
   }
 
   function runCltLoader() {
-    const cltValue = document.getElementById('cltValue');
-    const cltBar = document.getElementById('cltBar');
-    const tungstenValue = document.getElementById('tungstenValue');
-    const tungstenBar = document.getElementById('tungstenBar');
     const loaderStatus = document.getElementById('loaderStatus');
-
-    if (!(cltValue && cltBar && tungstenValue && tungstenBar && loaderStatus)) {
+    if (!loaderStatus) {
       finalizeLoader();
       return;
     }
 
-    const cltFinal = 1_000_000;
-    const tungstenStart = 0.00001;
-    const tungstenFinal = 0.99;
-    const phases = [
-      { at: 0.1, label: 'Scanning for Charlotte signatures...' },
-      { at: 0.42, label: 'Field intensity rising...' },
-      { at: 0.74, label: 'Tungsten concentration stabilizing...' },
-      { at: 0.95, label: 'Magnetic lock acquired.' }
-    ];
-
     const start = performance.now();
-    const easeOutQuint = (t) => 1 - Math.pow(1 - t, 5);
-
     function frame(now) {
       const t = Math.min((now - start) / duration, 1);
-      const base = easeOutQuint(t);
-      const jitterStrength = reducedMotion ? 0 : (1 - t) * 0.014;
-      const jitter = (Math.sin(now * 0.045) + Math.sin(now * 0.018 + 1.7)) * jitterStrength;
-      const surge = reducedMotion ? 0 : Math.exp(-Math.pow((t - 0.93) / 0.055, 2)) * 0.09;
-      const signal = Math.min(1, Math.max(0, base + jitter + surge));
-
-      const cltCurrent = Math.floor(signal * cltFinal);
-      const tungstenCurrent = tungstenStart + signal * (tungstenFinal - tungstenStart);
-
-      cltValue.textContent = cltCurrent.toLocaleString();
-      tungstenValue.textContent = `${tungstenCurrent.toFixed(5)} mg/m³`;
-      cltBar.style.width = `${signal * 100}%`;
-      tungstenBar.style.width = `${signal * 100}%`;
-
-      let status = phases[0].label;
-      for (const p of phases) if (t >= p.at) status = p.label;
-      loaderStatus.textContent = status;
-
-      if (!reducedMotion) {
-        entryLoader.style.setProperty('--loader-glow', String(0.35 + signal * 0.65));
-      }
-
-      if (t < 1) {
-        requestAnimationFrame(frame);
-      } else {
-        cltValue.textContent = '1,000,000';
-        tungstenValue.textContent = '0.99 mg/m³';
-        loaderStatus.textContent = 'Field synchronized. Entering CLT page.';
-        finalizeLoader();
-      }
+      if (!reducedMotion) entryLoader.style.setProperty('--loader-glow', String(0.35 + t * 0.65));
+      loaderStatus.textContent = 'Magnetometer calibration progress...';
+      if (t < 1) requestAnimationFrame(frame);
+      else finalizeLoader();
     }
 
     requestAnimationFrame(frame);
@@ -270,10 +227,10 @@ function initCltFieldSystem() {
     lastUpdate: document.getElementById('cltLastUpdate'),
     totalField: document.getElementById('cltTotalField'),
     tungsten: document.getElementById('cltTungsten'),
-    nearestDistance: document.getElementById('cltNearestFieldDistance'),
     nearestSource: document.getElementById('cltNearestSource'),
-    knownFieldDistance: document.getElementById('cltKnownFieldDistance'),
-    accuracy: document.getElementById('cltAccuracy'),
+    geoDistance: document.getElementById('cltGeoDistance'),
+    geoName: document.getElementById('cltGeoName'),
+    uploadedDistance: document.getElementById('cltUploadedDistance'),
     contributors: document.getElementById('cltContributors'),
     fallback: document.getElementById('cltFallback'),
     latInput: document.getElementById('cltLatitude'),
@@ -578,15 +535,12 @@ function initCltFieldSystem() {
       .filter((s) => s.category !== 'Secret')
       .sort((a, b) => a.distance - b.distance)[0];
     const nearestUploaded = [...customEvaluations].sort((a, b) => a.distance - b.distance)[0];
-    const nearestKnown = [...baseEvaluations.filter((s) => s.category !== 'Secret'), ...customEvaluations]
-      .sort((a, b) => a.distance - b.distance)[0];
-
-    return { evaluations, totalField, tungstenBase, nearest, nearestGeo, nearestUploaded, nearestKnown };
+    return { evaluations, totalField, tungstenBase, nearest, nearestGeo, nearestUploaded };
   }
 
-  function formatDistance(distanceKm) {
+  function formatDistanceKm(distanceKm) {
     if (!Number.isFinite(distanceKm)) return '—';
-    return distanceKm < 1 ? `${(distanceKm * 1000).toFixed(1)} m` : `${distanceKm.toFixed(3)} km`;
+    return distanceKm.toFixed(3);
   }
 
   function renderHistory() {
@@ -612,35 +566,18 @@ function initCltFieldSystem() {
 
     if (el.totalField) el.totalField.textContent = liveClt.toLocaleString(undefined, { maximumFractionDigits: 2 });
     if (el.tungsten) el.tungsten.textContent = `${liveTungsten.toFixed(5)} mg/m³`;
-    let nearestDisplay = '—';
-    const nearestGeoLabel = calc.nearestGeo ? `${calc.nearestGeo.name} (${formatDistance(calc.nearestGeo.distance)})` : '—';
-    const nearestUploadedLabel = calc.nearestUploaded ? `${calc.nearestUploaded.name} (${formatDistance(calc.nearestUploaded.distance)})` : 'None';
-    const easterEgg = calc.evaluations.find((s) => s.name === 'Vancouver Easter Egg');
-    const easterEligible = !easterEgg || easterEgg.strength >= 100;
-
-    if (calc.nearest) {
-      if (calc.nearest.name === 'Vancouver Easter Egg' && !easterEligible) {
-        nearestDisplay = `Geo: ${nearestGeoLabel} · Uploaded: ${nearestUploadedLabel}`;
-      } else {
-        nearestDisplay = `${calc.nearest.name} (${formatDistance(calc.nearest.distance)}) | Geo: ${nearestGeoLabel} | Uploaded: ${nearestUploadedLabel}`;
-      }
-    } else {
-      nearestDisplay = `Geo: ${nearestGeoLabel} · Uploaded: ${nearestUploadedLabel}`;
+    if (el.geoDistance) {
+      el.geoDistance.textContent = calc.nearestGeo ? `${formatDistanceKm(calc.nearestGeo.distance)} km` : '— km';
     }
-
-    if (el.nearestSource) el.nearestSource.textContent = nearestDisplay;
-    if (el.nearestDistance) {
-      const label = calc.nearestKnown
-        ? `<strong>Distance to nearest CLT Field:</strong> ${formatDistance(calc.nearestKnown.distance)} (${calc.nearestKnown.name})`
-        : '<strong>Distance to nearest CLT Field:</strong> —';
-      el.nearestDistance.innerHTML = label;
+    if (el.geoName) {
+      el.geoName.textContent = calc.nearestGeo ? calc.nearestGeo.name : '—';
     }
-    if (el.knownFieldDistance) {
-      el.knownFieldDistance.textContent = calc.nearestKnown
-        ? `Nearest known field distance: ${formatDistance(calc.nearestKnown.distance)} (${calc.nearestKnown.name})`
-        : 'Nearest known field distance: —';
+    if (el.uploadedDistance) {
+      el.uploadedDistance.textContent = calc.nearestUploaded ? `${formatDistanceKm(calc.nearestUploaded.distance)} km` : '— km';
     }
-    if (el.accuracy) el.accuracy.textContent = `Accuracy: ${Number.isFinite(accuracy) ? `${Math.round(accuracy)} m` : '—'}`;
+    if (el.nearestSource) {
+      el.nearestSource.textContent = calc.nearestUploaded ? calc.nearestUploaded.name : 'None';
+    }
 
     const stamp = new Date().toLocaleTimeString();
     if (el.lastUpdate) el.lastUpdate.textContent = `Last update: ${stamp}`;
@@ -649,7 +586,7 @@ function initCltFieldSystem() {
       time: stamp,
       clt: liveClt,
       tungsten: liveTungsten,
-      source: calc.nearestKnown ? calc.nearestKnown.name : 'Unknown source'
+      source: calc.nearestGeo ? calc.nearestGeo.name : 'Unknown source'
     });
     state.history = state.history.slice(0, 8);
     renderHistory();
@@ -665,7 +602,7 @@ function initCltFieldSystem() {
       `Coordinates: ${result.lat.toFixed(8)}, ${result.lon.toFixed(8)}`,
       `Timestamp: ${new Date(result.timestamp).toLocaleString()}`,
       `Nearest Source: ${result.sourceName}`,
-      `Distance to Source: ${formatDistance(result.distanceKm)}`
+      `Distance to Source: ${formatDistanceKm(result.distanceKm)} km`
     ].map((line) => `<li>${line}</li>`).join('');
   }
 
@@ -734,11 +671,14 @@ function initCltFieldSystem() {
 
   function onGeolocationError(error) {
     stopLiveTracking();
-    setFallbackVisibility(true);
 
     if (error?.code === 1) {
-      setStatus('Location permission denied. Fallback testing mode enabled.', 'LOCATION ACCESS REQUIRED');
-    } else if (error?.code === 2) {
+      document.body.innerHTML = '<main class="geo-denied-screen"><h1>Enable geolocation to continue.</h1></main>';
+      return;
+    }
+
+    setFallbackVisibility(true);
+    if (error?.code === 2) {
       setStatus('GPS unavailable. Fallback testing mode enabled.', 'GPS UNAVAILABLE');
     } else if (error?.code === 3) {
       setStatus('Geolocation timeout. Fallback testing mode enabled.', 'TRACKING PAUSED');
@@ -877,8 +817,16 @@ function initCltFieldSystem() {
   // Primary behavior: request live geolocation immediately on load.
   startLiveTracking();
 
+  // If manual fields are blank, seed them with current geolocation coordinates.
+  if (el.latInput && el.lonInput && (el.latInput.value.trim() === '' || el.lonInput.value.trim() === '')) {
+    navigator.geolocation?.getCurrentPosition((position) => {
+      el.latInput.value = String(position.coords.latitude);
+      el.lonInput.value = String(position.coords.longitude);
+    });
+  }
+
   // Keep denied fallback coordinates ready for manual testing if needed.
-  if (fallbackCoord && el.latInput && el.lonInput) {
+  if (fallbackCoord && el.latInput && el.lonInput && (el.latInput.value.trim() === '' || el.lonInput.value.trim() === '')) {
     el.latInput.value = String(fallbackCoord.lat);
     el.lonInput.value = String(fallbackCoord.lon);
   }

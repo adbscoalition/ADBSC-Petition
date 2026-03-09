@@ -46,33 +46,8 @@
   <a class="skip-link" href="#main">Skip to content</a>
 
   <div id="entryLoader" class="entry-loader clt-loader" data-loader="clt" aria-live="polite">
-    <div class="entry-loader-grid" aria-hidden="true"></div>
     <div class="loader-shell loader-shell-clt">
-      <p class="loader-kicker">Charlotte detection interface</p>
-      <h1>CLT Magnetic Lock Sequence</h1>
-      <p class="loader-subtitle">
-        Atmospheric and magnetic sensors synchronizing...
-      </p>
-
-      <div class="meter-panel clt-meter" role="status" aria-live="polite">
-        <div class="meter-head">
-          <p>CLT FIELD</p>
-          <p class="meter-unit">Charlotte Field Intensity</p>
-        </div>
-        <p id="cltValue" class="meter-value">0</p>
-        <div class="loader-track"><span id="cltBar"></span></div>
-      </div>
-
-      <div class="meter-panel tungsten-meter" role="status" aria-live="polite">
-        <div class="meter-head">
-          <p>TUNGSTEN CONCENTRATION</p>
-          <p class="meter-unit">mg/m³</p>
-        </div>
-        <p id="tungstenValue" class="meter-value tungsten">0.00001 mg/m³</p>
-        <div class="loader-track"><span id="tungstenBar"></span></div>
-      </div>
-
-      <p id="loaderStatus" class="loader-status">Scanning for Charlotte signatures...</p>
+      <h1 id="loaderStatus">Magnetometer calibration progress...</h1>
     </div>
   </div>
 
@@ -139,11 +114,11 @@
         <div class="clt-input-grid">
           <label>
             Latitude
-            <input id="cltLatitude" type="number" step="any" value="35.22867647481079" />
+            <input id="cltLatitude" type="number" step="any" placeholder="Latitude" />
           </label>
           <label>
             Longitude
-            <input id="cltLongitude" type="number" step="any" value="-80.84490976473366" />
+            <input id="cltLongitude" type="number" step="any" placeholder="Longitude" />
           </label>
           <label>
             Preset Location
@@ -161,7 +136,6 @@
       <h2 id="cltLiveTitle">Live Sensor Value</h2>
       <p class="live-kpi-label">Current CLT Field</p>
       <p class="live-kpi" id="cltTotalField">0</p>
-      <p id="cltNearestFieldDistance"><strong>Distance to nearest CLT Field:</strong> —</p>
     </section>
 
     <section class="panel readout-card clt-card-section" aria-labelledby="cltSpecsTitle">
@@ -171,14 +145,15 @@
 
     <section class="clt-dashboard-grid">
       <section class="panel readout-card clt-card-section" aria-labelledby="cltLocationTitle">
-        <h2 id="cltLocationTitle">Current Location</h2>
-        <p class="live-kpi-secondary" id="cltKnownFieldDistance">Nearest known field distance: —</p>
-        <p id="cltAccuracy">Accuracy: —</p>
+        <h2 id="cltLocationTitle">Nearest Geographical Location</h2>
+        <p class="live-kpi-secondary" id="cltGeoDistance">— km</p>
+        <p id="cltGeoName">—</p>
       </section>
 
       <section class="panel readout-card clt-card-section" aria-labelledby="cltNearestTitle">
-        <h2 id="cltNearestTitle">Nearest CLT Source</h2>
-        <p class="live-kpi-secondary" id="cltNearestSource">—</p>
+        <h2 id="cltNearestTitle">Nearest Uploaded Field</h2>
+        <p class="live-kpi-secondary" id="cltUploadedDistance">— km</p>
+        <p id="cltNearestSource">—</p>
       </section>
     </section>
 

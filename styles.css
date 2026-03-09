@@ -1243,9 +1243,20 @@ pre {
 }
 
 
-#cltNearestFieldDistance {
-  font-size: 1.07rem;
+
+.geo-denied-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 2rem;
 }
+
+.geo-denied-screen h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 4rem);
+}
+
 
 #cltContributors {
   font-size: 1.02rem;
