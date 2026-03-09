@@ -631,8 +631,7 @@ function initCltFieldSystem() {
       const fieldLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
       const distance = haversineKm(lat, lon, fieldLat, fieldLon);
       const distanceM = distance * 1000;
-      let strength = customFieldStrength(field, distanceM, nowMs);
-      strength = applySecretCltDamping(strength);
+      const strength = customFieldStrength(field, distanceM, nowMs);
       return {
         name: field.name,
         category: 'Secret',
