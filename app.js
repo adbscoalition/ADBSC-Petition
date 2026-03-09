@@ -301,6 +301,26 @@ function initCltFieldSystem() {
     return Number.isFinite(parsed) ? parsed : NaN;
   }
 
+  async function resolveCurrentCoords() {
+    if (Number.isFinite(state.lastBase?.lat) && Number.isFinite(state.lastBase?.lon)) {
+      return { lat: state.lastBase.lat, lon: state.lastBase.lon };
+    }
+    if (!navigator.geolocation) return null;
+
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: false,
+          timeout: 3000,
+          maximumAge: 30000
+        });
+      });
+      return { lat: position.coords.latitude, lon: position.coords.longitude };
+    } catch {
+      return null;
+    }
+  }
+
   function smoothDrift(current, maxAbs, smoothing = 0.33) {
     const target = randomBetween(-maxAbs, maxAbs);
     return current + (target - current) * smoothing;
@@ -486,17 +506,17 @@ function initCltFieldSystem() {
       const fieldLatBlank = String(el.fieldLatitude?.value ?? '').trim() === '';
       const fieldLonBlank = String(el.fieldLongitude?.value ?? '').trim() === '';
 
-      if ((!Number.isFinite(lat) || !Number.isFinite(lon)) && fieldLatBlank && fieldLonBlank && navigator.geolocation) {
-        try {
-          const position = await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
-          });
-          lat = position.coords.latitude;
-          lon = position.coords.longitude;
-          if (el.fieldLatitude) el.fieldLatitude.value = String(lat);
-          if (el.fieldLongitude) el.fieldLongitude.value = String(lon);
-        } catch {
-          // fall through to existing fallback behavior
+      if (fieldLatBlank || fieldLonBlank) {
+        const currentCoords = await resolveCurrentCoords();
+        if (currentCoords) {
+          if (fieldLatBlank) {
+            lat = currentCoords.lat;
+            if (el.fieldLatitude) el.fieldLatitude.value = String(lat);
+          }
+          if (fieldLonBlank) {
+            lon = currentCoords.lon;
+            if (el.fieldLongitude) el.fieldLongitude.value = String(lon);
+          }
         }
       }
 
@@ -927,9 +947,10 @@ function initCltFieldSystem() {
 
   // If manual fields are blank, seed them with current geolocation coordinates.
   if (el.latInput && el.lonInput && (el.latInput.value.trim() === '' || el.lonInput.value.trim() === '')) {
-    navigator.geolocation?.getCurrentPosition((position) => {
-      el.latInput.value = String(position.coords.latitude);
-      el.lonInput.value = String(position.coords.longitude);
+    resolveCurrentCoords().then((coords) => {
+      if (!coords) return;
+      el.latInput.value = String(coords.lat);
+      el.lonInput.value = String(coords.lon);
     });
   }
 
