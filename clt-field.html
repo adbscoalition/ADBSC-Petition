@@ -228,13 +228,15 @@
         </label>
         <fieldset class="uploader-days">
           <legend>Active Days (optional)</legend>
-          <label><input type="checkbox" class="field-day" value="0" /> Sun</label>
-          <label><input type="checkbox" class="field-day" value="1" /> Mon</label>
-          <label><input type="checkbox" class="field-day" value="2" /> Tue</label>
-          <label><input type="checkbox" class="field-day" value="3" /> Wed</label>
-          <label><input type="checkbox" class="field-day" value="4" /> Thu</label>
-          <label><input type="checkbox" class="field-day" value="5" /> Fri</label>
-          <label><input type="checkbox" class="field-day" value="6" /> Sat</label>
+          <div class="day-toggle-row" role="group" aria-label="Active days toggle buttons">
+            <button type="button" class="field-day-toggle" data-day="0" aria-pressed="false">Sun · Off</button>
+            <button type="button" class="field-day-toggle" data-day="1" aria-pressed="false">Mon · Off</button>
+            <button type="button" class="field-day-toggle" data-day="2" aria-pressed="false">Tue · Off</button>
+            <button type="button" class="field-day-toggle" data-day="3" aria-pressed="false">Wed · Off</button>
+            <button type="button" class="field-day-toggle" data-day="4" aria-pressed="false">Thu · Off</button>
+            <button type="button" class="field-day-toggle" data-day="5" aria-pressed="false">Fri · Off</button>
+            <button type="button" class="field-day-toggle" data-day="6" aria-pressed="false">Sat · Off</button>
+          </div>
         </fieldset>
         <label>
           Daily Start Time (optional)

@@ -275,7 +275,7 @@ function initCltFieldSystem() {
     fieldReset: document.getElementById('fieldReset'),
     fieldUploaderStatus: document.getElementById('fieldUploaderStatus'),
     uploadedFieldList: document.getElementById('uploadedFieldList'),
-    fieldDayInputs: Array.from(document.querySelectorAll('.field-day'))
+    fieldDayToggles: Array.from(document.querySelectorAll('.field-day-toggle'))
   };
 
   const fallbackCoord = coordinateDefinitions.find((d) => d.name === 'Geolocation Denied Fallback');
@@ -430,6 +430,29 @@ function initCltFieldSystem() {
     return Math.max(0, intensity * multiplier * tf);
   }
 
+
+  function setDayToggleState(day, isActive) {
+    const toggle = el.fieldDayToggles?.find((btn) => Number(btn.dataset.day) === Number(day));
+    if (!toggle) return;
+    toggle.classList.toggle('is-on', isActive);
+    toggle.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    const label = (toggle.textContent || '').split('·')[0].trim();
+    toggle.textContent = `${label} · ${isActive ? 'On' : 'Off'}`;
+  }
+
+  function getSelectedDays() {
+    return (el.fieldDayToggles || [])
+      .filter((btn) => btn.getAttribute('aria-pressed') === 'true')
+      .map((btn) => Number(btn.dataset.day));
+  }
+
+  function applySelectedDays(daysOfWeek) {
+    const selected = Array.isArray(daysOfWeek) ? daysOfWeek : [];
+    (el.fieldDayToggles || []).forEach((btn) => {
+      setDayToggleState(Number(btn.dataset.day), selected.includes(Number(btn.dataset.day)));
+    });
+  }
+
   function renderUploadedFields() {
     if (!(el.uploadedFieldList && el.fieldUploaderStatus)) return;
     if (!state.customFields.length) {
@@ -461,9 +484,7 @@ function initCltFieldSystem() {
         if (el.fieldLongitude) el.fieldLongitude.value = Number.isFinite(editLon) ? String(editLon) : '';
         if (el.fieldStartTime) el.fieldStartTime.value = field.startClock || '';
         if (el.fieldEndTime) el.fieldEndTime.value = field.endClock || '';
-        el.fieldDayInputs?.forEach((input) => {
-          input.checked = Array.isArray(field.daysOfWeek) && field.daysOfWeek.includes(Number(input.value));
-        });
+        applySelectedDays(field.daysOfWeek);
         el.fieldUploaderStatus.textContent = `Editing ${field.name}`;
       });
     });
@@ -485,7 +506,7 @@ function initCltFieldSystem() {
     if (el.fieldRange) el.fieldRange.value = '25';
     if (el.fieldStartTime) el.fieldStartTime.value = '';
     if (el.fieldEndTime) el.fieldEndTime.value = '';
-    el.fieldDayInputs?.forEach((input) => { input.checked = false; });
+    applySelectedDays([]);
   }
 
   function applySecretCltDamping(rawStrength) {
@@ -496,6 +517,14 @@ function initCltFieldSystem() {
   function initFieldUploader() {
     loadCustomFields();
     renderUploadedFields();
+    applySelectedDays([]);
+
+    (el.fieldDayToggles || []).forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const active = btn.getAttribute('aria-pressed') === 'true';
+        setDayToggleState(Number(btn.dataset.day), !active);
+      });
+    });
 
     el.fieldSave?.addEventListener('click', async () => {
       const intensity = Math.min(50000, Math.max(1, Number(el.fieldIntensity?.value || 0)));
@@ -529,7 +558,7 @@ function initCltFieldSystem() {
         return;
       }
 
-      const daysOfWeek = (el.fieldDayInputs || []).filter((i) => i.checked).map((i) => Number(i.value));
+      const daysOfWeek = getSelectedDays();
       const rawName = String(el.fieldName?.value || '').trim();
       const name = rawName || `My Field ${state.autoFieldCounter++}`;
       const payload = {
