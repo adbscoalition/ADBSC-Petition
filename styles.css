@@ -30,12 +30,23 @@ body {
   font-family: "Public Sans", sans-serif;
   color: var(--text);
   font-weight: 550;
+  position: relative;
   background:
     radial-gradient(circle at 20% -10%, #7a1f69 0%, transparent 44%),
     radial-gradient(circle at 86% 8%, #b3257b 0%, transparent 40%),
     linear-gradient(160deg, var(--bg-0), var(--bg-1));
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background: url("https://i.ibb.co/fYk6rjzG/download-1.png") center / cover no-repeat;
+  opacity: 0.2;
 }
 
 
