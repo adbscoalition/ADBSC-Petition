@@ -269,6 +269,8 @@ function initCltFieldSystem() {
     fieldRange: document.getElementById('fieldRange'),
     fieldLatitude: document.getElementById('fieldLatitude'),
     fieldLongitude: document.getElementById('fieldLongitude'),
+    fieldUseCurrentLocation: document.getElementById('fieldUseCurrentLocation'),
+    fieldClearCoordinates: document.getElementById('fieldClearCoordinates'),
     fieldStartTime: document.getElementById('fieldStartTime'),
     fieldEndTime: document.getElementById('fieldEndTime'),
     fieldSave: document.getElementById('fieldSave'),
@@ -492,9 +494,14 @@ function initCltFieldSystem() {
     el.uploadedFieldList.querySelectorAll('.field-delete').forEach((btn) => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-field-id');
+        const field = state.customFields.find((f) => f.id === id);
+        if (!field) return;
+        const ok = window.confirm(`Delete local secret field "${field.name}"? This cannot be undone.`);
+        if (!ok) return;
         state.customFields = state.customFields.filter((f) => f.id !== id);
         saveCustomFields();
         renderUploadedFields();
+        if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = `${field.name} deleted.`;
       });
     });
   }
@@ -524,6 +531,23 @@ function initCltFieldSystem() {
         const active = btn.getAttribute('aria-pressed') === 'true';
         setDayToggleState(Number(btn.dataset.day), !active);
       });
+    });
+
+    el.fieldUseCurrentLocation?.addEventListener('click', async () => {
+      const coords = await resolveCurrentCoords();
+      if (!coords) {
+        if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Unable to fetch current location for field coordinates.';
+        return;
+      }
+      if (el.fieldLatitude) el.fieldLatitude.value = String(coords.lat);
+      if (el.fieldLongitude) el.fieldLongitude.value = String(coords.lon);
+      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Coordinates set from current location.';
+    });
+
+    el.fieldClearCoordinates?.addEventListener('click', () => {
+      if (el.fieldLatitude) el.fieldLatitude.value = '';
+      if (el.fieldLongitude) el.fieldLongitude.value = '';
+      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Field coordinates cleared.';
     });
 
     el.fieldSave?.addEventListener('click', async () => {
@@ -642,6 +666,19 @@ function initCltFieldSystem() {
     return { evaluations, totalField, tungstenBase, nearest, nearestGeo, nearestUploaded };
   }
 
+  function getDisplayNearestSource(calc, options = {}) {
+    if (!calc || !Array.isArray(calc.evaluations)) return null;
+    const forScanSheet = !!options.forScanSheet;
+    const ranked = [...calc.evaluations].sort((a, b) => a.distance - b.distance);
+
+    return ranked.find((source) => {
+      if (source.uploaded) return true;
+      if (source.category !== 'Secret') return true;
+      if (forScanSheet && Number(source.strength) >= 100) return true;
+      return false;
+    }) || null;
+  }
+
   function formatDistanceShort(distanceKm, unitSystem = state.unitSystem) {
     if (!Number.isFinite(distanceKm)) return '—';
     if (unitSystem === 'imperial') {
@@ -701,7 +738,8 @@ function initCltFieldSystem() {
       el.uploadedDistance.textContent = calc.nearestUploaded ? formatDistancePrimary(calc.nearestUploaded.distance) : formatDistancePrimary(NaN);
     }
     if (el.nearestSource) {
-      el.nearestSource.textContent = calc.nearestUploaded ? calc.nearestUploaded.name : 'None';
+      const nearestDisplay = getDisplayNearestSource(calc, { forScanSheet: false });
+      el.nearestSource.textContent = nearestDisplay ? nearestDisplay.name : 'None';
     }
 
     const now = new Date();
@@ -761,14 +799,15 @@ function initCltFieldSystem() {
         const cltResult = Math.max(0, base.calc.totalField * (1 + randomBetween(-0.0025, 0.0025)));
         const tungstenResult = Math.max(0, base.calc.tungstenBase * (1 + randomBetween(-0.0045, 0.0045)));
 
+        const nearestScanSource = getDisplayNearestSource(base.calc, { forScanSheet: true });
         renderScanSheet({
           clt: cltResult,
           tungsten: tungstenResult,
           lat: base.lat,
           lon: base.lon,
           timestamp: Date.now(),
-          sourceName: base.calc.nearest ? base.calc.nearest.name : '—',
-          distanceKm: base.calc.nearest ? base.calc.nearest.distance : NaN
+          sourceName: nearestScanSource ? nearestScanSource.name : '—',
+          distanceKm: nearestScanSource ? nearestScanSource.distance : NaN
         });
 
         el.scanState.textContent = 'Accurate scan complete. Scan sheet frozen until next run.';

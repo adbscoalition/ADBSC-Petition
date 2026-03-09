@@ -1488,6 +1488,17 @@ pre {
 }
 
 
+.field-coordinate-actions {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.field-coordinate-actions .btn {
+  min-height: 40px;
+  padding: 0.5rem 1rem;
+}
+
 .uploader-days {
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-md);
