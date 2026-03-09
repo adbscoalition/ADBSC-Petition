@@ -35,7 +35,7 @@ if (entryLoader) {
 
     const phases = [
       { at: 0.1, label: 'Magnetometer calibration progress...' },
-      { at: 0.45, label: 'Aligning CLT vector axes...' },
+      { at: 0.45, label: 'Synchronizing with distance and time ranges...' },
       { at: 0.78, label: 'Finalizing instrument baseline...' }
     ];
 
