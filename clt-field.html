@@ -104,21 +104,40 @@
     </section>
 
     <section class="panel clt-system-controls" aria-labelledby="cltControlTitle" id="cltSystemApp">
-      <div class="section-head">
-        <h2 id="cltControlTitle">Live Tracking Status</h2>
-        <p id="cltSystemStatus" class="clt-system-status" role="status">Initializing geolocation tracker...</p>
-      </div>
-      <div class="clt-status-pill-row">
-        <p class="clt-status-pill" id="cltTrackingBadge">LOCATION ACCESS REQUIRED</p>
-        <p class="clt-status-meta" id="cltLastUpdate">Last update: —</p>
-        <label class="unit-toggle" for="cltUnitSwitch">
-          Units
-          <select id="cltUnitSwitch" aria-label="Distance units">
-            <option value="metric">Metric (m/km)</option>
-            <option value="imperial">Imperial (ft/mi)</option>
-          </select>
-        </label>
-      </div>
+      <details class="live-status-shell">
+        <summary>
+          <span>Live Tracking Status</span>
+          <span class="live-status-summary-meta" id="cltSystemStatus">Initializing geolocation tracker...</span>
+        </summary>
+
+        <div class="live-status-grid">
+          <article class="live-status-box">
+            <h3>Tracking Status</h3>
+            <p class="clt-status-pill" id="cltTrackingBadge">LOCATION ACCESS REQUIRED</p>
+          </article>
+
+          <article class="live-status-box">
+            <h3>Last update</h3>
+            <p class="clt-status-meta" id="cltLastUpdate">Last update: —</p>
+          </article>
+
+          <article class="live-status-box">
+            <h3>GPS accuracy</h3>
+            <p class="clt-status-meta" id="cltGpsAccuracy">—</p>
+          </article>
+
+          <article class="live-status-box">
+            <h3>Units selector</h3>
+            <label class="unit-toggle" for="cltUnitSwitch">
+              Units
+              <select id="cltUnitSwitch" aria-label="Distance units">
+                <option value="metric">Metric (m/km)</option>
+                <option value="imperial">Imperial (ft/mi)</option>
+              </select>
+            </label>
+          </article>
+        </div>
+      </details>
 
       <div class="clt-fallback" id="cltFallback" hidden>
         <h3>Fallback Testing Mode</h3>
@@ -126,11 +145,11 @@
         <div class="clt-input-grid">
           <label>
             Latitude
-            <input id="cltLatitude" type="text" inputmode="decimal" placeholder="Latitude" />
+            <input id="cltLatitude" type="text" inputmode="text" placeholder="Latitude" />
           </label>
           <label>
             Longitude
-            <input id="cltLongitude" type="text" inputmode="decimal" placeholder="Longitude" />
+            <input id="cltLongitude" type="text" inputmode="text" placeholder="Longitude" />
           </label>
           <label>
             Preset Location
@@ -153,6 +172,27 @@
     <section class="panel readout-card clt-card-section" aria-labelledby="cltSpecsTitle">
       <h2 id="cltSpecsTitle">Tungsten Concentration</h2>
       <p class="live-kpi" id="cltTungsten">0.000001 mg/m³</p>
+    </section>
+
+    <section class="panel clt-card-section" aria-labelledby="cltContribTitle">
+      <h2 id="cltContribTitle">CLT Contributions</h2>
+      <p class="clt-system-status">Per-source CLT and tungsten contributions with live drift applied.</p>
+      <div class="contrib-grid">
+        <div>
+          <h3>CLT Field Contribution</h3>
+          <table class="contrib-table" id="cltContributionTable" aria-label="CLT field contribution table">
+            <thead><tr><th>Source</th><th>CLT</th></tr></thead>
+            <tbody><tr><td>None</td><td>0.00</td></tr></tbody>
+          </table>
+        </div>
+        <div>
+          <h3>Tungsten Contribution</h3>
+          <table class="contrib-table" id="tungstenContributionTable" aria-label="Tungsten contribution table">
+            <thead><tr><th>Source</th><th>mg/m³</th></tr></thead>
+            <tbody><tr><td>None</td><td>0.000000</td></tr></tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
     <section class="clt-dashboard-grid">
@@ -220,11 +260,11 @@
         </label>
         <label>
           Field Latitude
-          <input id="fieldLatitude" type="text" inputmode="decimal" placeholder="Auto from current location" />
+          <input id="fieldLatitude" type="text" inputmode="text" placeholder="Auto from current location" />
         </label>
         <label>
           Field Longitude
-          <input id="fieldLongitude" type="text" inputmode="decimal" placeholder="Auto from current location" />
+          <input id="fieldLongitude" type="text" inputmode="text" placeholder="Auto from current location" />
         </label>
         <div class="field-coordinate-actions">
           <button class="btn secondary" id="fieldUseCurrentLocation" type="button">Use Current Location</button>
@@ -275,11 +315,11 @@
         <div class="clt-input-grid uploader-grid">
           <label>
             Teleport Latitude
-            <input id="simLatitude" type="text" inputmode="decimal" placeholder="35.22867647" />
+            <input id="simLatitude" type="text" inputmode="text" placeholder="35.22867647" />
           </label>
           <label>
             Teleport Longitude
-            <input id="simLongitude" type="text" inputmode="decimal" placeholder="-80.84490976" />
+            <input id="simLongitude" type="text" inputmode="text" placeholder="-80.84490976" />
           </label>
         </div>
         <div class="clt-actions">

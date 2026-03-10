@@ -257,6 +257,9 @@ function initCltFieldSystem() {
     scanState: document.getElementById('scanState'),
     scanBar: document.getElementById('scanProgressBar'),
     scanSheet: document.getElementById('scanSheetList'),
+    gpsAccuracy: document.getElementById('cltGpsAccuracy'),
+    cltContributionTable: document.getElementById('cltContributionTable'),
+    tungstenContributionTable: document.getElementById('tungstenContributionTable'),
     simPassword: document.getElementById('simPassword'),
     simUnlock: document.getElementById('simUnlock'),
     simCoordinateBlock: document.getElementById('simCoordinateBlock'),
@@ -678,7 +681,8 @@ function initCltFieldSystem() {
       .reduce((sum, source) => sum + source.strength, 0);
     const tungstenRegular = (regularFieldTotal / 1000) * 0.05;
     const tungstenSecret = 0.95 * (1 - Math.exp(-Math.max(secretFieldTotal, 0) / 6000));
-    const tungstenBase = 0.000001 + tungstenRegular + tungstenSecret;
+    const tungstenAmbient = 0.000001;
+    const tungstenBase = tungstenAmbient + tungstenRegular + tungstenSecret;
 
     const nearest = [...evaluations].sort((a, b) => a.distance - b.distance)[0];
     const nearestGeo = [...baseEvaluations]
@@ -687,7 +691,17 @@ function initCltFieldSystem() {
     const nearestUploaded = [...customEvaluations]
       .filter((s) => s.inField)
       .sort((a, b) => a.distance - b.distance)[0];
-    return { evaluations, totalField, tungstenBase, nearest, nearestGeo, nearestUploaded };
+    return {
+      evaluations,
+      totalField,
+      tungstenBase,
+      tungstenRegular,
+      tungstenSecret,
+      tungstenAmbient,
+      nearest,
+      nearestGeo,
+      nearestUploaded
+    };
   }
 
   function getDisplayNearestSource(calc, options = {}) {
@@ -722,6 +736,79 @@ function initCltFieldSystem() {
     return dateObj.toLocaleTimeString('en-US', { hour12: true, hour: 'numeric', minute: '2-digit', second: '2-digit' });
   }
 
+  function getSourceDisplayName(source, cltValue) {
+    if (source.category === 'Secret' && Number(cltValue) < 100) return 'Unknown Source';
+    return source.name || 'Unknown Source';
+  }
+
+  function renderContributionTables(calc, liveClt, liveTungsten) {
+    const cltBody = el.cltContributionTable?.querySelector('tbody');
+    const tungstenBody = el.tungstenContributionTable?.querySelector('tbody');
+    if (!cltBody || !tungstenBody) return;
+
+    if (!calc) {
+      cltBody.innerHTML = '<tr><td>None</td><td>0.00</td></tr>';
+      tungstenBody.innerHTML = '<tr><td>None</td><td>0.000000</td></tr>';
+      return;
+    }
+
+    const evaluations = Array.isArray(calc.evaluations) ? calc.evaluations : [];
+    const cltScale = calc.totalField > 0 ? liveClt / calc.totalField : 0;
+    const cltRows = evaluations
+      .map((source) => ({ source, value: Math.max(0, source.strength * cltScale) }))
+      .filter((row) => row.value > 0.00001)
+      .sort((a, b) => b.value - a.value);
+
+    const sourceKey = (source) => `${source.name}|${source.lat}|${source.lon}|${source.category}`;
+    const liveCltByKey = new Map(cltRows.map((row) => [sourceKey(row.source), row.value]));
+
+    if (!cltRows.length) {
+      cltBody.innerHTML = '<tr><td>None</td><td>0.00</td></tr>';
+    } else {
+      cltBody.innerHTML = cltRows.map((row) => {
+        const name = getSourceDisplayName(row.source, row.value);
+        return `<tr><td>${name}</td><td>${row.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td></tr>`;
+      }).join('');
+    }
+
+    const liveTungstenScale = calc.tungstenBase > 0 ? liveTungsten / calc.tungstenBase : 0;
+    const liveRegular = Math.max(0, (calc.tungstenRegular || 0) * liveTungstenScale);
+    const liveSecret = Math.max(0, (calc.tungstenSecret || 0) * liveTungstenScale);
+    const liveAmbient = Math.max(0, (calc.tungstenAmbient || 0) * liveTungstenScale);
+
+    const regularStrengthSum = evaluations.filter((s) => s.category !== 'Secret').reduce((sum, s) => sum + Math.max(0, s.strength), 0);
+    const secretStrengthSum = evaluations.filter((s) => s.category === 'Secret').reduce((sum, s) => sum + Math.max(0, s.strength), 0);
+
+    const tungstenRows = [];
+    evaluations.forEach((source) => {
+      const strength = Math.max(0, source.strength);
+      let value = 0;
+      if (source.category === 'Secret') {
+        value = secretStrengthSum > 0 ? liveSecret * (strength / secretStrengthSum) : 0;
+      } else {
+        value = regularStrengthSum > 0 ? liveRegular * (strength / regularStrengthSum) : 0;
+      }
+      if (value > 0.0000000001) tungstenRows.push({ source, value });
+    });
+
+    if (liveAmbient > 0) {
+      tungstenRows.push({ source: { name: 'Ambient Baseline', category: 'Regular', lat: 0, lon: 0 }, value: liveAmbient });
+    }
+
+    tungstenRows.sort((a, b) => b.value - a.value);
+
+    if (!tungstenRows.length) {
+      tungstenBody.innerHTML = '<tr><td>None</td><td>0.000000</td></tr>';
+    } else {
+      tungstenBody.innerHTML = tungstenRows.map((row) => {
+        const name = row.source.name === 'Ambient Baseline'
+          ? row.source.name
+          : getSourceDisplayName(row.source, liveCltByKey.get(sourceKey(row.source)) || 0);
+        return `<tr><td>${name}</td><td>${row.value.toFixed(6)}</td></tr>`;
+      }).join('');
+    }
+  }
+
   function renderHistory() {
     if (!el.contributors) return;
     if (!state.history.length) {
@@ -735,7 +822,7 @@ function initCltFieldSystem() {
         : '—';
       const idvlLabel = item.nearestIdvlName
         ? `${item.nearestIdvlName} (${formatDistanceShort(item.nearestIdvlDistanceKm)})`
-        : 'None';
+        : 'none';
       return `${item.time} | ${item.clt.toLocaleString(undefined, { maximumFractionDigits: 2 })} CLT | ` +
         `Tungsten ${item.tungsten.toFixed(5)} mg/m³ | Nearest GEO ${geoLabel} | Nearest IDVL ${idvlLabel}`;
     }).join('\n');
@@ -762,8 +849,13 @@ function initCltFieldSystem() {
       el.uploadedDistance.textContent = calc.nearestUploaded ? formatDistancePrimary(calc.nearestUploaded.distance) : formatDistancePrimary(NaN);
     }
     if (el.nearestSource) {
-      const nearestDisplay = getDisplayNearestSource(calc, { forScanSheet: false });
-      el.nearestSource.textContent = nearestDisplay ? nearestDisplay.name : 'None';
+      el.nearestSource.textContent = calc.nearestUploaded ? calc.nearestUploaded.name : 'none';
+    }
+    if (el.gpsAccuracy) {
+      const meters = Number(accuracy);
+      el.gpsAccuracy.textContent = Number.isFinite(meters)
+        ? `${meters.toFixed(1)} m`
+        : '—';
     }
 
     const now = new Date();
@@ -781,6 +873,7 @@ function initCltFieldSystem() {
     });
     state.history = state.history.slice(0, 50);
     renderHistory();
+    renderContributionTables(calc, liveClt, liveTungsten);
 
     if (el.scanBtn) el.scanBtn.disabled = false;
   }
@@ -830,7 +923,7 @@ function initCltFieldSystem() {
           lat: base.lat,
           lon: base.lon,
           timestamp: Date.now(),
-          sourceName: nearestScanSource ? nearestScanSource.name : '—',
+          sourceName: nearestScanSource ? nearestScanSource.name : 'none',
           distanceKm: nearestScanSource ? nearestScanSource.distance : NaN
         });
 
@@ -1011,6 +1104,7 @@ function initCltFieldSystem() {
       if (el.geoDistance) el.geoDistance.textContent = calc.nearestGeo ? formatDistancePrimary(calc.nearestGeo.distance) : formatDistancePrimary(NaN);
       if (el.uploadedDistance) el.uploadedDistance.textContent = calc.nearestUploaded ? formatDistancePrimary(calc.nearestUploaded.distance) : formatDistancePrimary(NaN);
       renderHistory();
+      renderContributionTables(calc, state.lastBase.liveClt, state.lastBase.liveTungsten);
     }
   });
 
@@ -1033,6 +1127,7 @@ function initCltFieldSystem() {
 
   if (el.scanBtn) el.scanBtn.disabled = true;
   renderHistory();
+  renderContributionTables(null, 0, 0);
 
   // Primary behavior: request live geolocation immediately on load.
   startLiveTracking();
