@@ -471,6 +471,10 @@ function initCltFieldSystem() {
       const coordLabel = (Number.isFinite(fieldLat) && Number.isFinite(fieldLon))
         ? `${fieldLat.toFixed(6)}, ${fieldLon.toFixed(6)}`
         : '—';
+      const hasTimeWindow = !!field.startClock || !!field.endClock;
+      const timeLabel = hasTimeWindow
+        ? `${field.startClock || '00:00'} → ${field.endClock || '24:00'}`
+        : 'Always active';
 
       const isEditing = state.editingFieldId === field.id;
 
@@ -478,6 +482,7 @@ function initCltFieldSystem() {
         `<div class="uploaded-field-head"><strong>${field.name}</strong>${isEditing ? '<span class="field-editing-badge">Editing</span>' : ''}</div>` +
         `<p class="uploaded-field-meta">${field.intensity} CLT · ${field.maxRangeM}m range</p>` +
         `<p class="uploaded-field-meta">Days: ${daysLabel}</p>` +
+        `<p class="uploaded-field-meta">Time: ${timeLabel}</p>` +
         `<p class="uploaded-field-meta">Coordinates: ${coordLabel}</p>` +
         `<div class="uploaded-field-actions">` +
         `<button class="field-edit" data-field-id="${field.id}" type="button">Edit</button>` +
@@ -502,8 +507,8 @@ function initCltFieldSystem() {
         if (el.fieldEndTime) el.fieldEndTime.value = field.endClock || '';
         applySelectedDays(field.daysOfWeek);
         if (el.fieldSave) el.fieldSave.textContent = 'Update Uploaded Field';
-        el.fieldUploaderStatus.textContent = `Editing uploaded field: ${field.name}`;
         renderUploadedFields();
+        el.fieldUploaderStatus.textContent = `Editing uploaded field: ${field.name}`;
       });
     });
 
