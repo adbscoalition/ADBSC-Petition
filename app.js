@@ -472,8 +472,10 @@ function initCltFieldSystem() {
         ? `${fieldLat.toFixed(6)}, ${fieldLon.toFixed(6)}`
         : '—';
 
-      return `<li class="uploaded-field-card">` +
-        `<div class="uploaded-field-head"><strong>${field.name}</strong></div>` +
+      const isEditing = state.editingFieldId === field.id;
+
+      return `<li class="uploaded-field-card${isEditing ? ' is-editing' : ''}">` +
+        `<div class="uploaded-field-head"><strong>${field.name}</strong>${isEditing ? '<span class="field-editing-badge">Editing</span>' : ''}</div>` +
         `<p class="uploaded-field-meta">${field.intensity} CLT · ${field.maxRangeM}m range</p>` +
         `<p class="uploaded-field-meta">Days: ${daysLabel}</p>` +
         `<p class="uploaded-field-meta">Coordinates: ${coordLabel}</p>` +
@@ -499,7 +501,9 @@ function initCltFieldSystem() {
         if (el.fieldStartTime) el.fieldStartTime.value = field.startClock || '';
         if (el.fieldEndTime) el.fieldEndTime.value = field.endClock || '';
         applySelectedDays(field.daysOfWeek);
-        el.fieldUploaderStatus.textContent = `Editing ${field.name}`;
+        if (el.fieldSave) el.fieldSave.textContent = 'Update Uploaded Field';
+        el.fieldUploaderStatus.textContent = `Editing uploaded field: ${field.name}`;
+        renderUploadedFields();
       });
     });
 
@@ -525,7 +529,9 @@ function initCltFieldSystem() {
     if (el.fieldRange) el.fieldRange.value = '25';
     if (el.fieldStartTime) el.fieldStartTime.value = '';
     if (el.fieldEndTime) el.fieldEndTime.value = '';
+    if (el.fieldSave) el.fieldSave.textContent = 'Save Field';
     applySelectedDays([]);
+    renderUploadedFields();
   }
 
   function applySecretCltDamping(rawStrength) {
@@ -673,7 +679,9 @@ function initCltFieldSystem() {
     const nearestGeo = [...baseEvaluations]
       .filter((s) => s.category !== 'Secret')
       .sort((a, b) => a.distance - b.distance)[0];
-    const nearestUploaded = [...customEvaluations].sort((a, b) => a.distance - b.distance)[0];
+    const nearestUploaded = [...customEvaluations]
+      .filter((s) => s.inField)
+      .sort((a, b) => a.distance - b.distance)[0];
     return { evaluations, totalField, tungstenBase, nearest, nearestGeo, nearestUploaded };
   }
 
@@ -683,7 +691,7 @@ function initCltFieldSystem() {
     const ranked = [...calc.evaluations].sort((a, b) => a.distance - b.distance);
 
     return ranked.find((source) => {
-      if (source.uploaded) return true;
+      if (source.uploaded) return source.inField;
       if (source.category !== 'Secret') return true;
       if (forScanSheet && Number(source.strength) >= 100) return true;
       return false;

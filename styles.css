@@ -1474,8 +1474,28 @@ pre {
   padding: 0.7rem 0.8rem;
 }
 
+
+#uploadedFieldList .uploaded-field-card.is-editing {
+  border-color: rgba(255, 168, 38, 0.95);
+  box-shadow: 0 0 0 1px rgba(255, 168, 38, 0.35);
+}
+
 .uploaded-field-head {
-  font-size: 1.02rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.field-editing-badge {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 800;
+  color: #351b00;
+  background: #ffcf7b;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
 }
 
 .uploaded-field-meta {
