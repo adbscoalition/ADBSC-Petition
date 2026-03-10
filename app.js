@@ -192,13 +192,13 @@ function initCltFieldSystem() {
 
   const coordinateDefinitions = [
     { name: 'Charlotte, NC', lat: 35.22867647481079, lon: -80.84490976473366 },
-    { name: 'Vancouver Easter Egg', lat: 49.2729341959022, lon: -123.06941193669999 },
+    { name: '????', lat: 49.2729341959022, lon: -123.06941193669999 },
     { name: 'Charlotte, MI', lat: 42.56318196348821, lon: -84.83584647437215 },
     { name: 'Haida Gwaii Islands', lat: 53.255510249854304, lon: -132.08947116604432 },
     { name: 'Charlotte Amalie, USVI', lat: 18.34185490966226, lon: -64.9316281681369 },
     { name: 'Port Charlotte, FL', lat: 27.010523765938274, lon: -82.14259591632731 },
     { name: 'Charlottetown, PEI', lat: 46.23722371252871, lon: -63.12970137942366 },
-    { name: 'Vancouver Micro Secret', lat: 49.27295878743672, lon: -123.06939862529713 },
+    { name: 'THE GODLY CHARLOTTE', lat: 49.27295878743672, lon: -123.06939862529713 },
     { name: 'Charlottesville, VA', lat: 38.0292848205594, lon: -78.47616344837674 },
     { name: 'Queen Charlotte Burial Place', lat: 51.4836838439432, lon: -0.60668429494321 },
     { name: 'Geolocation Denied Fallback', lat: 84.99999991933562, lon: -110.97606616281583 }
@@ -206,7 +206,7 @@ function initCltFieldSystem() {
 
   const magneticSources = [
     { name: 'Charlotte, NC', category: 'Regular', lat: 35.22867647481079, lon: -80.84490976473366, bands: [[0, 10, 1000, 1000], [10, 100, 1000, 200], [100, 200, 200, 50], [200, 400, 50, 10], [400, 1000, 10, 0]] },
-    { name: 'Vancouver Easter Egg', category: 'Secret', lat: 49.2729341959022, lon: -123.06941193669999, bands: [[0, 0.01, 15000, 15000], [0.01, 0.1, 15000, 500], [0.1, 1, 500, 20], [1, 5, 20, 0]] },
+    { name: '????', category: 'Secret', lat: 49.2729341959022, lon: -123.06941193669999, bands: [[0, 0.01, 15000, 15000], [0.01, 0.1, 15000, 500], [0.1, 1, 500, 20], [1, 5, 20, 0]] },
     { name: 'Charlotte, MI', category: 'Regular', lat: 42.56318196348821, lon: -84.83584647437215, bands: [[0, 2, 575, 575], [2, 10, 575, 200], [10, 40, 200, 30], [40, 120, 30, 0]] },
     { name: 'Haida Gwaii Islands', category: 'Regular', lat: 53.255510249854304, lon: -132.08947116604432, bands: [[0, 200, 230, 230], [200, 350, 230, 20], [350, 450, 20, 0]] },
     { name: 'Charlotte Amalie, USVI', category: 'Regular', lat: 18.34185490966226, lon: -64.9316281681369, bands: [[0, 1, 300, 300], [1, 10, 300, 100], [10, 25, 100, 20], [25, 40, 20, 0]] },
@@ -214,7 +214,7 @@ function initCltFieldSystem() {
     { name: 'Charlottetown, PEI', category: 'Regular', lat: 46.23722371252871, lon: -63.12970137942366, bands: [[0, 2, 350, 350], [2, 8, 350, 100], [8, 24, 100, 25], [24, 128, 25, 0]] },
     { name: 'Charlottesville, VA', category: 'Regular', lat: 38.0292848205594, lon: -78.47616344837674, bands: [[0, 3, 450, 450], [3, 30, 450, 200], [30, 120, 200, 20], [120, 360, 20, 0]] },
     { name: 'Queen Charlotte Burial Place', category: 'Secret', lat: 51.4836838439432, lon: -0.60668429494321, bands: [[0, 0.1, 14000, 14000], [0.1, 1, 14000, 3000], [1, 3, 3000, 900], [3, 14, 900, 200], [14, 50, 200, 40], [50, 250, 40, 0]] },
-    { name: 'Vancouver Micro Secret', category: 'Secret', lat: 49.27295878743672, lon: -123.06939862529713, bands: [[0, 0.001, 300000, 300000], [0.001, 0.01, 300000, 1], [0.01, 0.015, 1, 0]] }
+    { name: 'THE GODLY CHARLOTTE', category: 'Secret', lat: 49.27295878743672, lon: -123.06939862529713, bands: [[0, 0.001, 300000, 300000], [0.001, 0.01, 300000, 1], [0.01, 0.015, 1, 0]] }
   ];
 
   const state = {
@@ -464,12 +464,24 @@ function initCltFieldSystem() {
     }
 
     el.fieldUploaderStatus.textContent = `${state.customFields.length} local secret field(s) loaded.`;
-    el.uploadedFieldList.innerHTML = state.customFields.map((field) =>
-      `<li><strong>${field.name}</strong> · ${field.intensity} CLT · ${field.maxRangeM}m range · Days: ${(field.daysOfWeek?.length ? field.daysOfWeek.join(',') : 'All')}
-` +
-      `<button class="field-edit" data-field-id="${field.id}" type="button">Edit</button> ` +
-      `<button class="field-delete" data-field-id="${field.id}" type="button">Delete</button></li>`
-    ).join('');
+    el.uploadedFieldList.innerHTML = state.customFields.map((field) => {
+      const fieldLat = Number.isFinite(Number(field.lat)) ? Number(field.lat) : Number(field.latitude);
+      const fieldLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
+      const daysLabel = field.daysOfWeek?.length ? field.daysOfWeek.join(', ') : 'All';
+      const coordLabel = (Number.isFinite(fieldLat) && Number.isFinite(fieldLon))
+        ? `${fieldLat.toFixed(6)}, ${fieldLon.toFixed(6)}`
+        : '—';
+
+      return `<li class="uploaded-field-card">` +
+        `<div class="uploaded-field-head"><strong>${field.name}</strong></div>` +
+        `<p class="uploaded-field-meta">${field.intensity} CLT · ${field.maxRangeM}m range</p>` +
+        `<p class="uploaded-field-meta">Days: ${daysLabel}</p>` +
+        `<p class="uploaded-field-meta">Coordinates: ${coordLabel}</p>` +
+        `<div class="uploaded-field-actions">` +
+        `<button class="field-edit" data-field-id="${field.id}" type="button">Edit</button>` +
+        `<button class="field-delete" data-field-id="${field.id}" type="button">Delete</button>` +
+        `</div></li>`;
+    }).join('');
 
     el.uploadedFieldList.querySelectorAll('.field-edit').forEach((btn) => {
       btn.addEventListener('click', () => {

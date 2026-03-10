@@ -1461,13 +1461,41 @@ pre {
 
 
 
+#uploadedFieldList {
+  list-style: none;
+  padding-left: 0;
+  gap: 0.6rem;
+}
+
+#uploadedFieldList .uploaded-field-card {
+  border: 1px solid rgba(255, 79, 163, 0.35);
+  border-radius: 12px;
+  background: rgba(42, 12, 68, 0.72);
+  padding: 0.7rem 0.8rem;
+}
+
+.uploaded-field-head {
+  font-size: 1.02rem;
+}
+
+.uploaded-field-meta {
+  margin: 0.22rem 0 0;
+  font-size: 0.92rem;
+}
+
+.uploaded-field-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
 #uploadedFieldList button {
-  margin-left: 0.45rem;
   border: 1px solid rgba(255, 79, 163, 0.45);
   background: rgba(30, 8, 48, 0.75);
   color: var(--text);
   border-radius: 999px;
-  padding: 0.16rem 0.55rem;
+  padding: 0.2rem 0.6rem;
   cursor: pointer;
 }
 
