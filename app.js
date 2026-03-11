@@ -234,6 +234,8 @@ function initCltFieldSystem() {
     autoFieldCounter: 1,
     simulatorUnlocked: false,
     unitSystem: 'metric',
+    vancouverTimeLimitsEnabled: true,
+    uploadedTimeLimitsEnabled: true,
   };
 
   const el = {
@@ -268,6 +270,7 @@ function initCltFieldSystem() {
     simLatitude: document.getElementById('simLatitude'),
     simLongitude: document.getElementById('simLongitude'),
     simTeleport: document.getElementById('simTeleport'),
+    simTimeLimitsToggle: document.getElementById('simTimeLimitsToggle'),
     simStatus: document.getElementById('simStatus'),
     fieldName: document.getElementById('fieldName'),
     fieldIntensity: document.getElementById('fieldIntensity'),
@@ -645,12 +648,52 @@ function initCltFieldSystem() {
     });
   }
 
+  function isVancouverTimedSource(source) {
+    if (!source) return false;
+    const hasTimeRules = !!source.startClock || !!source.endClock || (Array.isArray(source.daysOfWeek) && source.daysOfWeek.length > 0);
+    if (!hasTimeRules) return false;
+    return Math.abs(Number(source.lat) - 49.27296428756112) < 0.000001
+      && Math.abs(Number(source.lon) - (-123.06937964843168)) < 0.000001;
+  }
+
+  function getTimeLimitToggleLabel() {
+    const enabled = state.vancouverTimeLimitsEnabled && state.uploadedTimeLimitsEnabled;
+    return enabled
+      ? 'Disable Vancouver/Uploaded Time Limits'
+      : 'Enable Vancouver/Uploaded Time Limits';
+  }
+
+  function refreshTimeLimitToggleButton() {
+    if (!el.simTimeLimitsToggle) return;
+    const enabled = state.vancouverTimeLimitsEnabled && state.uploadedTimeLimitsEnabled;
+    el.simTimeLimitsToggle.textContent = getTimeLimitToggleLabel();
+    el.simTimeLimitsToggle.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+  }
+
+  function toggleSimulatorTimeLimits() {
+    const next = !(state.vancouverTimeLimitsEnabled && state.uploadedTimeLimitsEnabled);
+    state.vancouverTimeLimitsEnabled = next;
+    state.uploadedTimeLimitsEnabled = next;
+    refreshTimeLimitToggleButton();
+
+    const mode = next ? 'enabled' : 'disabled';
+    if (el.simStatus) {
+      el.simStatus.textContent = `Simulator time limits ${mode} for Vancouver fields and uploaded fields.`;
+    }
+
+    if (state.lastBase) {
+      const calc = computeField(state.lastBase.lat, state.lastBase.lon);
+      renderLiveTelemetry(state.lastBase.lat, state.lastBase.lon, state.lastBase.accuracy, calc);
+    }
+  }
+
+
   function computeField(lat, lon) {
     const nowMs = Date.now();
     const baseEvaluations = magneticSources.map((source) => {
       const distance = haversineKm(lat, lon, source.lat, source.lon);
       let strength = interpolatedStrength(distance, source.bands);
-      if (source.startClock || source.endClock || (Array.isArray(source.daysOfWeek) && source.daysOfWeek.length)) {
+      if (isVancouverTimedSource(source) && state.vancouverTimeLimitsEnabled) {
         strength *= customFieldTimeFactor(source, nowMs);
       }
       if (source.category === 'Secret') strength = applySecretCltDamping(strength);
@@ -662,7 +705,9 @@ function initCltFieldSystem() {
       const fieldLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
       const distance = haversineKm(lat, lon, fieldLat, fieldLon);
       const distanceM = distance * 1000;
-      const strength = customFieldStrength(field, distanceM, nowMs);
+      const strength = state.uploadedTimeLimitsEnabled
+        ? customFieldStrength(field, distanceM, nowMs)
+        : customFieldStrength({ ...field, startClock: null, endClock: null, daysOfWeek: [] }, distanceM, nowMs);
       return {
         name: field.name,
         category: 'Secret',
@@ -951,7 +996,8 @@ function initCltFieldSystem() {
     }
 
     if (state.scanTimer) window.clearInterval(state.scanTimer);
-    if (el.scanBtn) el.scanBtn.disabled = true;
+    refreshTimeLimitToggleButton();
+  if (el.scanBtn) el.scanBtn.disabled = true;
 
     const start = Date.now();
     const durationMs = 5000;
@@ -1113,6 +1159,7 @@ function initCltFieldSystem() {
 
     state.simulatorUnlocked = true;
     if (el.simCoordinateBlock) el.simCoordinateBlock.hidden = false;
+    refreshTimeLimitToggleButton();
     if (el.simStatus) el.simStatus.textContent = 'Simulator unlocked. Enter teleport coordinates.';
   }
 
@@ -1178,7 +1225,9 @@ function initCltFieldSystem() {
   el.scanBtn?.addEventListener('click', runAccurateScan);
   el.simUnlock?.addEventListener('click', unlockSimulator);
   el.simTeleport?.addEventListener('click', activateSimulatorTeleport);
+  el.simTimeLimitsToggle?.addEventListener('click', toggleSimulatorTimeLimits);
 
+  refreshTimeLimitToggleButton();
   if (el.scanBtn) el.scanBtn.disabled = true;
   renderHistory();
   renderContributionTables(null, 0, 0);
