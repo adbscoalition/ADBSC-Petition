@@ -225,6 +225,8 @@ function initCltFieldSystem() {
     lastBase: null,
     cltDrift: 0,
     tungstenDrift: 0,
+    cltSourceMargins: {},
+    tungstenSourceMargins: {},
     history: [],
     simulationActive: false,
     customFields: [],
@@ -684,6 +686,17 @@ function initCltFieldSystem() {
     const tungstenAmbient = 0.000001;
     const tungstenBase = tungstenAmbient + tungstenRegular + tungstenSecret;
 
+    const tungstenBySource = {};
+    const secretFactor = secretFieldTotal > 0 ? (tungstenSecret / secretFieldTotal) : 0;
+    evaluations.forEach((source) => {
+      const key = getSourceKey(source);
+      if (source.category === 'Secret') {
+        tungstenBySource[key] = Math.max(0, source.strength * secretFactor);
+      } else {
+        tungstenBySource[key] = Math.max(0, (source.strength / 1000) * 0.05);
+      }
+    });
+
     const nearest = [...evaluations].sort((a, b) => a.distance - b.distance)[0];
     const nearestGeo = [...baseEvaluations]
       .filter((s) => s.category !== 'Secret')
@@ -698,6 +711,7 @@ function initCltFieldSystem() {
       tungstenRegular,
       tungstenSecret,
       tungstenAmbient,
+      tungstenBySource,
       nearest,
       nearestGeo,
       nearestUploaded
@@ -736,31 +750,32 @@ function initCltFieldSystem() {
     return dateObj.toLocaleTimeString('en-US', { hour12: true, hour: 'numeric', minute: '2-digit', second: '2-digit' });
   }
 
+  function getSourceKey(source) {
+    if (!source) return 'unknown';
+    return `${source.name || 'unknown'}|${source.category || 'Unknown'}|${source.lat ?? 'na'}|${source.lon ?? 'na'}`;
+  }
+
   function getSourceDisplayName(source, cltValue) {
     if (source.category === 'Secret' && Number(cltValue) < 100) return 'Unknown Source';
     return source.name || 'Unknown Source';
   }
 
-  function renderContributionTables(calc, liveClt, liveTungsten) {
+  function renderContributionTables(calc, liveClt, liveTungsten, liveBreakdown = null) {
     const cltBody = el.cltContributionTable?.querySelector('tbody');
     const tungstenBody = el.tungstenContributionTable?.querySelector('tbody');
     if (!cltBody || !tungstenBody) return;
 
-    if (!calc) {
+    if (!calc || !liveBreakdown) {
       cltBody.innerHTML = '<tr><td>None</td><td>0.00</td></tr>';
       tungstenBody.innerHTML = '<tr><td>None</td><td>0.000000</td></tr>';
       return;
     }
 
-    const evaluations = Array.isArray(calc.evaluations) ? calc.evaluations : [];
-    const cltScale = calc.totalField > 0 ? liveClt / calc.totalField : 0;
-    const cltRows = evaluations
-      .map((source) => ({ source, value: Math.max(0, source.strength * cltScale) }))
+    const cltRows = (liveBreakdown.cltBySource || [])
       .filter((row) => row.value > 0.00001)
       .sort((a, b) => b.value - a.value);
 
-    const sourceKey = (source) => `${source.name}|${source.lat}|${source.lon}|${source.category}`;
-    const liveCltByKey = new Map(cltRows.map((row) => [sourceKey(row.source), row.value]));
+    const cltByKey = new Map(cltRows.map((row) => [getSourceKey(row.source), row.value]));
 
     if (!cltRows.length) {
       cltBody.innerHTML = '<tr><td>None</td><td>0.00</td></tr>';
@@ -771,39 +786,18 @@ function initCltFieldSystem() {
       }).join('');
     }
 
-    const liveTungstenScale = calc.tungstenBase > 0 ? liveTungsten / calc.tungstenBase : 0;
-    const liveRegular = Math.max(0, (calc.tungstenRegular || 0) * liveTungstenScale);
-    const liveSecret = Math.max(0, (calc.tungstenSecret || 0) * liveTungstenScale);
-    const liveAmbient = Math.max(0, (calc.tungstenAmbient || 0) * liveTungstenScale);
-
-    const regularStrengthSum = evaluations.filter((s) => s.category !== 'Secret').reduce((sum, s) => sum + Math.max(0, s.strength), 0);
-    const secretStrengthSum = evaluations.filter((s) => s.category === 'Secret').reduce((sum, s) => sum + Math.max(0, s.strength), 0);
-
-    const tungstenRows = [];
-    evaluations.forEach((source) => {
-      const strength = Math.max(0, source.strength);
-      let value = 0;
-      if (source.category === 'Secret') {
-        value = secretStrengthSum > 0 ? liveSecret * (strength / secretStrengthSum) : 0;
-      } else {
-        value = regularStrengthSum > 0 ? liveRegular * (strength / regularStrengthSum) : 0;
-      }
-      if (value > 0.0000000001) tungstenRows.push({ source, value });
-    });
-
-    if (liveAmbient > 0) {
-      tungstenRows.push({ source: { name: 'Ambient Baseline', category: 'Regular', lat: 0, lon: 0 }, value: liveAmbient });
-    }
-
-    tungstenRows.sort((a, b) => b.value - a.value);
+    const tungstenRows = (liveBreakdown.tungstenBySource || [])
+      .filter((row) => row.value > 0.0000000001)
+      .sort((a, b) => b.value - a.value);
 
     if (!tungstenRows.length) {
       tungstenBody.innerHTML = '<tr><td>None</td><td>0.000000</td></tr>';
     } else {
       tungstenBody.innerHTML = tungstenRows.map((row) => {
-        const name = row.source.name === 'Ambient Baseline'
-          ? row.source.name
-          : getSourceDisplayName(row.source, liveCltByKey.get(sourceKey(row.source)) || 0);
+        if (row.source?.name === 'Ambient Baseline') {
+          return `<tr><td>Ambient Baseline</td><td>${row.value.toFixed(6)}</td></tr>`;
+        }
+        const name = getSourceDisplayName(row.source, cltByKey.get(getSourceKey(row.source)) || 0);
         return `<tr><td>${name}</td><td>${row.value.toFixed(6)}</td></tr>`;
       }).join('');
     }
@@ -829,13 +823,41 @@ function initCltFieldSystem() {
   }
 
   function renderLiveTelemetry(lat, lon, accuracy, calc) {
-    state.cltDrift = smoothDrift(state.cltDrift, 0.05);
-    state.tungstenDrift = smoothDrift(state.tungstenDrift, 0.20);
+    const cltBySource = [];
+    const tungstenBySource = [];
 
-    const liveClt = Math.max(0, calc.totalField * (1 + state.cltDrift));
-    const liveTungsten = Math.max(0, calc.tungstenBase * (1 + state.tungstenDrift));
+    (calc.evaluations || []).forEach((source) => {
+      const key = getSourceKey(source);
+      const cltMargin = smoothDrift(state.cltSourceMargins[key] || 0, 0.08);
+      const tungstenMargin = smoothDrift(state.tungstenSourceMargins[key] || 0, 0.2);
+      state.cltSourceMargins[key] = cltMargin;
+      state.tungstenSourceMargins[key] = tungstenMargin;
 
-    state.lastBase = { lat, lon, accuracy, calc, liveClt, liveTungsten, timestamp: Date.now() };
+      cltBySource.push({
+        source,
+        value: Math.max(0, Number(source.strength || 0) * (1 + cltMargin))
+      });
+
+      const tungstenBase = Number(calc.tungstenBySource?.[key] || 0);
+      tungstenBySource.push({
+        source,
+        value: Math.max(0, tungstenBase * (1 + tungstenMargin))
+      });
+    });
+
+    const ambientKey = '__ambient_baseline__';
+    const ambientMargin = smoothDrift(state.tungstenSourceMargins[ambientKey] || 0, 0.2);
+    state.tungstenSourceMargins[ambientKey] = ambientMargin;
+    tungstenBySource.push({
+      source: { name: 'Ambient Baseline', category: 'Regular', lat: 0, lon: 0 },
+      value: Math.max(0, Number(calc.tungstenAmbient || 0) * (1 + ambientMargin))
+    });
+
+    const liveClt = cltBySource.reduce((sum, row) => sum + row.value, 0);
+    const liveTungsten = tungstenBySource.reduce((sum, row) => sum + row.value, 0);
+    const liveBreakdown = { cltBySource, tungstenBySource };
+
+    state.lastBase = { lat, lon, accuracy, calc, liveClt, liveTungsten, liveBreakdown, timestamp: Date.now() };
 
     if (el.totalField) el.totalField.textContent = liveClt.toLocaleString(undefined, { maximumFractionDigits: 2 });
     if (el.tungsten) el.tungsten.textContent = `${liveTungsten.toFixed(5)} mg/m³`;
@@ -873,7 +895,7 @@ function initCltFieldSystem() {
     });
     state.history = state.history.slice(0, 50);
     renderHistory();
-    renderContributionTables(calc, liveClt, liveTungsten);
+    renderContributionTables(calc, liveClt, liveTungsten, liveBreakdown);
 
     if (el.scanBtn) el.scanBtn.disabled = false;
   }
@@ -1104,7 +1126,7 @@ function initCltFieldSystem() {
       if (el.geoDistance) el.geoDistance.textContent = calc.nearestGeo ? formatDistancePrimary(calc.nearestGeo.distance) : formatDistancePrimary(NaN);
       if (el.uploadedDistance) el.uploadedDistance.textContent = calc.nearestUploaded ? formatDistancePrimary(calc.nearestUploaded.distance) : formatDistancePrimary(NaN);
       renderHistory();
-      renderContributionTables(calc, state.lastBase.liveClt, state.lastBase.liveTungsten);
+      renderContributionTables(calc, state.lastBase.liveClt, state.lastBase.liveTungsten, state.lastBase.liveBreakdown);
     }
   });
 
