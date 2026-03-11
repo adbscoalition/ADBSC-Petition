@@ -548,8 +548,7 @@ function initCltFieldSystem() {
   }
 
   function applySecretCltDamping(rawStrength) {
-    if (rawStrength <= 1000) return rawStrength;
-    return 1000 + Math.pow(rawStrength - 1000, 0.62) * 8;
+    return Math.max(0, Number(rawStrength) || 0);
   }
 
   function initFieldUploader() {
