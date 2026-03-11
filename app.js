@@ -192,13 +192,13 @@ function initCltFieldSystem() {
 
   const coordinateDefinitions = [
     { name: 'Charlotte, NC', lat: 35.22867647481079, lon: -80.84490976473366 },
-    { name: '????', lat: 49.2729341959022, lon: -123.06941193669999 },
+    { name: 'THE GODLY RESONANCE', lat: 49.27296428756112, lon: -123.06937964843168 },
     { name: 'Charlotte, MI', lat: 42.56318196348821, lon: -84.83584647437215 },
     { name: 'Haida Gwaii Islands', lat: 53.255510249854304, lon: -132.08947116604432 },
     { name: 'Charlotte Amalie, USVI', lat: 18.34185490966226, lon: -64.9316281681369 },
     { name: 'Port Charlotte, FL', lat: 27.010523765938274, lon: -82.14259591632731 },
     { name: 'Charlottetown, PEI', lat: 46.23722371252871, lon: -63.12970137942366 },
-    { name: 'THE GODLY CHARLOTTE', lat: 49.27295878743672, lon: -123.06939862529713 },
+    { name: 'CHARLOTTE CHARLOTTE CHARLOTTE', lat: 49.27296428756112, lon: -123.06937964843168 },
     { name: 'Charlottesville, VA', lat: 38.0292848205594, lon: -78.47616344837674 },
     { name: 'Queen Charlotte Burial Place', lat: 51.4836838439432, lon: -0.60668429494321 },
     { name: 'Geolocation Denied Fallback', lat: 84.99999991933562, lon: -110.97606616281583 }
@@ -206,7 +206,7 @@ function initCltFieldSystem() {
 
   const magneticSources = [
     { name: 'Charlotte, NC', category: 'Regular', lat: 35.22867647481079, lon: -80.84490976473366, bands: [[0, 10, 1000, 1000], [10, 100, 1000, 200], [100, 200, 200, 50], [200, 400, 50, 10], [400, 1000, 10, 0]] },
-    { name: '????', category: 'Secret', lat: 49.2729341959022, lon: -123.06941193669999, bands: [[0, 0.01, 15000, 15000], [0.01, 0.1, 15000, 500], [0.1, 1, 500, 20], [1, 5, 20, 0]] },
+    { name: 'THE GODLY RESONANCE', category: 'Secret', lat: 49.27296428756112, lon: -123.06937964843168, bands: [[0, 0.01, 15000, 15000], [0.01, 0.05, 15000, 2000], [0.05, 0.25, 2000, 400], [0.25, 0.5, 400, 100], [0.5, 1.5, 100, 2], [1.5, 10, 2, 0]], revealThreshold: 15000, hiddenName: '????' },
     { name: 'Charlotte, MI', category: 'Regular', lat: 42.56318196348821, lon: -84.83584647437215, bands: [[0, 2, 575, 575], [2, 10, 575, 200], [10, 40, 200, 30], [40, 120, 30, 0]] },
     { name: 'Haida Gwaii Islands', category: 'Regular', lat: 53.255510249854304, lon: -132.08947116604432, bands: [[0, 200, 230, 230], [200, 350, 230, 20], [350, 450, 20, 0]] },
     { name: 'Charlotte Amalie, USVI', category: 'Regular', lat: 18.34185490966226, lon: -64.9316281681369, bands: [[0, 1, 300, 300], [1, 10, 300, 100], [10, 25, 100, 20], [25, 40, 20, 0]] },
@@ -214,7 +214,7 @@ function initCltFieldSystem() {
     { name: 'Charlottetown, PEI', category: 'Regular', lat: 46.23722371252871, lon: -63.12970137942366, bands: [[0, 2, 350, 350], [2, 8, 350, 100], [8, 24, 100, 25], [24, 128, 25, 0]] },
     { name: 'Charlottesville, VA', category: 'Regular', lat: 38.0292848205594, lon: -78.47616344837674, bands: [[0, 3, 450, 450], [3, 30, 450, 200], [30, 120, 200, 20], [120, 360, 20, 0]] },
     { name: 'Queen Charlotte Burial Place', category: 'Secret', lat: 51.4836838439432, lon: -0.60668429494321, bands: [[0, 0.1, 14000, 14000], [0.1, 1, 14000, 3000], [1, 3, 3000, 900], [3, 14, 900, 200], [14, 50, 200, 40], [50, 250, 40, 0]] },
-    { name: 'THE GODLY CHARLOTTE', category: 'Secret', lat: 49.27295878743672, lon: -123.06939862529713, bands: [[0, 0.001, 300000, 300000], [0.001, 0.01, 300000, 1], [0.01, 0.015, 1, 0]] }
+    { name: 'CHARLOTTE CHARLOTTE CHARLOTTE', category: 'Secret', lat: 49.27296428756112, lon: -123.06937964843168, bands: [[0, 0.001, 350000, 300000], [0.001, 0.012, 300000, 1000], [0.012, 0.085, 1000, 0]], revealThreshold: 65000, hiddenName: '???????????', startClock: '10:00', endClock: '19:00' },
   ];
 
   const state = {
@@ -225,13 +225,19 @@ function initCltFieldSystem() {
     lastBase: null,
     cltDrift: 0,
     tungstenDrift: 0,
+    cltSourceMargins: {},
+    tungstenSourceMargins: {},
     history: [],
     simulationActive: false,
     customFields: [],
     editingFieldId: null,
     autoFieldCounter: 1,
     simulatorUnlocked: false,
-    unitSystem: 'metric'
+    unitSystem: 'metric',
+    sensorBroken: false,
+    overloadStartMs: null,
+    repairInProgress: false,
+    repairCooldownUntilMs: 0
   };
 
   const el = {
@@ -257,6 +263,9 @@ function initCltFieldSystem() {
     scanState: document.getElementById('scanState'),
     scanBar: document.getElementById('scanProgressBar'),
     scanSheet: document.getElementById('scanSheetList'),
+    gpsAccuracy: document.getElementById('cltGpsAccuracy'),
+    cltContributionTable: document.getElementById('cltContributionTable'),
+    tungstenContributionTable: document.getElementById('tungstenContributionTable'),
     simPassword: document.getElementById('simPassword'),
     simUnlock: document.getElementById('simUnlock'),
     simCoordinateBlock: document.getElementById('simCoordinateBlock'),
@@ -277,7 +286,10 @@ function initCltFieldSystem() {
     fieldReset: document.getElementById('fieldReset'),
     fieldUploaderStatus: document.getElementById('fieldUploaderStatus'),
     uploadedFieldList: document.getElementById('uploadedFieldList'),
-    fieldDayToggles: Array.from(document.querySelectorAll('.field-day-toggle'))
+    fieldDayToggles: Array.from(document.querySelectorAll('.field-day-toggle')),
+    sensorFailureOverlay: document.getElementById('sensorFailureOverlay'),
+    repairAttemptBtn: document.getElementById('sensorRepairAttempt'),
+    repairStatus: document.getElementById('sensorRepairStatus')
   };
 
   const fallbackCoord = coordinateDefinitions.find((d) => d.name === 'Geolocation Denied Fallback');
@@ -471,11 +483,18 @@ function initCltFieldSystem() {
       const coordLabel = (Number.isFinite(fieldLat) && Number.isFinite(fieldLon))
         ? `${fieldLat.toFixed(6)}, ${fieldLon.toFixed(6)}`
         : '—';
+      const hasTimeWindow = !!field.startClock || !!field.endClock;
+      const timeLabel = hasTimeWindow
+        ? `${field.startClock || '00:00'} → ${field.endClock || '24:00'}`
+        : 'Always active';
 
-      return `<li class="uploaded-field-card">` +
-        `<div class="uploaded-field-head"><strong>${field.name}</strong></div>` +
+      const isEditing = state.editingFieldId === field.id;
+
+      return `<li class="uploaded-field-card${isEditing ? ' is-editing' : ''}">` +
+        `<div class="uploaded-field-head"><strong>${field.name}</strong>${isEditing ? '<span class="field-editing-badge">Editing</span>' : ''}</div>` +
         `<p class="uploaded-field-meta">${field.intensity} CLT · ${field.maxRangeM}m range</p>` +
         `<p class="uploaded-field-meta">Days: ${daysLabel}</p>` +
+        `<p class="uploaded-field-meta">Time: ${timeLabel}</p>` +
         `<p class="uploaded-field-meta">Coordinates: ${coordLabel}</p>` +
         `<div class="uploaded-field-actions">` +
         `<button class="field-edit" data-field-id="${field.id}" type="button">Edit</button>` +
@@ -499,7 +518,9 @@ function initCltFieldSystem() {
         if (el.fieldStartTime) el.fieldStartTime.value = field.startClock || '';
         if (el.fieldEndTime) el.fieldEndTime.value = field.endClock || '';
         applySelectedDays(field.daysOfWeek);
-        el.fieldUploaderStatus.textContent = `Editing ${field.name}`;
+        if (el.fieldSave) el.fieldSave.textContent = 'Update Uploaded Field';
+        renderUploadedFields();
+        el.fieldUploaderStatus.textContent = `Editing uploaded field: ${field.name}`;
       });
     });
 
@@ -525,7 +546,9 @@ function initCltFieldSystem() {
     if (el.fieldRange) el.fieldRange.value = '25';
     if (el.fieldStartTime) el.fieldStartTime.value = '';
     if (el.fieldEndTime) el.fieldEndTime.value = '';
+    if (el.fieldSave) el.fieldSave.textContent = 'Save Field';
     applySelectedDays([]);
+    renderUploadedFields();
   }
 
   function applySecretCltDamping(rawStrength) {
@@ -634,6 +657,9 @@ function initCltFieldSystem() {
     const baseEvaluations = magneticSources.map((source) => {
       const distance = haversineKm(lat, lon, source.lat, source.lon);
       let strength = interpolatedStrength(distance, source.bands);
+      if (source.startClock || source.endClock || (Array.isArray(source.daysOfWeek) && source.daysOfWeek.length)) {
+        strength *= customFieldTimeFactor(source, nowMs);
+      }
       if (source.category === 'Secret') strength = applySecretCltDamping(strength);
       return { ...source, distance, strength, inField: strength > 0 };
     });
@@ -667,14 +693,39 @@ function initCltFieldSystem() {
       .reduce((sum, source) => sum + source.strength, 0);
     const tungstenRegular = (regularFieldTotal / 1000) * 0.05;
     const tungstenSecret = 0.95 * (1 - Math.exp(-Math.max(secretFieldTotal, 0) / 6000));
-    const tungstenBase = 0.000001 + tungstenRegular + tungstenSecret;
+    const tungstenAmbient = 0.000001;
+    const tungstenBase = tungstenAmbient + tungstenRegular + tungstenSecret;
+
+    const tungstenBySource = {};
+    const secretFactor = secretFieldTotal > 0 ? (tungstenSecret / secretFieldTotal) : 0;
+    evaluations.forEach((source) => {
+      const key = getSourceKey(source);
+      if (source.category === 'Secret') {
+        tungstenBySource[key] = Math.max(0, source.strength * secretFactor);
+      } else {
+        tungstenBySource[key] = Math.max(0, (source.strength / 1000) * 0.05);
+      }
+    });
 
     const nearest = [...evaluations].sort((a, b) => a.distance - b.distance)[0];
     const nearestGeo = [...baseEvaluations]
       .filter((s) => s.category !== 'Secret')
       .sort((a, b) => a.distance - b.distance)[0];
-    const nearestUploaded = [...customEvaluations].sort((a, b) => a.distance - b.distance)[0];
-    return { evaluations, totalField, tungstenBase, nearest, nearestGeo, nearestUploaded };
+    const nearestUploaded = [...customEvaluations]
+      .filter((s) => s.inField)
+      .sort((a, b) => a.distance - b.distance)[0];
+    return {
+      evaluations,
+      totalField,
+      tungstenBase,
+      tungstenRegular,
+      tungstenSecret,
+      tungstenAmbient,
+      tungstenBySource,
+      nearest,
+      nearestGeo,
+      nearestUploaded
+    };
   }
 
   function getDisplayNearestSource(calc, options = {}) {
@@ -683,7 +734,7 @@ function initCltFieldSystem() {
     const ranked = [...calc.evaluations].sort((a, b) => a.distance - b.distance);
 
     return ranked.find((source) => {
-      if (source.uploaded) return true;
+      if (source.uploaded) return source.inField;
       if (source.category !== 'Secret') return true;
       if (forScanSheet && Number(source.strength) >= 100) return true;
       return false;
@@ -709,6 +760,130 @@ function initCltFieldSystem() {
     return dateObj.toLocaleTimeString('en-US', { hour12: true, hour: 'numeric', minute: '2-digit', second: '2-digit' });
   }
 
+  function getTelemetryErrorChancePercent(cltValue) {
+    const clt = Number(cltValue);
+    if (!Number.isFinite(clt) || clt < 50000) return 0;
+    const steps = Math.floor((clt - 50000) / 5000) + 1;
+    return Math.max(0, Math.min(100, steps * 5));
+  }
+
+  function shouldOutputTelemetryError(cltValue) {
+    return Math.random() * 100 < getTelemetryErrorChancePercent(cltValue);
+  }
+
+  function getSourceKey(source) {
+    if (!source) return 'unknown';
+    return `${source.name || 'unknown'}|${source.category || 'Unknown'}|${source.lat ?? 'na'}|${source.lon ?? 'na'}`;
+  }
+
+  function getSourceDisplayName(source, cltValue) {
+    const value = Number(cltValue) || 0;
+    if (source?.hiddenName && value < Number(source.revealThreshold || 0)) return source.hiddenName;
+    if (source.category === 'Secret' && value < 100) return 'Unknown Source';
+    return source.name || 'Unknown Source';
+  }
+
+  function renderContributionTables(calc, liveClt, liveTungsten, liveBreakdown = null) {
+    const cltBody = el.cltContributionTable?.querySelector('tbody');
+    const tungstenBody = el.tungstenContributionTable?.querySelector('tbody');
+    if (!cltBody || !tungstenBody) return;
+
+    if (!calc || !liveBreakdown) {
+      cltBody.innerHTML = '<tr><td>None</td><td>0.00</td></tr>';
+      tungstenBody.innerHTML = '<tr><td>None</td><td>0.000000</td></tr>';
+      return;
+    }
+
+    const cltRows = (liveBreakdown.cltBySource || [])
+      .filter((row) => row.value > 0.00001)
+      .sort((a, b) => b.value - a.value);
+
+    const cltByKey = new Map(cltRows.map((row) => [getSourceKey(row.source), row.value]));
+
+    if (!cltRows.length) {
+      cltBody.innerHTML = '<tr><td>None</td><td>0.00</td></tr>';
+    } else {
+      cltBody.innerHTML = cltRows.map((row) => {
+        const name = getSourceDisplayName(row.source, row.value);
+        return `<tr><td>${name}</td><td>${row.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td></tr>`;
+      }).join('');
+    }
+
+    const tungstenRows = (liveBreakdown.tungstenBySource || [])
+      .filter((row) => row.value > 0.0000000001)
+      .sort((a, b) => b.value - a.value);
+
+    if (!tungstenRows.length) {
+      tungstenBody.innerHTML = '<tr><td>None</td><td>0.000000</td></tr>';
+    } else {
+      tungstenBody.innerHTML = tungstenRows.map((row) => {
+        if (row.source?.name === 'Ambient Baseline') {
+          return `<tr><td>Ambient Baseline</td><td>${row.value.toFixed(6)}</td></tr>`;
+        }
+        const name = getSourceDisplayName(row.source, cltByKey.get(getSourceKey(row.source)) || 0);
+        return `<tr><td>${name}</td><td>${row.value.toFixed(6)}</td></tr>`;
+      }).join('');
+    }
+  }
+
+  function showSensorFailureOverlay(show) {
+    if (!el.sensorFailureOverlay) return;
+    el.sensorFailureOverlay.hidden = !show;
+  }
+
+  function breakSensor() {
+    if (state.sensorBroken) return;
+    state.sensorBroken = true;
+    state.overloadStartMs = null;
+    setStatus('Uh Oh! Looks like the CLT Field sensor broke.', 'SENSOR FAILURE');
+    if (el.repairStatus) el.repairStatus.textContent = 'Sensor offline. Move farther away, then attempt repair.';
+    showSensorFailureOverlay(true);
+    stopLiveTracking();
+  }
+
+  async function attemptSensorRepair() {
+    if (state.repairInProgress || !state.sensorBroken) return;
+    state.repairInProgress = true;
+    if (el.repairAttemptBtn) {
+      el.repairAttemptBtn.disabled = true;
+      el.repairAttemptBtn.textContent = 'Attempting Repair...';
+    }
+    if (el.repairStatus) el.repairStatus.textContent = 'Repair attempt in progress...';
+
+    await new Promise((resolve) => window.setTimeout(resolve, 3000));
+
+    let currentClt = Number(state.lastBase?.liveClt) || 0;
+    const coords = await resolveCurrentCoords();
+    if (coords) {
+      const calc = computeField(coords.lat, coords.lon);
+      currentClt = Number(calc.totalField) || currentClt;
+    }
+
+    const repairChance = Math.max(0, Math.min(100, 100 - (currentClt * 0.001)));
+    if (el.repairStatus) {
+      el.repairStatus.textContent = `Repair chance: ${repairChance.toFixed(1)}% at ${currentClt.toLocaleString(undefined, { maximumFractionDigits: 2 })} CLT`;
+    }
+    const ok = Math.random() * 100 < repairChance;
+
+    if (ok) {
+      state.sensorBroken = false;
+      state.overloadStartMs = null;
+      state.repairCooldownUntilMs = Date.now() + 5000;
+      showSensorFailureOverlay(false);
+      setStatus('Sensor repaired. Restarting live tracking...', 'LOCATION ACCESS REQUIRED');
+      startLiveTracking();
+    } else {
+      setStatus('Repair failed. Move to a less powerful spot and try again.', 'SENSOR FAILURE');
+      showSensorFailureOverlay(true);
+    }
+
+    state.repairInProgress = false;
+    if (el.repairAttemptBtn) {
+      el.repairAttemptBtn.disabled = false;
+      el.repairAttemptBtn.textContent = 'Attempt Repair';
+    }
+  }
+
   function renderHistory() {
     if (!el.contributors) return;
     if (!state.history.length) {
@@ -722,35 +897,84 @@ function initCltFieldSystem() {
         : '—';
       const idvlLabel = item.nearestIdvlName
         ? `${item.nearestIdvlName} (${formatDistanceShort(item.nearestIdvlDistanceKm)})`
-        : 'None';
+        : 'none';
       return `${item.time} | ${item.clt.toLocaleString(undefined, { maximumFractionDigits: 2 })} CLT | ` +
         `Tungsten ${item.tungsten.toFixed(5)} mg/m³ | Nearest GEO ${geoLabel} | Nearest IDVL ${idvlLabel}`;
     }).join('\n');
   }
 
   function renderLiveTelemetry(lat, lon, accuracy, calc) {
-    state.cltDrift = smoothDrift(state.cltDrift, 0.05);
-    state.tungstenDrift = smoothDrift(state.tungstenDrift, 0.20);
+    const cltBySource = [];
+    const tungstenBySource = [];
 
-    const liveClt = Math.max(0, calc.totalField * (1 + state.cltDrift));
-    const liveTungsten = Math.max(0, calc.tungstenBase * (1 + state.tungstenDrift));
+    (calc.evaluations || []).forEach((source) => {
+      const key = getSourceKey(source);
+      const cltMargin = smoothDrift(state.cltSourceMargins[key] || 0, 0.08);
+      const tungstenMargin = smoothDrift(state.tungstenSourceMargins[key] || 0, 0.2);
+      state.cltSourceMargins[key] = cltMargin;
+      state.tungstenSourceMargins[key] = tungstenMargin;
 
-    state.lastBase = { lat, lon, accuracy, calc, liveClt, liveTungsten, timestamp: Date.now() };
+      cltBySource.push({
+        source,
+        value: Math.max(0, Number(source.strength || 0) * (1 + cltMargin))
+      });
 
-    if (el.totalField) el.totalField.textContent = liveClt.toLocaleString(undefined, { maximumFractionDigits: 2 });
-    if (el.tungsten) el.tungsten.textContent = `${liveTungsten.toFixed(5)} mg/m³`;
+      const tungstenBase = Number(calc.tungstenBySource?.[key] || 0);
+      tungstenBySource.push({
+        source,
+        value: Math.max(0, tungstenBase * (1 + tungstenMargin))
+      });
+    });
+
+    const ambientKey = '__ambient_baseline__';
+    const ambientMargin = smoothDrift(state.tungstenSourceMargins[ambientKey] || 0, 0.2);
+    state.tungstenSourceMargins[ambientKey] = ambientMargin;
+    tungstenBySource.push({
+      source: { name: 'Ambient Baseline', category: 'Regular', lat: 0, lon: 0 },
+      value: Math.max(0, Number(calc.tungstenAmbient || 0) * (1 + ambientMargin))
+    });
+
+    const liveClt = cltBySource.reduce((sum, row) => sum + row.value, 0);
+    const liveTungsten = tungstenBySource.reduce((sum, row) => sum + row.value, 0);
+    const liveBreakdown = { cltBySource, tungstenBySource };
+
+    state.overloadStartMs = null;
+
+    state.lastBase = { lat, lon, accuracy, calc, liveClt, liveTungsten, liveBreakdown, timestamp: Date.now() };
+
+    const cltError = shouldOutputTelemetryError(liveClt);
+    const tungstenError = shouldOutputTelemetryError(liveClt);
+    const geoDistanceError = shouldOutputTelemetryError(liveClt);
+    const uploadedDistanceError = shouldOutputTelemetryError(liveClt);
+    const gpsError = shouldOutputTelemetryError(liveClt);
+
+    if (el.totalField) el.totalField.textContent = cltError
+      ? 'error'
+      : liveClt.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    if (el.tungsten) el.tungsten.textContent = tungstenError
+      ? 'error'
+      : `${liveTungsten.toFixed(5)} mg/m³`;
     if (el.geoDistance) {
-      el.geoDistance.textContent = calc.nearestGeo ? formatDistancePrimary(calc.nearestGeo.distance) : formatDistancePrimary(NaN);
+      el.geoDistance.textContent = geoDistanceError
+        ? 'error'
+        : (calc.nearestGeo ? formatDistancePrimary(calc.nearestGeo.distance) : formatDistancePrimary(NaN));
     }
     if (el.geoName) {
       el.geoName.textContent = calc.nearestGeo ? calc.nearestGeo.name : '—';
     }
     if (el.uploadedDistance) {
-      el.uploadedDistance.textContent = calc.nearestUploaded ? formatDistancePrimary(calc.nearestUploaded.distance) : formatDistancePrimary(NaN);
+      el.uploadedDistance.textContent = uploadedDistanceError
+        ? 'error'
+        : (calc.nearestUploaded ? formatDistancePrimary(calc.nearestUploaded.distance) : formatDistancePrimary(NaN));
     }
     if (el.nearestSource) {
-      const nearestDisplay = getDisplayNearestSource(calc, { forScanSheet: false });
-      el.nearestSource.textContent = nearestDisplay ? nearestDisplay.name : 'None';
+      el.nearestSource.textContent = calc.nearestUploaded ? calc.nearestUploaded.name : 'none';
+    }
+    if (el.gpsAccuracy) {
+      const meters = Number(accuracy);
+      el.gpsAccuracy.textContent = gpsError
+        ? 'error'
+        : (Number.isFinite(meters) ? `${meters.toFixed(1)} m` : '—');
     }
 
     const now = new Date();
@@ -768,19 +992,21 @@ function initCltFieldSystem() {
     });
     state.history = state.history.slice(0, 50);
     renderHistory();
+    renderContributionTables(calc, liveClt, liveTungsten, liveBreakdown);
 
     if (el.scanBtn) el.scanBtn.disabled = false;
   }
 
   function renderScanSheet(result) {
     if (!el.scanSheet) return;
+    const withError = (value) => (shouldOutputTelemetryError(result.clt) ? 'error' : value);
     el.scanSheet.innerHTML = [
-      `CLT Field: ${result.clt.toLocaleString(undefined, { maximumFractionDigits: 4 })}`,
-      `Tungsten: ${result.tungsten.toFixed(6)} mg/m³`,
-      `Coordinates: ${result.lat.toFixed(8)}, ${result.lon.toFixed(8)}`,
+      `CLT Field: ${withError(result.clt.toLocaleString(undefined, { maximumFractionDigits: 4 }))}`,
+      `Tungsten: ${withError(`${result.tungsten.toFixed(6)} mg/m³`)}`,
+      `Coordinates: ${withError(`${result.lat.toFixed(8)}, ${result.lon.toFixed(8)}`)}`,
       `Timestamp: ${new Date(result.timestamp).toLocaleString()}`,
-      `Nearest Source: ${result.sourceName}`,
-      `Distance to Source: ${formatDistanceShort(result.distanceKm)}`
+      `Nearest Source: ${withError(result.sourceName)}`,
+      `Distance to Source: ${withError(formatDistanceShort(result.distanceKm))}`
     ].map((line) => `<li>${line}</li>`).join('');
   }
 
@@ -817,7 +1043,7 @@ function initCltFieldSystem() {
           lat: base.lat,
           lon: base.lon,
           timestamp: Date.now(),
-          sourceName: nearestScanSource ? nearestScanSource.name : '—',
+          sourceName: nearestScanSource ? nearestScanSource.name : 'none',
           distanceKm: nearestScanSource ? nearestScanSource.distance : NaN
         });
 
@@ -998,6 +1224,7 @@ function initCltFieldSystem() {
       if (el.geoDistance) el.geoDistance.textContent = calc.nearestGeo ? formatDistancePrimary(calc.nearestGeo.distance) : formatDistancePrimary(NaN);
       if (el.uploadedDistance) el.uploadedDistance.textContent = calc.nearestUploaded ? formatDistancePrimary(calc.nearestUploaded.distance) : formatDistancePrimary(NaN);
       renderHistory();
+      renderContributionTables(calc, state.lastBase.liveClt, state.lastBase.liveTungsten, state.lastBase.liveBreakdown);
     }
   });
 
@@ -1012,6 +1239,8 @@ function initCltFieldSystem() {
     setTimeout(() => { if (el.copyLogs) el.copyLogs.textContent = 'Copy Logs'; }, 1500);
   });
 
+  el.repairAttemptBtn?.addEventListener('click', attemptSensorRepair);
+
   initFallbackTools();
   initFieldUploader();
   el.scanBtn?.addEventListener('click', runAccurateScan);
@@ -1020,6 +1249,7 @@ function initCltFieldSystem() {
 
   if (el.scanBtn) el.scanBtn.disabled = true;
   renderHistory();
+  renderContributionTables(null, 0, 0);
 
   // Primary behavior: request live geolocation immediately on load.
   startLiveTracking();
