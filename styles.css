@@ -1658,3 +1658,30 @@ pre {
 #simCoordinateBlock {
   margin-top: 0.7rem;
 }
+
+
+.sensor-failure-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 2, 20, 0.92);
+  display: grid;
+  place-items: center;
+  z-index: 60;
+  padding: 1rem;
+}
+
+.sensor-failure-card {
+  max-width: 760px;
+  width: 100%;
+  border: 1px solid rgba(255, 79, 163, 0.6);
+  border-radius: 16px;
+  padding: 1rem;
+  background: rgba(42, 12, 68, 0.94);
+}
+
+.sensor-failure-card h2 {
+  font-family: "Public Sans", sans-serif;
+  color: var(--text);
+  font-size: clamp(1.1rem, 2.4vw, 1.4rem);
+  margin-bottom: 0.8rem;
+}

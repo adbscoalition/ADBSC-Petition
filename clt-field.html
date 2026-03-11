@@ -93,6 +93,17 @@
     </nav>
   </header>
 
+  
+  <div id="sensorFailureOverlay" class="sensor-failure-overlay" hidden>
+    <div class="sensor-failure-card">
+      <h2>Uh Oh! Looks like the CLT Field sensor broke. Try to repair it in a less powerful spot.</h2>
+      <div class="clt-actions">
+        <a class="btn secondary" href="index.html">Return Home</a>
+        <button class="btn primary" id="sensorRepairAttempt" type="button">Attempt Repair</button>
+      </div>
+    </div>
+  </div>
+
   <main id="main" class="page-shell">
     <section class="panel clt-system-hero" aria-labelledby="cltPageTitle">
       <p class="eyebrow">Live Instrument Console</p>

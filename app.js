@@ -192,13 +192,13 @@ function initCltFieldSystem() {
 
   const coordinateDefinitions = [
     { name: 'Charlotte, NC', lat: 35.22867647481079, lon: -80.84490976473366 },
-    { name: '????', lat: 49.2729341959022, lon: -123.06941193669999 },
+    { name: 'THE GODLY RESONANCE', lat: 49.27296428756112, lon: -123.06937964843168 },
     { name: 'Charlotte, MI', lat: 42.56318196348821, lon: -84.83584647437215 },
     { name: 'Haida Gwaii Islands', lat: 53.255510249854304, lon: -132.08947116604432 },
     { name: 'Charlotte Amalie, USVI', lat: 18.34185490966226, lon: -64.9316281681369 },
     { name: 'Port Charlotte, FL', lat: 27.010523765938274, lon: -82.14259591632731 },
     { name: 'Charlottetown, PEI', lat: 46.23722371252871, lon: -63.12970137942366 },
-    { name: 'THE GODLY CHARLOTTE', lat: 49.27295878743672, lon: -123.06939862529713 },
+    { name: 'CHARLOTTE CHARLOTTE CHARLOTTE', lat: 49.27296428756112, lon: -123.06937964843168 },
     { name: 'Charlottesville, VA', lat: 38.0292848205594, lon: -78.47616344837674 },
     { name: 'Queen Charlotte Burial Place', lat: 51.4836838439432, lon: -0.60668429494321 },
     { name: 'Geolocation Denied Fallback', lat: 84.99999991933562, lon: -110.97606616281583 }
@@ -206,7 +206,7 @@ function initCltFieldSystem() {
 
   const magneticSources = [
     { name: 'Charlotte, NC', category: 'Regular', lat: 35.22867647481079, lon: -80.84490976473366, bands: [[0, 10, 1000, 1000], [10, 100, 1000, 200], [100, 200, 200, 50], [200, 400, 50, 10], [400, 1000, 10, 0]] },
-    { name: '????', category: 'Secret', lat: 49.2729341959022, lon: -123.06941193669999, bands: [[0, 0.01, 15000, 15000], [0.01, 0.1, 15000, 500], [0.1, 1, 500, 20], [1, 5, 20, 0]] },
+    { name: 'THE GODLY RESONANCE', category: 'Secret', lat: 49.27296428756112, lon: -123.06937964843168, bands: [[0, 10, 15000, 15000], [10, 50, 15000, 2000], [50, 250, 2000, 400], [250, 500, 400, 100], [500, 1500, 100, 2], [1500, 10000, 2, 0]], revealThreshold: 15000, hiddenName: '????' },
     { name: 'Charlotte, MI', category: 'Regular', lat: 42.56318196348821, lon: -84.83584647437215, bands: [[0, 2, 575, 575], [2, 10, 575, 200], [10, 40, 200, 30], [40, 120, 30, 0]] },
     { name: 'Haida Gwaii Islands', category: 'Regular', lat: 53.255510249854304, lon: -132.08947116604432, bands: [[0, 200, 230, 230], [200, 350, 230, 20], [350, 450, 20, 0]] },
     { name: 'Charlotte Amalie, USVI', category: 'Regular', lat: 18.34185490966226, lon: -64.9316281681369, bands: [[0, 1, 300, 300], [1, 10, 300, 100], [10, 25, 100, 20], [25, 40, 20, 0]] },
@@ -214,7 +214,7 @@ function initCltFieldSystem() {
     { name: 'Charlottetown, PEI', category: 'Regular', lat: 46.23722371252871, lon: -63.12970137942366, bands: [[0, 2, 350, 350], [2, 8, 350, 100], [8, 24, 100, 25], [24, 128, 25, 0]] },
     { name: 'Charlottesville, VA', category: 'Regular', lat: 38.0292848205594, lon: -78.47616344837674, bands: [[0, 3, 450, 450], [3, 30, 450, 200], [30, 120, 200, 20], [120, 360, 20, 0]] },
     { name: 'Queen Charlotte Burial Place', category: 'Secret', lat: 51.4836838439432, lon: -0.60668429494321, bands: [[0, 0.1, 14000, 14000], [0.1, 1, 14000, 3000], [1, 3, 3000, 900], [3, 14, 900, 200], [14, 50, 200, 40], [50, 250, 40, 0]] },
-    { name: 'THE GODLY CHARLOTTE', category: 'Secret', lat: 49.27295878743672, lon: -123.06939862529713, bands: [[0, 0.001, 300000, 300000], [0.001, 0.01, 300000, 1], [0.01, 0.015, 1, 0]] }
+    { name: 'CHARLOTTE CHARLOTTE CHARLOTTE', category: 'Secret', lat: 49.27296428756112, lon: -123.06937964843168, bands: [[0, 1, 350000, 300000], [1, 12, 300000, 1000], [12, 85, 1000, 0]], revealThreshold: 65000, hiddenName: '???????????', startClock: '10:00', endClock: '19:00' },
   ];
 
   const state = {
@@ -233,7 +233,10 @@ function initCltFieldSystem() {
     editingFieldId: null,
     autoFieldCounter: 1,
     simulatorUnlocked: false,
-    unitSystem: 'metric'
+    unitSystem: 'metric',
+    sensorBroken: false,
+    overloadStartMs: null,
+    repairInProgress: false
   };
 
   const el = {
@@ -282,7 +285,9 @@ function initCltFieldSystem() {
     fieldReset: document.getElementById('fieldReset'),
     fieldUploaderStatus: document.getElementById('fieldUploaderStatus'),
     uploadedFieldList: document.getElementById('uploadedFieldList'),
-    fieldDayToggles: Array.from(document.querySelectorAll('.field-day-toggle'))
+    fieldDayToggles: Array.from(document.querySelectorAll('.field-day-toggle')),
+    sensorFailureOverlay: document.getElementById('sensorFailureOverlay'),
+    repairAttemptBtn: document.getElementById('sensorRepairAttempt')
   };
 
   const fallbackCoord = coordinateDefinitions.find((d) => d.name === 'Geolocation Denied Fallback');
@@ -650,6 +655,9 @@ function initCltFieldSystem() {
     const baseEvaluations = magneticSources.map((source) => {
       const distance = haversineKm(lat, lon, source.lat, source.lon);
       let strength = interpolatedStrength(distance, source.bands);
+      if (source.startClock || source.endClock || (Array.isArray(source.daysOfWeek) && source.daysOfWeek.length)) {
+        strength *= customFieldTimeFactor(source, nowMs);
+      }
       if (source.category === 'Secret') strength = applySecretCltDamping(strength);
       return { ...source, distance, strength, inField: strength > 0 };
     });
@@ -756,7 +764,9 @@ function initCltFieldSystem() {
   }
 
   function getSourceDisplayName(source, cltValue) {
-    if (source.category === 'Secret' && Number(cltValue) < 100) return 'Unknown Source';
+    const value = Number(cltValue) || 0;
+    if (source?.hiddenName && value < Number(source.revealThreshold || 0)) return source.hiddenName;
+    if (source.category === 'Secret' && value < 100) return 'Unknown Source';
     return source.name || 'Unknown Source';
   }
 
@@ -800,6 +810,57 @@ function initCltFieldSystem() {
         const name = getSourceDisplayName(row.source, cltByKey.get(getSourceKey(row.source)) || 0);
         return `<tr><td>${name}</td><td>${row.value.toFixed(6)}</td></tr>`;
       }).join('');
+    }
+  }
+
+  function showSensorFailureOverlay(show) {
+    if (!el.sensorFailureOverlay) return;
+    el.sensorFailureOverlay.hidden = !show;
+  }
+
+  function breakSensor() {
+    if (state.sensorBroken) return;
+    state.sensorBroken = true;
+    state.overloadStartMs = null;
+    setStatus('Uh Oh! Looks like the CLT Field sensor broke.', 'SENSOR FAILURE');
+    showSensorFailureOverlay(true);
+    stopLiveTracking();
+  }
+
+  async function attemptSensorRepair() {
+    if (state.repairInProgress || !state.sensorBroken) return;
+    state.repairInProgress = true;
+    if (el.repairAttemptBtn) {
+      el.repairAttemptBtn.disabled = true;
+      el.repairAttemptBtn.textContent = 'Attempting Repair...';
+    }
+
+    await new Promise((resolve) => window.setTimeout(resolve, 3000));
+
+    let currentClt = Number(state.lastBase?.liveClt) || 0;
+    const coords = await resolveCurrentCoords();
+    if (coords) {
+      const calc = computeField(coords.lat, coords.lon);
+      currentClt = Number(calc.totalField) || currentClt;
+    }
+
+    const repairChance = Math.max(0, Math.min(100, 100 - (currentClt * 0.001)));
+    const ok = Math.random() * 100 < repairChance;
+
+    if (ok) {
+      state.sensorBroken = false;
+      showSensorFailureOverlay(false);
+      setStatus('Sensor repaired. Restarting live tracking...', 'LOCATION ACCESS REQUIRED');
+      startLiveTracking();
+    } else {
+      setStatus('Repair failed. Move to a less powerful spot and try again.', 'SENSOR FAILURE');
+      showSensorFailureOverlay(true);
+    }
+
+    state.repairInProgress = false;
+    if (el.repairAttemptBtn) {
+      el.repairAttemptBtn.disabled = false;
+      el.repairAttemptBtn.textContent = 'Attempt Repair';
     }
   }
 
@@ -857,7 +918,19 @@ function initCltFieldSystem() {
     const liveTungsten = tungstenBySource.reduce((sum, row) => sum + row.value, 0);
     const liveBreakdown = { cltBySource, tungstenBySource };
 
+    const cccContribution = cltBySource.find((row) => row.source?.name === 'CHARLOTTE CHARLOTTE CHARLOTTE')?.value || 0;
+    if (cccContribution >= 200000) {
+      if (!state.overloadStartMs) state.overloadStartMs = Date.now();
+      if (Date.now() - state.overloadStartMs >= 5000) {
+        breakSensor();
+      }
+    } else {
+      state.overloadStartMs = null;
+    }
+
     state.lastBase = { lat, lon, accuracy, calc, liveClt, liveTungsten, liveBreakdown, timestamp: Date.now() };
+
+    if (state.sensorBroken) return;
 
     if (el.totalField) el.totalField.textContent = liveClt.toLocaleString(undefined, { maximumFractionDigits: 2 });
     if (el.tungsten) el.tungsten.textContent = `${liveTungsten.toFixed(5)} mg/m³`;
@@ -1140,6 +1213,8 @@ function initCltFieldSystem() {
     }
     setTimeout(() => { if (el.copyLogs) el.copyLogs.textContent = 'Copy Logs'; }, 1500);
   });
+
+  el.repairAttemptBtn?.addEventListener('click', attemptSensorRepair);
 
   initFallbackTools();
   initFieldUploader();
