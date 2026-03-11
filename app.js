@@ -206,7 +206,7 @@ function initCltFieldSystem() {
 
   const magneticSources = [
     { name: 'Charlotte, NC', category: 'Regular', lat: 35.22867647481079, lon: -80.84490976473366, bands: [[0, 10, 1000, 1000], [10, 100, 1000, 200], [100, 200, 200, 50], [200, 400, 50, 10], [400, 1000, 10, 0]] },
-    { name: 'THE GODLY RESONANCE', category: 'Secret', lat: 49.27296428756112, lon: -123.06937964843168, bands: [[0, 10, 15000, 15000], [10, 50, 15000, 2000], [50, 250, 2000, 400], [250, 500, 400, 100], [500, 1500, 100, 2], [1500, 10000, 2, 0]], revealThreshold: 15000, hiddenName: '????' },
+    { name: 'THE GODLY RESONANCE', category: 'Secret', lat: 49.27296428756112, lon: -123.06937964843168, bands: [[0, 0.01, 15000, 15000], [0.01, 0.05, 15000, 2000], [0.05, 0.25, 2000, 400], [0.25, 0.5, 400, 100], [0.5, 1.5, 100, 2], [1.5, 10, 2, 0]], revealThreshold: 15000, hiddenName: '????' },
     { name: 'Charlotte, MI', category: 'Regular', lat: 42.56318196348821, lon: -84.83584647437215, bands: [[0, 2, 575, 575], [2, 10, 575, 200], [10, 40, 200, 30], [40, 120, 30, 0]] },
     { name: 'Haida Gwaii Islands', category: 'Regular', lat: 53.255510249854304, lon: -132.08947116604432, bands: [[0, 200, 230, 230], [200, 350, 230, 20], [350, 450, 20, 0]] },
     { name: 'Charlotte Amalie, USVI', category: 'Regular', lat: 18.34185490966226, lon: -64.9316281681369, bands: [[0, 1, 300, 300], [1, 10, 300, 100], [10, 25, 100, 20], [25, 40, 20, 0]] },
@@ -214,7 +214,7 @@ function initCltFieldSystem() {
     { name: 'Charlottetown, PEI', category: 'Regular', lat: 46.23722371252871, lon: -63.12970137942366, bands: [[0, 2, 350, 350], [2, 8, 350, 100], [8, 24, 100, 25], [24, 128, 25, 0]] },
     { name: 'Charlottesville, VA', category: 'Regular', lat: 38.0292848205594, lon: -78.47616344837674, bands: [[0, 3, 450, 450], [3, 30, 450, 200], [30, 120, 200, 20], [120, 360, 20, 0]] },
     { name: 'Queen Charlotte Burial Place', category: 'Secret', lat: 51.4836838439432, lon: -0.60668429494321, bands: [[0, 0.1, 14000, 14000], [0.1, 1, 14000, 3000], [1, 3, 3000, 900], [3, 14, 900, 200], [14, 50, 200, 40], [50, 250, 40, 0]] },
-    { name: 'CHARLOTTE CHARLOTTE CHARLOTTE', category: 'Secret', lat: 49.27296428756112, lon: -123.06937964843168, bands: [[0, 1, 350000, 300000], [1, 12, 300000, 1000], [12, 85, 1000, 0]], revealThreshold: 65000, hiddenName: '???????????', startClock: '10:00', endClock: '19:00' },
+    { name: 'CHARLOTTE CHARLOTTE CHARLOTTE', category: 'Secret', lat: 49.27296428756112, lon: -123.06937964843168, bands: [[0, 0.001, 350000, 300000], [0.001, 0.012, 300000, 1000], [0.012, 0.085, 1000, 0]], revealThreshold: 65000, hiddenName: '???????????', startClock: '10:00', endClock: '19:00' },
   ];
 
   const state = {
@@ -236,7 +236,8 @@ function initCltFieldSystem() {
     unitSystem: 'metric',
     sensorBroken: false,
     overloadStartMs: null,
-    repairInProgress: false
+    repairInProgress: false,
+    repairCooldownUntilMs: 0
   };
 
   const el = {
@@ -287,7 +288,8 @@ function initCltFieldSystem() {
     uploadedFieldList: document.getElementById('uploadedFieldList'),
     fieldDayToggles: Array.from(document.querySelectorAll('.field-day-toggle')),
     sensorFailureOverlay: document.getElementById('sensorFailureOverlay'),
-    repairAttemptBtn: document.getElementById('sensorRepairAttempt')
+    repairAttemptBtn: document.getElementById('sensorRepairAttempt'),
+    repairStatus: document.getElementById('sensorRepairStatus')
   };
 
   const fallbackCoord = coordinateDefinitions.find((d) => d.name === 'Geolocation Denied Fallback');
@@ -823,6 +825,7 @@ function initCltFieldSystem() {
     state.sensorBroken = true;
     state.overloadStartMs = null;
     setStatus('Uh Oh! Looks like the CLT Field sensor broke.', 'SENSOR FAILURE');
+    if (el.repairStatus) el.repairStatus.textContent = 'Sensor offline. Move farther away, then attempt repair.';
     showSensorFailureOverlay(true);
     stopLiveTracking();
   }
@@ -834,6 +837,7 @@ function initCltFieldSystem() {
       el.repairAttemptBtn.disabled = true;
       el.repairAttemptBtn.textContent = 'Attempting Repair...';
     }
+    if (el.repairStatus) el.repairStatus.textContent = 'Repair attempt in progress...';
 
     await new Promise((resolve) => window.setTimeout(resolve, 3000));
 
@@ -845,10 +849,15 @@ function initCltFieldSystem() {
     }
 
     const repairChance = Math.max(0, Math.min(100, 100 - (currentClt * 0.001)));
+    if (el.repairStatus) {
+      el.repairStatus.textContent = `Repair chance: ${repairChance.toFixed(1)}% at ${currentClt.toLocaleString(undefined, { maximumFractionDigits: 2 })} CLT`;
+    }
     const ok = Math.random() * 100 < repairChance;
 
     if (ok) {
       state.sensorBroken = false;
+      state.overloadStartMs = null;
+      state.repairCooldownUntilMs = Date.now() + 5000;
       showSensorFailureOverlay(false);
       setStatus('Sensor repaired. Restarting live tracking...', 'LOCATION ACCESS REQUIRED');
       startLiveTracking();
@@ -919,7 +928,9 @@ function initCltFieldSystem() {
     const liveBreakdown = { cltBySource, tungstenBySource };
 
     const cccContribution = cltBySource.find((row) => row.source?.name === 'CHARLOTTE CHARLOTTE CHARLOTTE')?.value || 0;
-    if (cccContribution >= 200000) {
+    if (Date.now() < state.repairCooldownUntilMs) {
+      state.overloadStartMs = null;
+    } else if (cccContribution >= 200000) {
       if (!state.overloadStartMs) state.overloadStartMs = Date.now();
       if (Date.now() - state.overloadStartMs >= 5000) {
         breakSensor();

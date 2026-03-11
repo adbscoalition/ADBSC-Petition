@@ -1685,3 +1685,8 @@ pre {
   font-size: clamp(1.1rem, 2.4vw, 1.4rem);
   margin-bottom: 0.8rem;
 }
+
+.sensor-failure-card p {
+  margin: 0 0 0.8rem;
+  color: var(--text-muted);
+}
