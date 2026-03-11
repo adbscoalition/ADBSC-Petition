@@ -760,6 +760,17 @@ function initCltFieldSystem() {
     return dateObj.toLocaleTimeString('en-US', { hour12: true, hour: 'numeric', minute: '2-digit', second: '2-digit' });
   }
 
+  function getTelemetryErrorChancePercent(cltValue) {
+    const clt = Number(cltValue);
+    if (!Number.isFinite(clt) || clt < 50000) return 0;
+    const steps = Math.floor((clt - 50000) / 5000) + 1;
+    return Math.max(0, Math.min(100, steps * 5));
+  }
+
+  function shouldOutputTelemetryError(cltValue) {
+    return Math.random() * 100 < getTelemetryErrorChancePercent(cltValue);
+  }
+
   function getSourceKey(source) {
     if (!source) return 'unknown';
     return `${source.name || 'unknown'}|${source.category || 'Unknown'}|${source.lat ?? 'na'}|${source.lon ?? 'na'}`;
@@ -927,42 +938,43 @@ function initCltFieldSystem() {
     const liveTungsten = tungstenBySource.reduce((sum, row) => sum + row.value, 0);
     const liveBreakdown = { cltBySource, tungstenBySource };
 
-    const nowMs = Date.now();
-    const overloadThresholdMet = Number.isFinite(liveClt) && liveClt >= 200000;
-    if (nowMs < state.repairCooldownUntilMs) {
-      state.overloadStartMs = null;
-    } else if (overloadThresholdMet) {
-      if (!state.overloadStartMs) state.overloadStartMs = nowMs;
-      if (nowMs - state.overloadStartMs >= 5000) {
-        breakSensor();
-      }
-    } else {
-      state.overloadStartMs = null;
-    }
+    state.overloadStartMs = null;
 
     state.lastBase = { lat, lon, accuracy, calc, liveClt, liveTungsten, liveBreakdown, timestamp: Date.now() };
 
-    if (state.sensorBroken) return;
+    const cltError = shouldOutputTelemetryError(liveClt);
+    const tungstenError = shouldOutputTelemetryError(liveClt);
+    const geoDistanceError = shouldOutputTelemetryError(liveClt);
+    const uploadedDistanceError = shouldOutputTelemetryError(liveClt);
+    const gpsError = shouldOutputTelemetryError(liveClt);
 
-    if (el.totalField) el.totalField.textContent = liveClt.toLocaleString(undefined, { maximumFractionDigits: 2 });
-    if (el.tungsten) el.tungsten.textContent = `${liveTungsten.toFixed(5)} mg/m³`;
+    if (el.totalField) el.totalField.textContent = cltError
+      ? 'error'
+      : liveClt.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    if (el.tungsten) el.tungsten.textContent = tungstenError
+      ? 'error'
+      : `${liveTungsten.toFixed(5)} mg/m³`;
     if (el.geoDistance) {
-      el.geoDistance.textContent = calc.nearestGeo ? formatDistancePrimary(calc.nearestGeo.distance) : formatDistancePrimary(NaN);
+      el.geoDistance.textContent = geoDistanceError
+        ? 'error'
+        : (calc.nearestGeo ? formatDistancePrimary(calc.nearestGeo.distance) : formatDistancePrimary(NaN));
     }
     if (el.geoName) {
       el.geoName.textContent = calc.nearestGeo ? calc.nearestGeo.name : '—';
     }
     if (el.uploadedDistance) {
-      el.uploadedDistance.textContent = calc.nearestUploaded ? formatDistancePrimary(calc.nearestUploaded.distance) : formatDistancePrimary(NaN);
+      el.uploadedDistance.textContent = uploadedDistanceError
+        ? 'error'
+        : (calc.nearestUploaded ? formatDistancePrimary(calc.nearestUploaded.distance) : formatDistancePrimary(NaN));
     }
     if (el.nearestSource) {
       el.nearestSource.textContent = calc.nearestUploaded ? calc.nearestUploaded.name : 'none';
     }
     if (el.gpsAccuracy) {
       const meters = Number(accuracy);
-      el.gpsAccuracy.textContent = Number.isFinite(meters)
-        ? `${meters.toFixed(1)} m`
-        : '—';
+      el.gpsAccuracy.textContent = gpsError
+        ? 'error'
+        : (Number.isFinite(meters) ? `${meters.toFixed(1)} m` : '—');
     }
 
     const now = new Date();
@@ -987,13 +999,14 @@ function initCltFieldSystem() {
 
   function renderScanSheet(result) {
     if (!el.scanSheet) return;
+    const withError = (value) => (shouldOutputTelemetryError(result.clt) ? 'error' : value);
     el.scanSheet.innerHTML = [
-      `CLT Field: ${result.clt.toLocaleString(undefined, { maximumFractionDigits: 4 })}`,
-      `Tungsten: ${result.tungsten.toFixed(6)} mg/m³`,
-      `Coordinates: ${result.lat.toFixed(8)}, ${result.lon.toFixed(8)}`,
+      `CLT Field: ${withError(result.clt.toLocaleString(undefined, { maximumFractionDigits: 4 }))}`,
+      `Tungsten: ${withError(`${result.tungsten.toFixed(6)} mg/m³`)}`,
+      `Coordinates: ${withError(`${result.lat.toFixed(8)}, ${result.lon.toFixed(8)}`)}`,
       `Timestamp: ${new Date(result.timestamp).toLocaleString()}`,
-      `Nearest Source: ${result.sourceName}`,
-      `Distance to Source: ${formatDistanceShort(result.distanceKm)}`
+      `Nearest Source: ${withError(result.sourceName)}`,
+      `Distance to Source: ${withError(formatDistanceShort(result.distanceKm))}`
     ].map((line) => `<li>${line}</li>`).join('');
   }
 
