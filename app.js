@@ -800,7 +800,7 @@ function initCltFieldSystem() {
   function getTelemetryErrorChancePercent(cltValue) {
     const clt = Number(cltValue);
     if (!Number.isFinite(clt) || clt < 50000) return 0;
-    const steps = Math.floor((clt - 50000) / 10000) + 1;
+    const steps = Math.floor((clt - 50000) / 20000) + 1;
     return Math.max(0, Math.min(100, steps * 5));
   }
 
@@ -820,7 +820,7 @@ function initCltFieldSystem() {
     return source.name || 'Unknown Source';
   }
 
-  function renderContributionTables(calc, liveClt, liveTungsten, liveBreakdown = null) {
+  function renderContributionTables(calc, liveClt, liveTungsten, liveBreakdown = null, hasTelemetryError = false) {
     const cltBody = el.cltContributionTable?.querySelector('tbody');
     const tungstenBody = el.tungstenContributionTable?.querySelector('tbody');
     if (!cltBody || !tungstenBody) return;
@@ -842,7 +842,8 @@ function initCltFieldSystem() {
     } else {
       cltBody.innerHTML = cltRows.map((row) => {
         const name = getSourceDisplayName(row.source, row.value);
-        return `<tr><td>${name}</td><td>${row.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td></tr>`;
+        const valueLabel = hasTelemetryError ? 'ERROR' : row.value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+        return `<tr><td>${name}</td><td>${valueLabel}</td></tr>`;
       }).join('');
     }
 
@@ -855,10 +856,12 @@ function initCltFieldSystem() {
     } else {
       tungstenBody.innerHTML = tungstenRows.map((row) => {
         if (row.source?.name === 'Ambient Baseline') {
-          return `<tr><td>Ambient Baseline</td><td>${row.value.toFixed(6)}</td></tr>`;
+          const valueLabel = hasTelemetryError ? 'ERROR' : row.value.toFixed(6);
+          return `<tr><td>Ambient Baseline</td><td>${valueLabel}</td></tr>`;
         }
         const name = getSourceDisplayName(row.source, cltByKey.get(getSourceKey(row.source)) || 0);
-        return `<tr><td>${name}</td><td>${row.value.toFixed(6)}</td></tr>`;
+        const valueLabel = hasTelemetryError ? 'ERROR' : row.value.toFixed(6);
+        return `<tr><td>${name}</td><td>${valueLabel}</td></tr>`;
       }).join('');
     }
   }
@@ -878,8 +881,11 @@ function initCltFieldSystem() {
       const idvlLabel = item.nearestIdvlName
         ? `${item.nearestIdvlName} (${formatDistanceShort(item.nearestIdvlDistanceKm)})`
         : 'none';
-      return `${item.time} | ${item.clt.toLocaleString(undefined, { maximumFractionDigits: 2 })} CLT | ` +
-        `Tungsten ${item.tungsten.toFixed(5)} mg/m³ | Nearest GEO ${geoLabel} | Nearest IDVL ${idvlLabel}`;
+      const cltLabel = item.cltError ? 'ERROR' : `${item.clt.toLocaleString(undefined, { maximumFractionDigits: 2 })} CLT`;
+      const tungstenLabel = item.tungstenError ? 'ERROR' : `${item.tungsten.toFixed(5)} mg/m³`;
+      const geoValue = item.geoDistanceError ? 'ERROR' : geoLabel;
+      const idvlValue = item.uploadedDistanceError ? 'ERROR' : idvlLabel;
+      return `${item.time} | ${cltLabel} | Tungsten ${tungstenLabel} | Nearest GEO ${geoValue} | Nearest IDVL ${idvlValue}`;
     }).join('\n');
   }
 
@@ -927,14 +933,14 @@ function initCltFieldSystem() {
     const gpsError = shouldOutputTelemetryError(liveClt);
 
     if (el.totalField) el.totalField.textContent = cltError
-      ? 'error'
+      ? 'ERROR'
       : liveClt.toLocaleString(undefined, { maximumFractionDigits: 2 });
     if (el.tungsten) el.tungsten.textContent = tungstenError
-      ? 'error'
+      ? 'ERROR'
       : `${liveTungsten.toFixed(5)} mg/m³`;
     if (el.geoDistance) {
       el.geoDistance.textContent = geoDistanceError
-        ? 'error'
+        ? 'ERROR'
         : (calc.nearestGeo ? formatDistancePrimary(calc.nearestGeo.distance) : formatDistancePrimary(NaN));
     }
     if (el.geoName) {
@@ -942,7 +948,7 @@ function initCltFieldSystem() {
     }
     if (el.uploadedDistance) {
       el.uploadedDistance.textContent = uploadedDistanceError
-        ? 'error'
+        ? 'ERROR'
         : (calc.nearestUploaded ? formatDistancePrimary(calc.nearestUploaded.distance) : formatDistancePrimary(NaN));
     }
     if (el.nearestSource) {
@@ -951,7 +957,7 @@ function initCltFieldSystem() {
     if (el.gpsAccuracy) {
       const meters = Number(accuracy);
       el.gpsAccuracy.textContent = gpsError
-        ? 'error'
+        ? 'ERROR'
         : (Number.isFinite(meters) ? `${meters.toFixed(1)} m` : '—');
     }
 
@@ -966,18 +972,22 @@ function initCltFieldSystem() {
       nearestGeoName: calc.nearestGeo ? calc.nearestGeo.name : null,
       nearestGeoDistanceKm: calc.nearestGeo ? calc.nearestGeo.distance : NaN,
       nearestIdvlName: calc.nearestUploaded ? calc.nearestUploaded.name : null,
-      nearestIdvlDistanceKm: calc.nearestUploaded ? calc.nearestUploaded.distance : NaN
+      nearestIdvlDistanceKm: calc.nearestUploaded ? calc.nearestUploaded.distance : NaN,
+      cltError,
+      tungstenError,
+      geoDistanceError,
+      uploadedDistanceError
     });
     state.history = state.history.slice(0, 50);
     renderHistory();
-    renderContributionTables(calc, liveClt, liveTungsten, liveBreakdown);
+    renderContributionTables(calc, liveClt, liveTungsten, liveBreakdown, cltError || tungstenError);
 
     if (el.scanBtn) el.scanBtn.disabled = false;
   }
 
   function renderScanSheet(result) {
     if (!el.scanSheet) return;
-    const withError = (value) => (shouldOutputTelemetryError(result.clt) ? 'error' : value);
+    const withError = (value) => (shouldOutputTelemetryError(result.clt) ? 'ERROR' : value);
     el.scanSheet.innerHTML = [
       `CLT Field: ${withError(result.clt.toLocaleString(undefined, { maximumFractionDigits: 4 }))}`,
       `Tungsten: ${withError(`${result.tungsten.toFixed(6)} mg/m³`)}`,
@@ -996,7 +1006,7 @@ function initCltFieldSystem() {
 
     if (state.scanTimer) window.clearInterval(state.scanTimer);
     refreshTimeLimitToggleButton();
-  if (el.scanBtn) el.scanBtn.disabled = true;
+    if (el.scanBtn) el.scanBtn.disabled = true;
 
     const start = Date.now();
     const durationMs = 5000;
