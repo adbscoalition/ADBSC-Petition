@@ -826,7 +826,7 @@ function initCltFieldSystem() {
   function getSourceDisplayName(source, cltValue) {
     const value = Number(cltValue) || 0;
     if (source?.hiddenName && value < Number(source.revealThreshold || 0)) return source.hiddenName;
-    if (source.category === 'Secret' && value < 100) return 'Unknown Source';
+    if (source.category === 'Secret' && !source?.uploaded && value < 100) return 'Unknown Source';
     return source.name || 'Unknown Source';
   }
 
