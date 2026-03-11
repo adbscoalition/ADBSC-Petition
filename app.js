@@ -234,8 +234,8 @@ function initCltFieldSystem() {
     autoFieldCounter: 1,
     simulatorUnlocked: false,
     unitSystem: 'metric',
-    vancouverTimeLimitsEnabled: false,
-    uploadedTimeLimitsEnabled: false,
+    vancouverTimeLimitsEnabled: true,
+    uploadedTimeLimitsEnabled: true,
   };
 
   const el = {
