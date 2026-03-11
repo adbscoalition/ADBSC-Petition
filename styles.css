@@ -1549,3 +1549,11 @@ pre {
 #simCoordinateBlock {
   margin-top: 0.7rem;
 }
+
+.sensor-broken-screen {
+  text-align: center;
+}
+
+.sensor-broken-screen .clt-actions {
+  justify-content: center;
+}

@@ -94,6 +94,7 @@
   </header>
 
   <main id="main" class="page-shell">
+    <div id="cltMainShell">
     <section class="panel clt-system-hero" aria-labelledby="cltPageTitle">
       <p class="eyebrow">Live Instrument Console</p>
       <h1 id="cltPageTitle">CLT Magnetic Field Tracker</h1>
@@ -287,6 +288,17 @@
         </div>
       </div>
       <p id="simStatus" class="clt-system-status">Simulator locked.</p>
+    </section>
+    </div>
+
+    <section class="panel clt-card-section sensor-broken-screen" id="sensorBrokenScreen" hidden>
+      <h2>Uh Oh! Looks like the CLT Field sensor broke.</h2>
+      <p>Try to repair it in a less powerful spot.</p>
+      <div class="clt-actions">
+        <a class="btn secondary" href="index.html">Return Home</a>
+        <button class="btn primary" id="attemptRepairBtn" type="button">Attempt Repair</button>
+      </div>
+      <p id="repairStatus" class="clt-system-status">Sensor offline.</p>
     </section>
 
   </main>
