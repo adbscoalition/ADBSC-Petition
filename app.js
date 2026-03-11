@@ -234,8 +234,8 @@ function initCltFieldSystem() {
     autoFieldCounter: 1,
     simulatorUnlocked: false,
     unitSystem: 'metric',
-    vancouverTimeLimitsEnabled: true,
-    uploadedTimeLimitsEnabled: true,
+    vancouverTimeLimitsEnabled: false,
+    uploadedTimeLimitsEnabled: false,
   };
 
   const el = {
@@ -1160,7 +1160,7 @@ function initCltFieldSystem() {
     state.simulatorUnlocked = true;
     if (el.simCoordinateBlock) el.simCoordinateBlock.hidden = false;
     refreshTimeLimitToggleButton();
-    if (el.simStatus) el.simStatus.textContent = 'Simulator unlocked. Enter teleport coordinates.';
+    if (el.simStatus) el.simStatus.textContent = `Simulator unlocked. Enter teleport coordinates. Time limits are ${(state.vancouverTimeLimitsEnabled && state.uploadedTimeLimitsEnabled) ? 'enabled' : 'disabled'}.`;
   }
 
   function initFallbackTools() {
