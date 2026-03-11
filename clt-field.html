@@ -252,8 +252,8 @@
           <input id="fieldName" type="text" placeholder="My Field" />
         </label>
         <label>
-          Intensity (CLT units, max 50,000)
-          <input id="fieldIntensity" type="number" min="1" max="50000" step="1" value="5000" />
+          Intensity (CLT units, max 1,000,000)
+          <input id="fieldIntensity" type="number" min="1" max="1000000" step="1" value="5000" />
         </label>
         <label>
           Maximum Intensity Range (meters, max 100)
@@ -325,7 +325,7 @@
         </div>
         <div class="clt-actions">
           <button class="btn secondary" id="simTeleport" type="button">Teleport</button>
-          <button class="btn secondary" id="simTimeLimitsToggle" type="button">Disable Vancouver/Uploaded Time Limits</button>
+          <button class="btn secondary" id="simTimeLimitsToggle" type="button">Disable Uploaded Field Time Limits</button>
         </div>
       </div>
       <p id="simStatus" class="clt-system-status">Simulator locked.</p>
