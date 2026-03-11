@@ -234,10 +234,6 @@ function initCltFieldSystem() {
     autoFieldCounter: 1,
     simulatorUnlocked: false,
     unitSystem: 'metric',
-    sensorBroken: false,
-    overloadStartMs: null,
-    repairInProgress: false,
-    repairCooldownUntilMs: 0
   };
 
   const el = {
@@ -287,9 +283,6 @@ function initCltFieldSystem() {
     fieldUploaderStatus: document.getElementById('fieldUploaderStatus'),
     uploadedFieldList: document.getElementById('uploadedFieldList'),
     fieldDayToggles: Array.from(document.querySelectorAll('.field-day-toggle')),
-    sensorFailureOverlay: document.getElementById('sensorFailureOverlay'),
-    repairAttemptBtn: document.getElementById('sensorRepairAttempt'),
-    repairStatus: document.getElementById('sensorRepairStatus')
   };
 
   const fallbackCoord = coordinateDefinitions.find((d) => d.name === 'Geolocation Denied Fallback');
@@ -763,7 +756,7 @@ function initCltFieldSystem() {
   function getTelemetryErrorChancePercent(cltValue) {
     const clt = Number(cltValue);
     if (!Number.isFinite(clt) || clt < 50000) return 0;
-    const steps = Math.floor((clt - 50000) / 5000) + 1;
+    const steps = Math.floor((clt - 50000) / 10000) + 1;
     return Math.max(0, Math.min(100, steps * 5));
   }
 
@@ -826,63 +819,6 @@ function initCltFieldSystem() {
     }
   }
 
-  function showSensorFailureOverlay(show) {
-    if (!el.sensorFailureOverlay) return;
-    el.sensorFailureOverlay.hidden = !show;
-  }
-
-  function breakSensor() {
-    if (state.sensorBroken) return;
-    state.sensorBroken = true;
-    state.overloadStartMs = null;
-    setStatus('Uh Oh! Looks like the CLT Field sensor broke.', 'SENSOR FAILURE');
-    if (el.repairStatus) el.repairStatus.textContent = 'Sensor offline. Move farther away, then attempt repair.';
-    showSensorFailureOverlay(true);
-    stopLiveTracking();
-  }
-
-  async function attemptSensorRepair() {
-    if (state.repairInProgress || !state.sensorBroken) return;
-    state.repairInProgress = true;
-    if (el.repairAttemptBtn) {
-      el.repairAttemptBtn.disabled = true;
-      el.repairAttemptBtn.textContent = 'Attempting Repair...';
-    }
-    if (el.repairStatus) el.repairStatus.textContent = 'Repair attempt in progress...';
-
-    await new Promise((resolve) => window.setTimeout(resolve, 3000));
-
-    let currentClt = Number(state.lastBase?.liveClt) || 0;
-    const coords = await resolveCurrentCoords();
-    if (coords) {
-      const calc = computeField(coords.lat, coords.lon);
-      currentClt = Number(calc.totalField) || currentClt;
-    }
-
-    const repairChance = Math.max(0, Math.min(100, 100 - (currentClt * 0.001)));
-    if (el.repairStatus) {
-      el.repairStatus.textContent = `Repair chance: ${repairChance.toFixed(1)}% at ${currentClt.toLocaleString(undefined, { maximumFractionDigits: 2 })} CLT`;
-    }
-    const ok = Math.random() * 100 < repairChance;
-
-    if (ok) {
-      state.sensorBroken = false;
-      state.overloadStartMs = null;
-      state.repairCooldownUntilMs = Date.now() + 5000;
-      showSensorFailureOverlay(false);
-      setStatus('Sensor repaired. Restarting live tracking...', 'LOCATION ACCESS REQUIRED');
-      startLiveTracking();
-    } else {
-      setStatus('Repair failed. Move to a less powerful spot and try again.', 'SENSOR FAILURE');
-      showSensorFailureOverlay(true);
-    }
-
-    state.repairInProgress = false;
-    if (el.repairAttemptBtn) {
-      el.repairAttemptBtn.disabled = false;
-      el.repairAttemptBtn.textContent = 'Attempt Repair';
-    }
-  }
 
   function renderHistory() {
     if (!el.contributors) return;
@@ -937,8 +873,6 @@ function initCltFieldSystem() {
     const liveClt = cltBySource.reduce((sum, row) => sum + row.value, 0);
     const liveTungsten = tungstenBySource.reduce((sum, row) => sum + row.value, 0);
     const liveBreakdown = { cltBySource, tungstenBySource };
-
-    state.overloadStartMs = null;
 
     state.lastBase = { lat, lon, accuracy, calc, liveClt, liveTungsten, liveBreakdown, timestamp: Date.now() };
 
@@ -1238,8 +1172,6 @@ function initCltFieldSystem() {
     }
     setTimeout(() => { if (el.copyLogs) el.copyLogs.textContent = 'Copy Logs'; }, 1500);
   });
-
-  el.repairAttemptBtn?.addEventListener('click', attemptSensorRepair);
 
   initFallbackTools();
   initFieldUploader();
