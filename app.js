@@ -927,12 +927,13 @@ function initCltFieldSystem() {
     const liveTungsten = tungstenBySource.reduce((sum, row) => sum + row.value, 0);
     const liveBreakdown = { cltBySource, tungstenBySource };
 
-    const cccContribution = cltBySource.find((row) => row.source?.name === 'CHARLOTTE CHARLOTTE CHARLOTTE')?.value || 0;
-    if (Date.now() < state.repairCooldownUntilMs) {
+    const nowMs = Date.now();
+    const overloadThresholdMet = Number.isFinite(liveClt) && liveClt >= 200000;
+    if (nowMs < state.repairCooldownUntilMs) {
       state.overloadStartMs = null;
-    } else if (cccContribution >= 200000) {
-      if (!state.overloadStartMs) state.overloadStartMs = Date.now();
-      if (Date.now() - state.overloadStartMs >= 5000) {
+    } else if (overloadThresholdMet) {
+      if (!state.overloadStartMs) state.overloadStartMs = nowMs;
+      if (nowMs - state.overloadStartMs >= 5000) {
         breakSensor();
       }
     } else {
