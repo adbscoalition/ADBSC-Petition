@@ -97,7 +97,7 @@
     <section class="panel field-calculator-shell" id="fieldCalculatorApp" aria-labelledby="calculatorTitle">
       <div class="field-calculator-hero">
         <p class="eyebrow">Personal Signal Estimator</p>
-        <h1 id="calculatorTitle">Field Calculator</h1>
+        <h1 id="calculatorTitle">Field Calculator <span class="beta-tag">BETA</span></h1>
         <p class="field-calculator-copy">
           Calculate personal CLT with <strong>32 + (8 × n)</strong>, where <strong>n</strong> is your name rank.
           This uses built-in historical rank lists for Charlotte. You can provide a year to retrieve that year's rank value for the selected dataset.
@@ -107,8 +107,8 @@
       <section class="field-calculator-panel" aria-label="Calculation controls">
         <div class="field-calculator-grid">
           <label>
-            Name
-            <input id="fcName" type="text" value="Charlotte" placeholder="Enter name" autocomplete="name" />
+            Legal first name <span class="field-note">(nickname not counted)</span>
+            <input id="fcName" type="text" placeholder="Enter legal first name" autocomplete="name" />
           </label>
           <label>
             Country dataset

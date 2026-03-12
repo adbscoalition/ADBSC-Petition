@@ -1378,7 +1378,7 @@ function initFieldCalculator() {
     return parsed;
   }
 
-  function renderResult({ status = 'idle', title = 'Result', primaryLabel = '', primaryValue = '', metrics = [], lines = [] } = {}) {
+  function renderResult({ status = 'idle', title = 'Result', primaryLabel = '', primaryValue = '', metrics = [], lines = [], nameValue = '', nameIsAlert = false } = {}) {
     if (!el.result) return;
     el.result.classList.toggle('is-success', status === 'success');
     el.result.classList.toggle('is-warning', status === 'warning');
@@ -1390,9 +1390,12 @@ function initFieldCalculator() {
     const metricsHtml = metrics.length
       ? `<dl class="field-result-metrics">${metrics.map((item) => `<div class="metric"><dt>${item.label}</dt><dd>${item.value}</dd></div>`).join('')}</dl>`
       : '';
+    const nameHtml = nameValue
+      ? `<p class="field-result-name ${nameIsAlert ? 'is-alert' : ''}">Name: ${nameValue}</p>`
+      : '';
     const linesHtml = lines.map((line) => `<p>${line}</p>`).join('');
 
-    el.result.innerHTML = `<h2>${title}</h2>${primaryHtml}${metricsHtml}${linesHtml}`;
+    el.result.innerHTML = `<h2>${title}</h2>${primaryHtml}${metricsHtml}${nameHtml}${linesHtml}`;
   }
 
   function runCalculationLoader(durationMs = 1800) {
@@ -1449,9 +1452,18 @@ function initFieldCalculator() {
     const isCharlotte = enteredName.toLowerCase() === 'charlotte';
     if (!isCharlotte) {
       renderResult({
-        status: 'warning',
-        title: 'No CLT emitted',
-        lines: ['Name is not Charlotte. CLT output is 0.', 'This calculator only runs magnetic field computation for Charlotte.']
+        status: 'success',
+        title: 'Calculated CLT Result',
+        primaryLabel: 'CLT',
+        primaryValue: '0',
+        metrics: [
+          { label: 'Rank (n)', value: '—' },
+          { label: 'Year', value: String(year || '—') },
+          { label: 'Dataset', value: getSelectedLabel(countryCode) }
+        ],
+        nameValue: enteredName,
+        nameIsAlert: true,
+        lines: ['Formula: 32 + 8n']
       });
       return;
     }
@@ -1488,8 +1500,8 @@ function initFieldCalculator() {
           { label: 'Year', value: String(year || years[0]) },
           { label: 'Dataset', value: getSelectedLabel(countryCode) }
         ],
+        nameValue: enteredName,
         lines: [
-          `Name: ${enteredName}`,
           'Formula: 32 + 8n'
         ]
       });

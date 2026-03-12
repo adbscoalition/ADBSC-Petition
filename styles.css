@@ -1829,3 +1829,32 @@ pre {
   border-color: rgba(255, 105, 136, 0.72);
   box-shadow: 0 0 0 1px rgba(255, 105, 136, 0.22);
 }
+
+
+.beta-tag {
+  display: inline-block;
+  margin-left: 0.45rem;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 79, 163, 0.75);
+  background: rgba(255, 79, 163, 0.2);
+  color: #ffd2f0;
+  font-size: 0.68em;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+}
+
+.field-note {
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+.field-result-name {
+  margin: 0.55rem 0 0;
+  font-weight: 700;
+}
+
+.field-result-name.is-alert {
+  color: #ff7a95;
+}
