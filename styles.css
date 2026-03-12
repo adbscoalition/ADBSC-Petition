@@ -1754,6 +1754,31 @@ pre {
 }
 
 
+.field-result-primary {
+  margin-top: 0.7rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(255, 79, 163, 0.5);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(88, 20, 116, 0.62), rgba(46, 12, 66, 0.68));
+  text-align: center;
+}
+
+.field-result-primary-label {
+  display: block;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-soft);
+}
+
+.field-result-primary strong {
+  display: block;
+  margin-top: 0.22rem;
+  font-size: clamp(1.9rem, 4vw, 2.7rem);
+  line-height: 1.05;
+  color: #ffd2f0;
+}
+
 .field-result-metrics {
   margin: 0.7rem 0 0;
   padding: 0;
@@ -1791,8 +1816,8 @@ pre {
 }
 
 .field-result.is-success {
-  border-color: rgba(111, 255, 184, 0.65);
-  box-shadow: 0 0 0 1px rgba(111, 255, 184, 0.25);
+  border-color: rgba(255, 79, 163, 0.78);
+  box-shadow: 0 0 0 1px rgba(255, 79, 163, 0.3);
 }
 
 .field-result.is-warning {

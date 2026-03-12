@@ -1284,10 +1284,58 @@ function initFieldCalculator() {
   const app = document.getElementById('fieldCalculatorApp');
   if (!app) return;
 
-  const usaCountryCode = 'us';
-  const countries = [
-    { label: 'United States', code: usaCountryCode }
-  ];
+  const datasets = {
+    us: {
+      label: 'United States',
+      ranks: {
+        2024: 4, 2023: 3, 2022: 3, 2021: 3, 2020: 4, 2019: 6, 2018: 6, 2017: 7, 2016: 7, 2015: 9,
+        2014: 10, 2013: 11, 2012: 19, 2011: 27, 2010: 46, 2009: 68, 2008: 86, 2007: 101, 2006: 125,
+        2005: 135, 2004: 170, 2003: 182, 2002: 204, 2001: 229, 2000: 289, 1999: 307, 1998: 304,
+        1997: 301, 1996: 302, 1995: 275, 1994: 291, 1993: 293, 1992: 286, 1991: 287, 1990: 287,
+        1989: 292, 1988: 288, 1987: 292, 1986: 286, 1985: 265, 1984: 304, 1983: 283, 1982: 308,
+        1981: 290, 1980: 292, 1979: 285, 1978: 278, 1977: 265, 1976: 245, 1975: 224, 1974: 203,
+        1973: 194, 1972: 188, 1971: 176, 1970: 166, 1969: 160, 1968: 163, 1967: 163, 1966: 151,
+        1965: 153, 1964: 158, 1963: 153, 1962: 154, 1961: 147, 1960: 151, 1959: 144, 1958: 140,
+        1957: 133, 1956: 133, 1955: 129, 1954: 113, 1953: 100, 1952: 89, 1951: 84, 1950: 80,
+        1949: 71, 1948: 69, 1947: 68, 1946: 64, 1945: 55, 1944: 50, 1943: 47, 1942: 51, 1941: 55,
+        1940: 55, 1939: 66, 1938: 70, 1937: 67, 1936: 61, 1935: 65, 1934: 72, 1933: 79, 1932: 74,
+        1931: 75, 1930: 75, 1929: 73, 1928: 72, 1927: 75, 1926: 78, 1925: 77, 1924: 80, 1923: 77,
+        1922: 76, 1921: 79, 1920: 79, 1919: 79, 1918: 78, 1917: 76, 1916: 80, 1915: 81, 1914: 88,
+        1913: 87, 1912: 91, 1911: 95, 1910: 99, 1909: 94, 1908: 98, 1907: 105, 1906: 103, 1905: 104,
+        1904: 110, 1903: 115, 1902: 114, 1901: 105, 1900: 110, 1899: 104, 1898: 105, 1897: 104,
+        1896: 103, 1895: 106, 1894: 100, 1893: 100, 1892: 98, 1891: 101, 1890: 98, 1889: 89, 1888: 88,
+        1887: 91, 1886: 94, 1885: 94, 1884: 86, 1883: 92, 1882: 100, 1881: 95, 1880: 91
+      }
+    },
+    ca: {
+      label: 'Canada',
+      ranks: {
+        2023: 2, 2022: 2, 2021: 3, 2020: 3, 2019: 2, 2018: 3, 2017: 3, 2016: 3, 2015: 3, 2014: 6,
+        2013: 6, 2012: 10, 2011: 9, 2010: 13, 2009: 20, 2008: 26, 2007: 29, 2006: 28, 2005: 47,
+        2004: 57, 2003: 77, 2002: 70, 2001: 63, 2000: 86, 1945: 97, 1944: 97, 1942: 95, 1921: 97
+      }
+    },
+    gb_ew: {
+      label: 'UK (England/Wales)',
+      ranks: {
+        2024: 23, 2023: 23, 2022: 26, 2021: 25, 2020: 20, 2019: 18, 2018: 12, 2017: 12, 2016: 12,
+        2015: 25, 2014: 23, 2013: 21, 2012: 20, 2011: 21, 2010: 20, 2009: 14, 2008: 13, 2007: 12,
+        2006: 12, 2005: 9, 2004: 8, 2003: 9, 2002: 7, 2001: 6, 2000: 5, 1999: 6, 1998: 6, 1997: 7,
+        1996: 7
+      }
+    },
+    au: {
+      label: 'Australia',
+      ranks: {
+        2024: 1, 2023: 5, 2022: 1, 2021: 3, 2020: 3, 2019: 1, 2018: 1, 2017: 1, 2016: 2, 2015: 1,
+        2014: 3, 2013: 1, 2012: 1, 2011: 7, 2010: 5, 2009: 3, 2008: 6, 2007: 7, 2006: 2, 2005: 3,
+        2004: 6, 2003: 12, 2002: 14, 2001: 16, 2000: 26, 1999: 39, 1998: 54, 1997: 65, 1996: 87,
+        1995: 83, 1994: 79, 1993: 94, 1992: 67, 1990: 97, 1989: 89
+      }
+    }
+  };
+
+  const countries = Object.entries(datasets).map(([code, value]) => ({ code, label: value.label }));
 
   const el = {
     name: document.getElementById('fcName'),
@@ -1302,39 +1350,24 @@ function initFieldCalculator() {
 
   if (el.country) {
     el.country.innerHTML = countries.map((country) => `<option value="${country.code}">${country.label}</option>`).join('');
-    el.country.value = usaCountryCode;
-    el.country.disabled = true;
+    el.country.value = 'us';
   }
 
   function getSelectedLabel(code) {
     return countries.find((c) => c.code === code)?.label || 'Unknown';
   }
 
-  const usaCharlotteRankByYear = {
-    2024: 4, 2023: 3, 2022: 3, 2021: 3, 2020: 4, 2019: 6, 2018: 6, 2017: 7, 2016: 7, 2015: 9,
-    2014: 10, 2013: 11, 2012: 19, 2011: 27, 2010: 46, 2009: 68, 2008: 86, 2007: 101, 2006: 125,
-    2005: 135, 2004: 170, 2003: 182, 2002: 204, 2001: 229, 2000: 289, 1999: 307, 1998: 304,
-    1997: 301, 1996: 302, 1995: 275, 1994: 291, 1993: 293, 1992: 286, 1991: 287, 1990: 287,
-    1989: 292, 1988: 288, 1987: 292, 1986: 286, 1985: 265, 1984: 304, 1983: 283, 1982: 308,
-    1981: 290, 1980: 292, 1979: 285, 1978: 278, 1977: 265, 1976: 245, 1975: 224, 1974: 203,
-    1973: 194, 1972: 188, 1971: 176, 1970: 166, 1969: 160, 1968: 163, 1967: 163, 1966: 151,
-    1965: 153, 1964: 158, 1963: 153, 1962: 154, 1961: 147, 1960: 151, 1959: 144, 1958: 140,
-    1957: 133, 1956: 133, 1955: 129, 1954: 113, 1953: 100, 1952: 89, 1951: 84, 1950: 80,
-    1949: 71, 1948: 69, 1947: 68, 1946: 64, 1945: 55, 1944: 50, 1943: 47, 1942: 51, 1941: 55,
-    1940: 55, 1939: 66, 1938: 70, 1937: 67, 1936: 61, 1935: 65, 1934: 72, 1933: 79, 1932: 74,
-    1931: 75, 1930: 75, 1929: 73, 1928: 72, 1927: 75, 1926: 78, 1925: 77, 1924: 80, 1923: 77,
-    1922: 76, 1921: 79, 1920: 79, 1919: 79, 1918: 78, 1917: 76, 1916: 80, 1915: 81, 1914: 88,
-    1913: 87, 1912: 91, 1911: 95, 1910: 99, 1909: 94, 1908: 98, 1907: 105, 1906: 103, 1905: 104,
-    1904: 110, 1903: 115, 1902: 114, 1901: 105, 1900: 110, 1899: 104, 1898: 105, 1897: 104,
-    1896: 103, 1895: 106, 1894: 100, 1893: 100, 1892: 98, 1891: 101, 1890: 98, 1889: 89, 1888: 88,
-    1887: 91, 1886: 94, 1885: 94, 1884: 86, 1883: 92, 1882: 100, 1881: 95, 1880: 91
-  };
+  function getDatasetYears(countryCode) {
+    const ranks = datasets[countryCode]?.ranks || {};
+    return Object.keys(ranks).map(Number).sort((a, b) => b - a);
+  }
 
-  const usaKnownYears = Object.keys(usaCharlotteRankByYear).map(Number).sort((a, b) => b - a);
-
-  function getUsCharlotteRank(year) {
-    if (Number.isInteger(year)) return usaCharlotteRankByYear[year] ?? null;
-    return usaCharlotteRankByYear[usaKnownYears[0]] ?? null;
+  function getRankFromLocalData(countryCode, year) {
+    const ranks = datasets[countryCode]?.ranks || {};
+    const years = getDatasetYears(countryCode);
+    if (!years.length) return null;
+    if (Number.isInteger(year)) return ranks[year] ?? null;
+    return ranks[years[0]] ?? null;
   }
 
   function normalizeYear() {
@@ -1345,18 +1378,21 @@ function initFieldCalculator() {
     return parsed;
   }
 
-  function renderResult({ status = 'idle', title = 'Result', metrics = [], lines = [] } = {}) {
+  function renderResult({ status = 'idle', title = 'Result', primaryLabel = '', primaryValue = '', metrics = [], lines = [] } = {}) {
     if (!el.result) return;
     el.result.classList.toggle('is-success', status === 'success');
     el.result.classList.toggle('is-warning', status === 'warning');
     el.result.classList.toggle('is-error', status === 'error');
 
+    const primaryHtml = primaryValue
+      ? `<div class="field-result-primary"><span class="field-result-primary-label">${primaryLabel}</span><strong>${primaryValue}</strong></div>`
+      : '';
     const metricsHtml = metrics.length
       ? `<dl class="field-result-metrics">${metrics.map((item) => `<div class="metric"><dt>${item.label}</dt><dd>${item.value}</dd></div>`).join('')}</dl>`
       : '';
     const linesHtml = lines.map((line) => `<p>${line}</p>`).join('');
 
-    el.result.innerHTML = `<h2>${title}</h2>${metricsHtml}${linesHtml}`;
+    el.result.innerHTML = `<h2>${title}</h2>${primaryHtml}${metricsHtml}${linesHtml}`;
   }
 
   function runCalculationLoader(durationMs = 1800) {
@@ -1366,10 +1402,10 @@ function initFieldCalculator() {
     el.runBar.style.width = '0%';
 
     const phases = [
-      { at: 0.18, label: 'Validating Charlotte signature...' },
-      { at: 0.44, label: 'Retrieving historical rank data...' },
-      { at: 0.74, label: 'Applying CLT formula 32 + 8n...' },
-      { at: 0.96, label: 'Finalizing magnetic output...' }
+      { at: 0.08, label: 'Finding name rankings...' },
+      { at: 0.36, label: 'Calibrating formulas...' },
+      { at: 0.68, label: 'Ranking Charlottes...' },
+      { at: 0.94, label: 'Done!' }
     ];
 
     return new Promise((resolve) => {
@@ -1394,13 +1430,9 @@ function initFieldCalculator() {
     });
   }
 
-  function getRankFromLocalData(year) {
-    return getUsCharlotteRank(year);
-  }
-
   async function calculate() {
     const enteredName = String(el.name?.value || '').trim();
-    const countryCode = String(el.country?.value || usaCountryCode);
+    const countryCode = String(el.country?.value || 'us');
     const year = normalizeYear();
     const hasYearInput = String(el.year?.value || '').trim().length > 0;
 
@@ -1429,7 +1461,8 @@ function initFieldCalculator() {
 
     try {
       const loaderPromise = runCalculationLoader();
-      const rank = getRankFromLocalData(year);
+      const rank = getRankFromLocalData(countryCode, year);
+      const years = getDatasetYears(countryCode);
       await loaderPromise;
 
       if (!rank) {
@@ -1437,8 +1470,8 @@ function initFieldCalculator() {
           status: 'warning',
           title: 'No rank data found',
           lines: [
-            `No USA Charlotte rank is available for year ${year}.`,
-            `Available range: ${usaKnownYears[usaKnownYears.length - 1]}-${usaKnownYears[0]}.`
+            `No ${getSelectedLabel(countryCode)} Charlotte rank is available for year ${year}.`,
+            years.length ? `Available years: ${years[years.length - 1]}-${years[0]}.` : 'No dataset years available.'
           ]
         });
         return;
@@ -1448,11 +1481,12 @@ function initFieldCalculator() {
       renderResult({
         status: 'success',
         title: 'Calculated CLT Result',
+        primaryLabel: 'CLT',
+        primaryValue: clt.toLocaleString(),
         metrics: [
-          { label: 'CLT', value: clt.toLocaleString() },
           { label: 'Rank (n)', value: rank.toLocaleString() },
-          { label: 'Year', value: String(year || usaKnownYears[0]) },
-          { label: 'Dataset', value: 'United States' }
+          { label: 'Year', value: String(year || years[0]) },
+          { label: 'Dataset', value: getSelectedLabel(countryCode) }
         ],
         lines: [
           `Name: ${enteredName}`,
