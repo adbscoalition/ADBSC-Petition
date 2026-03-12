@@ -150,10 +150,10 @@ if (entryLoader) {
     const status = document.getElementById('calculatorLoaderStatus');
     const bar = document.getElementById('calculatorLoaderBar');
     const phases = [
-      { at: 0.12, label: 'Preparing field calculator...' },
-      { at: 0.42, label: 'Connecting rank dataset...' },
-      { at: 0.78, label: 'Loading CLT formula profile...' },
-      { at: 0.94, label: 'Field calculator ready.' }
+      { at: 0.08, label: 'Finding name rankings...' },
+      { at: 0.36, label: 'Calibrating formulas...' },
+      { at: 0.68, label: 'Ranking Charlottes...' },
+      { at: 0.94, label: 'Done!' }
     ];
 
     const start = performance.now();
@@ -1286,25 +1286,6 @@ function initFieldCalculator() {
 
   const usaCountryCode = 'us';
   const countries = [
-    { label: 'Australia (NSW)', code: 'au_nsw' },
-    { label: 'Austria', code: 'at' },
-    { label: 'Belgium', code: 'be' },
-    { label: 'Canada', code: 'ca' },
-    { label: 'Czechia', code: 'cz' },
-    { label: 'Denmark', code: 'dk' },
-    { label: 'England & Wales', code: 'gb_ew' },
-    { label: 'France', code: 'fr' },
-    { label: 'Germany', code: 'de' },
-    { label: 'Ireland', code: 'ie' },
-    { label: 'Netherlands', code: 'nl' },
-    { label: 'New Zealand', code: 'nz' },
-    { label: 'Northern Ireland', code: 'gb_ni' },
-    { label: 'Norway', code: 'no' },
-    { label: 'Poland', code: 'pl' },
-    { label: 'Puerto Rico', code: 'pr' },
-    { label: 'Quebec, Canada', code: 'ca_qc' },
-    { label: 'Scotland', code: 'gb_sct' },
-    { label: 'Switzerland', code: 'ch' },
     { label: 'United States', code: usaCountryCode }
   ];
 
@@ -1322,6 +1303,7 @@ function initFieldCalculator() {
   if (el.country) {
     el.country.innerHTML = countries.map((country) => `<option value="${country.code}">${country.label}</option>`).join('');
     el.country.value = usaCountryCode;
+    el.country.disabled = true;
   }
 
   function getSelectedLabel(code) {
@@ -1363,12 +1345,18 @@ function initFieldCalculator() {
     return parsed;
   }
 
-  function renderResult({ status = 'idle', title = 'Result', lines = [] } = {}) {
+  function renderResult({ status = 'idle', title = 'Result', metrics = [], lines = [] } = {}) {
     if (!el.result) return;
     el.result.classList.toggle('is-success', status === 'success');
     el.result.classList.toggle('is-warning', status === 'warning');
     el.result.classList.toggle('is-error', status === 'error');
-    el.result.innerHTML = `<h2>${title}</h2>${lines.map((line) => `<p>${line}</p>`).join('')}`;
+
+    const metricsHtml = metrics.length
+      ? `<dl class="field-result-metrics">${metrics.map((item) => `<div class="metric"><dt>${item.label}</dt><dd>${item.value}</dd></div>`).join('')}</dl>`
+      : '';
+    const linesHtml = lines.map((line) => `<p>${line}</p>`).join('');
+
+    el.result.innerHTML = `<h2>${title}</h2>${metricsHtml}${linesHtml}`;
   }
 
   function runCalculationLoader(durationMs = 1800) {
@@ -1457,16 +1445,17 @@ function initFieldCalculator() {
       }
 
       const clt = 32 + (8 * rank);
-      const selectedCountryLabel = getSelectedLabel(countryCode);
-      const usedFallback = countryCode !== usaCountryCode;
       renderResult({
         status: 'success',
-        title: `Calculated CLT: ${clt.toLocaleString()}`,
+        title: 'Calculated CLT Result',
+        metrics: [
+          { label: 'CLT', value: clt.toLocaleString() },
+          { label: 'Rank (n)', value: rank.toLocaleString() },
+          { label: 'Year', value: String(year || usaKnownYears[0]) },
+          { label: 'Dataset', value: 'United States' }
+        ],
         lines: [
           `Name: ${enteredName}`,
-          `Rank n: ${rank.toLocaleString()}`,
-          `Dataset: United States${year ? ` · Year: ${year}` : ` · Year: ${usaKnownYears[0]}`}`,
-          usedFallback ? `Selected country (${selectedCountryLabel}) currently falls back to USA local dataset.` : 'Using USA local dataset.',
           'Formula: 32 + 8n'
         ]
       });

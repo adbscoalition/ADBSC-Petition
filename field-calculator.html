@@ -101,7 +101,7 @@
         <p class="field-calculator-copy">
           Calculate personal CLT with <strong>32 + (8 × n)</strong>, where <strong>n</strong> is your name rank.
           This uses a built-in historical rank list for Charlotte (USA). You can provide a year to retrieve that year's rank value.
-          Countries currently fall back to the USA local dataset.
+          Only USA is available right now while other country datasets are unavailable.
         </p>
       </div>
 
@@ -112,7 +112,7 @@
             <input id="fcName" type="text" value="Charlotte" placeholder="Enter name" autocomplete="name" />
           </label>
           <label>
-            Country dataset
+            Country dataset (available)
             <select id="fcCountry"></select>
           </label>
           <label>
@@ -132,8 +132,14 @@
       </div>
 
       <article class="field-result" id="fcResult" aria-live="polite">
-        <h2>Result</h2>
-        <p>Run a calculation to view rank and personal CLT output.</p>
+        <h2>Calculated CLT Result</h2>
+        <dl class="field-result-metrics">
+          <div class="metric"><dt>CLT</dt><dd>—</dd></div>
+          <div class="metric"><dt>Rank (n)</dt><dd>—</dd></div>
+          <div class="metric"><dt>Year</dt><dd>—</dd></div>
+          <div class="metric"><dt>Dataset</dt><dd>United States</dd></div>
+        </dl>
+        <p>Run a calculation to populate the result values.</p>
       </article>
     </section>
   </main>

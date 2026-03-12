@@ -1694,7 +1694,7 @@ pre {
 
 .field-calculator-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: 1fr;
   gap: 0.85rem;
 }
 
@@ -1750,6 +1750,38 @@ pre {
 .field-result h2 {
   margin: 0;
   font-size: 1.1rem;
+  color: var(--text);
+}
+
+
+.field-result-metrics {
+  margin: 0.7rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.55rem;
+}
+
+.field-result-metrics .metric {
+  margin: 0;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid rgba(255, 79, 163, 0.35);
+  border-radius: 12px;
+  background: rgba(53, 13, 78, 0.45);
+}
+
+.field-result-metrics dt {
+  margin: 0;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-soft);
+}
+
+.field-result-metrics dd {
+  margin: 0.28rem 0 0;
+  font-size: 1.08rem;
+  font-weight: 800;
   color: var(--text);
 }
 
