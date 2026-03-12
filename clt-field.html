@@ -88,23 +88,13 @@
       <a href="index.html">Main</a>
       <a href="portals.html">Portals</a>
       <a href="clt-field.html">CLT Field</a>
+      <a href="field-calculator.html">Field Calculator</a>
       <a href="instructions.html">Instructions</a>
       <a href="legal.html">Legal Notice</a>
     </nav>
   </header>
 
   
-  <div id="sensorFailureOverlay" class="sensor-failure-overlay" hidden>
-    <div class="sensor-failure-card">
-      <h2>Uh Oh! Looks like the CLT Field sensor broke. Try to repair it in a less powerful spot.</h2>
-      <p id="sensorRepairStatus">Sensor offline. Move farther away, then attempt repair.</p>
-      <div class="clt-actions">
-        <a class="btn secondary" href="index.html">Return Home</a>
-        <button class="btn primary" id="sensorRepairAttempt" type="button">Attempt Repair</button>
-      </div>
-    </div>
-  </div>
-
   <main id="main" class="page-shell">
     <section class="panel clt-system-hero" aria-labelledby="cltPageTitle">
       <p class="eyebrow">Live Instrument Console</p>
@@ -263,8 +253,8 @@
           <input id="fieldName" type="text" placeholder="My Field" />
         </label>
         <label>
-          Intensity (CLT units, max 50,000)
-          <input id="fieldIntensity" type="number" min="1" max="50000" step="1" value="5000" />
+          Intensity (CLT units, max 1,000,000)
+          <input id="fieldIntensity" type="number" min="1" max="1000000" step="1" value="5000" />
         </label>
         <label>
           Maximum Intensity Range (meters, max 100)
@@ -336,6 +326,7 @@
         </div>
         <div class="clt-actions">
           <button class="btn secondary" id="simTeleport" type="button">Teleport</button>
+          <button class="btn secondary" id="simTimeLimitsToggle" type="button">Disable Uploaded Field Time Limits</button>
         </div>
       </div>
       <p id="simStatus" class="clt-system-status">Simulator locked.</p>

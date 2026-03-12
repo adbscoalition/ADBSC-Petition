@@ -146,6 +146,34 @@ if (entryLoader) {
     requestAnimationFrame(frame);
   }
 
+  function runCalculatorLoader() {
+    const status = document.getElementById('calculatorLoaderStatus');
+    const bar = document.getElementById('calculatorLoaderBar');
+    const phases = [
+      { at: 0.08, label: 'Finding name rankings...' },
+      { at: 0.36, label: 'Calibrating formulas...' },
+      { at: 0.68, label: 'Ranking Charlottes...' },
+      { at: 0.94, label: 'Done!' }
+    ];
+
+    const start = performance.now();
+
+    function frame(now) {
+      const t = Math.min((now - start) / duration, 1);
+      if (bar) bar.style.width = `${t * 100}%`;
+      if (!reducedMotion) entryLoader.style.setProperty('--loader-glow', String(0.33 + t * 0.67));
+
+      let label = phases[0].label;
+      for (const p of phases) if (t >= p.at) label = p.label;
+      if (status) status.textContent = label;
+
+      if (t < 1) requestAnimationFrame(frame);
+      else finalizeLoader();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
   function runInstructionsLoader() {
     const status = document.getElementById('instructionsLoaderStatus');
     const typedLine = document.getElementById('typedLoaderLine');
@@ -180,6 +208,7 @@ if (entryLoader) {
   if (type === 'clt') runCltLoader();
   else if (type === 'portals') runPortalsLoader();
   else if (type === 'instructions') runInstructionsLoader();
+  else if (type === 'calculator') runCalculatorLoader();
   else if (type === 'legal') runLegalLoader();
   else runMainLoader();
 }
@@ -192,13 +221,11 @@ function initCltFieldSystem() {
 
   const coordinateDefinitions = [
     { name: 'Charlotte, NC', lat: 35.22867647481079, lon: -80.84490976473366 },
-    { name: 'THE GODLY RESONANCE', lat: 49.27296428756112, lon: -123.06937964843168 },
     { name: 'Charlotte, MI', lat: 42.56318196348821, lon: -84.83584647437215 },
     { name: 'Haida Gwaii Islands', lat: 53.255510249854304, lon: -132.08947116604432 },
     { name: 'Charlotte Amalie, USVI', lat: 18.34185490966226, lon: -64.9316281681369 },
     { name: 'Port Charlotte, FL', lat: 27.010523765938274, lon: -82.14259591632731 },
     { name: 'Charlottetown, PEI', lat: 46.23722371252871, lon: -63.12970137942366 },
-    { name: 'CHARLOTTE CHARLOTTE CHARLOTTE', lat: 49.27296428756112, lon: -123.06937964843168 },
     { name: 'Charlottesville, VA', lat: 38.0292848205594, lon: -78.47616344837674 },
     { name: 'Queen Charlotte Burial Place', lat: 51.4836838439432, lon: -0.60668429494321 },
     { name: 'Geolocation Denied Fallback', lat: 84.99999991933562, lon: -110.97606616281583 }
@@ -206,7 +233,6 @@ function initCltFieldSystem() {
 
   const magneticSources = [
     { name: 'Charlotte, NC', category: 'Regular', lat: 35.22867647481079, lon: -80.84490976473366, bands: [[0, 10, 1000, 1000], [10, 100, 1000, 200], [100, 200, 200, 50], [200, 400, 50, 10], [400, 1000, 10, 0]] },
-    { name: 'THE GODLY RESONANCE', category: 'Secret', lat: 49.27296428756112, lon: -123.06937964843168, bands: [[0, 0.01, 15000, 15000], [0.01, 0.05, 15000, 2000], [0.05, 0.25, 2000, 400], [0.25, 0.5, 400, 100], [0.5, 1.5, 100, 2], [1.5, 10, 2, 0]], revealThreshold: 15000, hiddenName: '????' },
     { name: 'Charlotte, MI', category: 'Regular', lat: 42.56318196348821, lon: -84.83584647437215, bands: [[0, 2, 575, 575], [2, 10, 575, 200], [10, 40, 200, 30], [40, 120, 30, 0]] },
     { name: 'Haida Gwaii Islands', category: 'Regular', lat: 53.255510249854304, lon: -132.08947116604432, bands: [[0, 200, 230, 230], [200, 350, 230, 20], [350, 450, 20, 0]] },
     { name: 'Charlotte Amalie, USVI', category: 'Regular', lat: 18.34185490966226, lon: -64.9316281681369, bands: [[0, 1, 300, 300], [1, 10, 300, 100], [10, 25, 100, 20], [25, 40, 20, 0]] },
@@ -214,7 +240,6 @@ function initCltFieldSystem() {
     { name: 'Charlottetown, PEI', category: 'Regular', lat: 46.23722371252871, lon: -63.12970137942366, bands: [[0, 2, 350, 350], [2, 8, 350, 100], [8, 24, 100, 25], [24, 128, 25, 0]] },
     { name: 'Charlottesville, VA', category: 'Regular', lat: 38.0292848205594, lon: -78.47616344837674, bands: [[0, 3, 450, 450], [3, 30, 450, 200], [30, 120, 200, 20], [120, 360, 20, 0]] },
     { name: 'Queen Charlotte Burial Place', category: 'Secret', lat: 51.4836838439432, lon: -0.60668429494321, bands: [[0, 0.1, 14000, 14000], [0.1, 1, 14000, 3000], [1, 3, 3000, 900], [3, 14, 900, 200], [14, 50, 200, 40], [50, 250, 40, 0]] },
-    { name: 'CHARLOTTE CHARLOTTE CHARLOTTE', category: 'Secret', lat: 49.27296428756112, lon: -123.06937964843168, bands: [[0, 0.001, 350000, 300000], [0.001, 0.012, 300000, 1000], [0.012, 0.085, 1000, 0]], revealThreshold: 65000, hiddenName: '???????????', startClock: '10:00', endClock: '19:00' },
   ];
 
   const state = {
@@ -234,10 +259,7 @@ function initCltFieldSystem() {
     autoFieldCounter: 1,
     simulatorUnlocked: false,
     unitSystem: 'metric',
-    sensorBroken: false,
-    overloadStartMs: null,
-    repairInProgress: false,
-    repairCooldownUntilMs: 0
+    uploadedTimeLimitsEnabled: true,
   };
 
   const el = {
@@ -272,6 +294,7 @@ function initCltFieldSystem() {
     simLatitude: document.getElementById('simLatitude'),
     simLongitude: document.getElementById('simLongitude'),
     simTeleport: document.getElementById('simTeleport'),
+    simTimeLimitsToggle: document.getElementById('simTimeLimitsToggle'),
     simStatus: document.getElementById('simStatus'),
     fieldName: document.getElementById('fieldName'),
     fieldIntensity: document.getElementById('fieldIntensity'),
@@ -287,9 +310,6 @@ function initCltFieldSystem() {
     fieldUploaderStatus: document.getElementById('fieldUploaderStatus'),
     uploadedFieldList: document.getElementById('uploadedFieldList'),
     fieldDayToggles: Array.from(document.querySelectorAll('.field-day-toggle')),
-    sensorFailureOverlay: document.getElementById('sensorFailureOverlay'),
-    repairAttemptBtn: document.getElementById('sensorRepairAttempt'),
-    repairStatus: document.getElementById('sensorRepairStatus')
   };
 
   const fallbackCoord = coordinateDefinitions.find((d) => d.name === 'Geolocation Denied Fallback');
@@ -552,8 +572,7 @@ function initCltFieldSystem() {
   }
 
   function applySecretCltDamping(rawStrength) {
-    if (rawStrength <= 1000) return rawStrength;
-    return 1000 + Math.pow(rawStrength - 1000, 0.62) * 8;
+    return Math.max(0, Number(rawStrength) || 0);
   }
 
   function initFieldUploader() {
@@ -586,7 +605,7 @@ function initCltFieldSystem() {
     });
 
     el.fieldSave?.addEventListener('click', async () => {
-      const intensity = Math.min(50000, Math.max(1, Number(el.fieldIntensity?.value || 0)));
+      const intensity = Math.min(1000000, Math.max(1, Number(el.fieldIntensity?.value || 0)));
       const maxRangeM = Math.min(100, Math.max(1, Number(el.fieldRange?.value || 0)));
 
       let lat = parseCoordinateInput(el.fieldLatitude?.value);
@@ -652,14 +671,42 @@ function initCltFieldSystem() {
     });
   }
 
+  function getTimeLimitToggleLabel() {
+    const enabled = state.uploadedTimeLimitsEnabled;
+    return enabled
+      ? 'Disable Uploaded Field Time Limits'
+      : 'Enable Uploaded Field Time Limits';
+  }
+
+  function refreshTimeLimitToggleButton() {
+    if (!el.simTimeLimitsToggle) return;
+    const enabled = state.uploadedTimeLimitsEnabled;
+    el.simTimeLimitsToggle.textContent = getTimeLimitToggleLabel();
+    el.simTimeLimitsToggle.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+  }
+
+  function toggleSimulatorTimeLimits() {
+    const next = !state.uploadedTimeLimitsEnabled;
+    state.uploadedTimeLimitsEnabled = next;
+    refreshTimeLimitToggleButton();
+
+    const mode = next ? 'enabled' : 'disabled';
+    if (el.simStatus) {
+      el.simStatus.textContent = `Simulator time limits ${mode} for uploaded fields.`;
+    }
+
+    if (state.lastBase) {
+      const calc = computeField(state.lastBase.lat, state.lastBase.lon);
+      renderLiveTelemetry(state.lastBase.lat, state.lastBase.lon, state.lastBase.accuracy, calc);
+    }
+  }
+
+
   function computeField(lat, lon) {
     const nowMs = Date.now();
     const baseEvaluations = magneticSources.map((source) => {
       const distance = haversineKm(lat, lon, source.lat, source.lon);
       let strength = interpolatedStrength(distance, source.bands);
-      if (source.startClock || source.endClock || (Array.isArray(source.daysOfWeek) && source.daysOfWeek.length)) {
-        strength *= customFieldTimeFactor(source, nowMs);
-      }
       if (source.category === 'Secret') strength = applySecretCltDamping(strength);
       return { ...source, distance, strength, inField: strength > 0 };
     });
@@ -669,7 +716,9 @@ function initCltFieldSystem() {
       const fieldLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
       const distance = haversineKm(lat, lon, fieldLat, fieldLon);
       const distanceM = distance * 1000;
-      const strength = customFieldStrength(field, distanceM, nowMs);
+      const strength = state.uploadedTimeLimitsEnabled
+        ? customFieldStrength(field, distanceM, nowMs)
+        : customFieldStrength({ ...field, startClock: null, endClock: null, daysOfWeek: [] }, distanceM, nowMs);
       return {
         name: field.name,
         category: 'Secret',
@@ -763,12 +812,22 @@ function initCltFieldSystem() {
   function getTelemetryErrorChancePercent(cltValue) {
     const clt = Number(cltValue);
     if (!Number.isFinite(clt) || clt < 50000) return 0;
-    const steps = Math.floor((clt - 50000) / 5000) + 1;
+    const steps = Math.floor((clt - 50000) / 20000) + 1;
     return Math.max(0, Math.min(100, steps * 5));
   }
 
   function shouldOutputTelemetryError(cltValue) {
     return Math.random() * 100 < getTelemetryErrorChancePercent(cltValue);
+  }
+
+
+  function getCltDriftMaxAbs(cltValue) {
+    const clt = Number(cltValue);
+    const steps = (!Number.isFinite(clt) || clt < 50000)
+      ? 0
+      : (Math.floor((clt - 50000) / 5000) + 1);
+    const percent = 5 + steps;
+    return Math.max(0, percent / 100);
   }
 
   function getSourceKey(source) {
@@ -779,11 +838,11 @@ function initCltFieldSystem() {
   function getSourceDisplayName(source, cltValue) {
     const value = Number(cltValue) || 0;
     if (source?.hiddenName && value < Number(source.revealThreshold || 0)) return source.hiddenName;
-    if (source.category === 'Secret' && value < 100) return 'Unknown Source';
+    if (source.category === 'Secret' && !source?.uploaded && value < 100) return 'Unknown Source';
     return source.name || 'Unknown Source';
   }
 
-  function renderContributionTables(calc, liveClt, liveTungsten, liveBreakdown = null) {
+  function renderContributionTables(calc, liveClt, liveTungsten, liveBreakdown = null, hasTelemetryError = false) {
     const cltBody = el.cltContributionTable?.querySelector('tbody');
     const tungstenBody = el.tungstenContributionTable?.querySelector('tbody');
     if (!cltBody || !tungstenBody) return;
@@ -804,8 +863,9 @@ function initCltFieldSystem() {
       cltBody.innerHTML = '<tr><td>None</td><td>0.00</td></tr>';
     } else {
       cltBody.innerHTML = cltRows.map((row) => {
-        const name = getSourceDisplayName(row.source, row.value);
-        return `<tr><td>${name}</td><td>${row.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td></tr>`;
+        const name = hasTelemetryError ? 'ERROR' : getSourceDisplayName(row.source, row.value);
+        const valueLabel = hasTelemetryError ? 'ERROR' : row.value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+        return `<tr><td>${name}</td><td>${valueLabel}</td></tr>`;
       }).join('');
     }
 
@@ -818,71 +878,17 @@ function initCltFieldSystem() {
     } else {
       tungstenBody.innerHTML = tungstenRows.map((row) => {
         if (row.source?.name === 'Ambient Baseline') {
-          return `<tr><td>Ambient Baseline</td><td>${row.value.toFixed(6)}</td></tr>`;
+          const name = hasTelemetryError ? 'ERROR' : 'Ambient Baseline';
+          const valueLabel = hasTelemetryError ? 'ERROR' : row.value.toFixed(6);
+          return `<tr><td>${name}</td><td>${valueLabel}</td></tr>`;
         }
-        const name = getSourceDisplayName(row.source, cltByKey.get(getSourceKey(row.source)) || 0);
-        return `<tr><td>${name}</td><td>${row.value.toFixed(6)}</td></tr>`;
+        const name = hasTelemetryError ? 'ERROR' : getSourceDisplayName(row.source, cltByKey.get(getSourceKey(row.source)) || 0);
+        const valueLabel = hasTelemetryError ? 'ERROR' : row.value.toFixed(6);
+        return `<tr><td>${name}</td><td>${valueLabel}</td></tr>`;
       }).join('');
     }
   }
 
-  function showSensorFailureOverlay(show) {
-    if (!el.sensorFailureOverlay) return;
-    el.sensorFailureOverlay.hidden = !show;
-  }
-
-  function breakSensor() {
-    if (state.sensorBroken) return;
-    state.sensorBroken = true;
-    state.overloadStartMs = null;
-    setStatus('Uh Oh! Looks like the CLT Field sensor broke.', 'SENSOR FAILURE');
-    if (el.repairStatus) el.repairStatus.textContent = 'Sensor offline. Move farther away, then attempt repair.';
-    showSensorFailureOverlay(true);
-    stopLiveTracking();
-  }
-
-  async function attemptSensorRepair() {
-    if (state.repairInProgress || !state.sensorBroken) return;
-    state.repairInProgress = true;
-    if (el.repairAttemptBtn) {
-      el.repairAttemptBtn.disabled = true;
-      el.repairAttemptBtn.textContent = 'Attempting Repair...';
-    }
-    if (el.repairStatus) el.repairStatus.textContent = 'Repair attempt in progress...';
-
-    await new Promise((resolve) => window.setTimeout(resolve, 3000));
-
-    let currentClt = Number(state.lastBase?.liveClt) || 0;
-    const coords = await resolveCurrentCoords();
-    if (coords) {
-      const calc = computeField(coords.lat, coords.lon);
-      currentClt = Number(calc.totalField) || currentClt;
-    }
-
-    const repairChance = Math.max(0, Math.min(100, 100 - (currentClt * 0.001)));
-    if (el.repairStatus) {
-      el.repairStatus.textContent = `Repair chance: ${repairChance.toFixed(1)}% at ${currentClt.toLocaleString(undefined, { maximumFractionDigits: 2 })} CLT`;
-    }
-    const ok = Math.random() * 100 < repairChance;
-
-    if (ok) {
-      state.sensorBroken = false;
-      state.overloadStartMs = null;
-      state.repairCooldownUntilMs = Date.now() + 5000;
-      showSensorFailureOverlay(false);
-      setStatus('Sensor repaired. Restarting live tracking...', 'LOCATION ACCESS REQUIRED');
-      startLiveTracking();
-    } else {
-      setStatus('Repair failed. Move to a less powerful spot and try again.', 'SENSOR FAILURE');
-      showSensorFailureOverlay(true);
-    }
-
-    state.repairInProgress = false;
-    if (el.repairAttemptBtn) {
-      el.repairAttemptBtn.disabled = false;
-      el.repairAttemptBtn.textContent = 'Attempt Repair';
-    }
-  }
 
   function renderHistory() {
     if (!el.contributors) return;
@@ -898,8 +904,11 @@ function initCltFieldSystem() {
       const idvlLabel = item.nearestIdvlName
         ? `${item.nearestIdvlName} (${formatDistanceShort(item.nearestIdvlDistanceKm)})`
         : 'none';
-      return `${item.time} | ${item.clt.toLocaleString(undefined, { maximumFractionDigits: 2 })} CLT | ` +
-        `Tungsten ${item.tungsten.toFixed(5)} mg/m³ | Nearest GEO ${geoLabel} | Nearest IDVL ${idvlLabel}`;
+      const cltLabel = item.cltError ? 'ERROR' : `${item.clt.toLocaleString(undefined, { maximumFractionDigits: 2 })} CLT`;
+      const tungstenLabel = item.tungstenError ? 'ERROR' : `${item.tungsten.toFixed(5)} mg/m³`;
+      const geoValue = geoLabel;
+      const idvlValue = item.uploadedDistanceError ? 'ERROR' : idvlLabel;
+      return `${item.time} | ${cltLabel} | Tungsten ${tungstenLabel} | Nearest GEO ${geoValue} | Nearest IDVL ${idvlValue}`;
     }).join('\n');
   }
 
@@ -909,7 +918,7 @@ function initCltFieldSystem() {
 
     (calc.evaluations || []).forEach((source) => {
       const key = getSourceKey(source);
-      const cltMargin = smoothDrift(state.cltSourceMargins[key] || 0, 0.08);
+      const cltMargin = smoothDrift(state.cltSourceMargins[key] || 0, getCltDriftMaxAbs(calc.totalField));
       const tungstenMargin = smoothDrift(state.tungstenSourceMargins[key] || 0, 0.2);
       state.cltSourceMargins[key] = cltMargin;
       state.tungstenSourceMargins[key] = tungstenMargin;
@@ -938,33 +947,28 @@ function initCltFieldSystem() {
     const liveTungsten = tungstenBySource.reduce((sum, row) => sum + row.value, 0);
     const liveBreakdown = { cltBySource, tungstenBySource };
 
-    state.overloadStartMs = null;
-
     state.lastBase = { lat, lon, accuracy, calc, liveClt, liveTungsten, liveBreakdown, timestamp: Date.now() };
 
     const cltError = shouldOutputTelemetryError(liveClt);
     const tungstenError = shouldOutputTelemetryError(liveClt);
-    const geoDistanceError = shouldOutputTelemetryError(liveClt);
     const uploadedDistanceError = shouldOutputTelemetryError(liveClt);
     const gpsError = shouldOutputTelemetryError(liveClt);
 
     if (el.totalField) el.totalField.textContent = cltError
-      ? 'error'
+      ? 'ERROR'
       : liveClt.toLocaleString(undefined, { maximumFractionDigits: 2 });
     if (el.tungsten) el.tungsten.textContent = tungstenError
-      ? 'error'
+      ? 'ERROR'
       : `${liveTungsten.toFixed(5)} mg/m³`;
     if (el.geoDistance) {
-      el.geoDistance.textContent = geoDistanceError
-        ? 'error'
-        : (calc.nearestGeo ? formatDistancePrimary(calc.nearestGeo.distance) : formatDistancePrimary(NaN));
+      el.geoDistance.textContent = calc.nearestGeo ? formatDistancePrimary(calc.nearestGeo.distance) : formatDistancePrimary(NaN);
     }
     if (el.geoName) {
       el.geoName.textContent = calc.nearestGeo ? calc.nearestGeo.name : '—';
     }
     if (el.uploadedDistance) {
       el.uploadedDistance.textContent = uploadedDistanceError
-        ? 'error'
+        ? 'ERROR'
         : (calc.nearestUploaded ? formatDistancePrimary(calc.nearestUploaded.distance) : formatDistancePrimary(NaN));
     }
     if (el.nearestSource) {
@@ -973,7 +977,7 @@ function initCltFieldSystem() {
     if (el.gpsAccuracy) {
       const meters = Number(accuracy);
       el.gpsAccuracy.textContent = gpsError
-        ? 'error'
+        ? 'ERROR'
         : (Number.isFinite(meters) ? `${meters.toFixed(1)} m` : '—');
     }
 
@@ -988,23 +992,26 @@ function initCltFieldSystem() {
       nearestGeoName: calc.nearestGeo ? calc.nearestGeo.name : null,
       nearestGeoDistanceKm: calc.nearestGeo ? calc.nearestGeo.distance : NaN,
       nearestIdvlName: calc.nearestUploaded ? calc.nearestUploaded.name : null,
-      nearestIdvlDistanceKm: calc.nearestUploaded ? calc.nearestUploaded.distance : NaN
+      nearestIdvlDistanceKm: calc.nearestUploaded ? calc.nearestUploaded.distance : NaN,
+      cltError,
+      tungstenError,
+      uploadedDistanceError
     });
     state.history = state.history.slice(0, 50);
     renderHistory();
-    renderContributionTables(calc, liveClt, liveTungsten, liveBreakdown);
+    renderContributionTables(calc, liveClt, liveTungsten, liveBreakdown, cltError || tungstenError);
 
     if (el.scanBtn) el.scanBtn.disabled = false;
   }
 
   function renderScanSheet(result) {
     if (!el.scanSheet) return;
-    const withError = (value) => (shouldOutputTelemetryError(result.clt) ? 'error' : value);
+    const withError = (value) => (shouldOutputTelemetryError(result.clt) ? 'ERROR' : value);
     el.scanSheet.innerHTML = [
       `CLT Field: ${withError(result.clt.toLocaleString(undefined, { maximumFractionDigits: 4 }))}`,
       `Tungsten: ${withError(`${result.tungsten.toFixed(6)} mg/m³`)}`,
       `Coordinates: ${withError(`${result.lat.toFixed(8)}, ${result.lon.toFixed(8)}`)}`,
-      `Timestamp: ${new Date(result.timestamp).toLocaleString()}`,
+      `Timestamp: ${withError(new Date(result.timestamp).toLocaleString())}`,
       `Nearest Source: ${withError(result.sourceName)}`,
       `Distance to Source: ${withError(formatDistanceShort(result.distanceKm))}`
     ].map((line) => `<li>${line}</li>`).join('');
@@ -1017,6 +1024,7 @@ function initCltFieldSystem() {
     }
 
     if (state.scanTimer) window.clearInterval(state.scanTimer);
+    refreshTimeLimitToggleButton();
     if (el.scanBtn) el.scanBtn.disabled = true;
 
     const start = Date.now();
@@ -1179,7 +1187,8 @@ function initCltFieldSystem() {
 
     state.simulatorUnlocked = true;
     if (el.simCoordinateBlock) el.simCoordinateBlock.hidden = false;
-    if (el.simStatus) el.simStatus.textContent = 'Simulator unlocked. Enter teleport coordinates.';
+    refreshTimeLimitToggleButton();
+    if (el.simStatus) el.simStatus.textContent = `Simulator unlocked. Enter teleport coordinates. Uploaded field time limits are ${state.uploadedTimeLimitsEnabled ? 'enabled' : 'disabled'}.`;
   }
 
   function initFallbackTools() {
@@ -1239,14 +1248,14 @@ function initCltFieldSystem() {
     setTimeout(() => { if (el.copyLogs) el.copyLogs.textContent = 'Copy Logs'; }, 1500);
   });
 
-  el.repairAttemptBtn?.addEventListener('click', attemptSensorRepair);
-
   initFallbackTools();
   initFieldUploader();
   el.scanBtn?.addEventListener('click', runAccurateScan);
   el.simUnlock?.addEventListener('click', unlockSimulator);
   el.simTeleport?.addEventListener('click', activateSimulatorTeleport);
+  el.simTimeLimitsToggle?.addEventListener('click', toggleSimulatorTimeLimits);
 
+  refreshTimeLimitToggleButton();
   if (el.scanBtn) el.scanBtn.disabled = true;
   renderHistory();
   renderContributionTables(null, 0, 0);
@@ -1269,6 +1278,256 @@ function initCltFieldSystem() {
     el.lonInput.value = String(fallbackCoord.lon);
   }
 }
+
+
+function initFieldCalculator() {
+  const app = document.getElementById('fieldCalculatorApp');
+  if (!app) return;
+
+  const datasets = {
+    us: {
+      label: 'United States',
+      ranks: {
+        2024: 4, 2023: 3, 2022: 3, 2021: 3, 2020: 4, 2019: 6, 2018: 6, 2017: 7, 2016: 7, 2015: 9,
+        2014: 10, 2013: 11, 2012: 19, 2011: 27, 2010: 46, 2009: 68, 2008: 86, 2007: 101, 2006: 125,
+        2005: 135, 2004: 170, 2003: 182, 2002: 204, 2001: 229, 2000: 289, 1999: 307, 1998: 304,
+        1997: 301, 1996: 302, 1995: 275, 1994: 291, 1993: 293, 1992: 286, 1991: 287, 1990: 287,
+        1989: 292, 1988: 288, 1987: 292, 1986: 286, 1985: 265, 1984: 304, 1983: 283, 1982: 308,
+        1981: 290, 1980: 292, 1979: 285, 1978: 278, 1977: 265, 1976: 245, 1975: 224, 1974: 203,
+        1973: 194, 1972: 188, 1971: 176, 1970: 166, 1969: 160, 1968: 163, 1967: 163, 1966: 151,
+        1965: 153, 1964: 158, 1963: 153, 1962: 154, 1961: 147, 1960: 151, 1959: 144, 1958: 140,
+        1957: 133, 1956: 133, 1955: 129, 1954: 113, 1953: 100, 1952: 89, 1951: 84, 1950: 80,
+        1949: 71, 1948: 69, 1947: 68, 1946: 64, 1945: 55, 1944: 50, 1943: 47, 1942: 51, 1941: 55,
+        1940: 55, 1939: 66, 1938: 70, 1937: 67, 1936: 61, 1935: 65, 1934: 72, 1933: 79, 1932: 74,
+        1931: 75, 1930: 75, 1929: 73, 1928: 72, 1927: 75, 1926: 78, 1925: 77, 1924: 80, 1923: 77,
+        1922: 76, 1921: 79, 1920: 79, 1919: 79, 1918: 78, 1917: 76, 1916: 80, 1915: 81, 1914: 88,
+        1913: 87, 1912: 91, 1911: 95, 1910: 99, 1909: 94, 1908: 98, 1907: 105, 1906: 103, 1905: 104,
+        1904: 110, 1903: 115, 1902: 114, 1901: 105, 1900: 110, 1899: 104, 1898: 105, 1897: 104,
+        1896: 103, 1895: 106, 1894: 100, 1893: 100, 1892: 98, 1891: 101, 1890: 98, 1889: 89, 1888: 88,
+        1887: 91, 1886: 94, 1885: 94, 1884: 86, 1883: 92, 1882: 100, 1881: 95, 1880: 91
+      }
+    },
+    ca: {
+      label: 'Canada',
+      ranks: {
+        2023: 2, 2022: 2, 2021: 3, 2020: 3, 2019: 2, 2018: 3, 2017: 3, 2016: 3, 2015: 3, 2014: 6,
+        2013: 6, 2012: 10, 2011: 9, 2010: 13, 2009: 20, 2008: 26, 2007: 29, 2006: 28, 2005: 47,
+        2004: 57, 2003: 77, 2002: 70, 2001: 63, 2000: 86, 1945: 97, 1944: 97, 1942: 95, 1921: 97
+      }
+    },
+    gb_ew: {
+      label: 'UK (England/Wales)',
+      ranks: {
+        2024: 23, 2023: 23, 2022: 26, 2021: 25, 2020: 20, 2019: 18, 2018: 12, 2017: 12, 2016: 12,
+        2015: 25, 2014: 23, 2013: 21, 2012: 20, 2011: 21, 2010: 20, 2009: 14, 2008: 13, 2007: 12,
+        2006: 12, 2005: 9, 2004: 8, 2003: 9, 2002: 7, 2001: 6, 2000: 5, 1999: 6, 1998: 6, 1997: 7,
+        1996: 7
+      }
+    },
+    au: {
+      label: 'Australia',
+      ranks: {
+        2024: 1, 2023: 5, 2022: 1, 2021: 3, 2020: 3, 2019: 1, 2018: 1, 2017: 1, 2016: 2, 2015: 1,
+        2014: 3, 2013: 1, 2012: 1, 2011: 7, 2010: 5, 2009: 3, 2008: 6, 2007: 7, 2006: 2, 2005: 3,
+        2004: 6, 2003: 12, 2002: 14, 2001: 16, 2000: 26, 1999: 39, 1998: 54, 1997: 65, 1996: 87,
+        1995: 83, 1994: 79, 1993: 94, 1992: 67, 1990: 97, 1989: 89
+      }
+    }
+  };
+
+  const countries = Object.entries(datasets).map(([code, value]) => ({ code, label: value.label }));
+
+  const el = {
+    name: document.getElementById('fcName'),
+    country: document.getElementById('fcCountry'),
+    year: document.getElementById('fcYear'),
+    calculate: document.getElementById('fcCalculate'),
+    runLoader: document.getElementById('fcRunLoader'),
+    runBar: document.getElementById('fcRunBar'),
+    runStatus: document.getElementById('fcRunStatus'),
+    result: document.getElementById('fcResult')
+  };
+
+  if (el.country) {
+    el.country.innerHTML = countries.map((country) => `<option value="${country.code}">${country.label}</option>`).join('');
+    el.country.value = 'us';
+  }
+
+  function getSelectedLabel(code) {
+    return countries.find((c) => c.code === code)?.label || 'Unknown';
+  }
+
+  function getDatasetYears(countryCode) {
+    const ranks = datasets[countryCode]?.ranks || {};
+    return Object.keys(ranks).map(Number).sort((a, b) => b - a);
+  }
+
+  function getRankFromLocalData(countryCode, year) {
+    const ranks = datasets[countryCode]?.ranks || {};
+    const years = getDatasetYears(countryCode);
+    if (!years.length) return null;
+    if (Number.isInteger(year)) return ranks[year] ?? null;
+    return ranks[years[0]] ?? null;
+  }
+
+  function normalizeYear() {
+    const raw = String(el.year?.value || '').trim();
+    if (!raw) return null;
+    const parsed = Number(raw);
+    if (!Number.isInteger(parsed) || parsed < 1880 || parsed > 2100) return null;
+    return parsed;
+  }
+
+  function renderResult({ status = 'idle', title = 'Result', primaryLabel = '', primaryValue = '', metrics = [], lines = [], nameValue = '', nameIsAlert = false } = {}) {
+    if (!el.result) return;
+    el.result.classList.toggle('is-success', status === 'success');
+    el.result.classList.toggle('is-warning', status === 'warning');
+    el.result.classList.toggle('is-error', status === 'error');
+
+    const primaryHtml = primaryValue
+      ? `<div class="field-result-primary"><span class="field-result-primary-label">${primaryLabel}</span><strong>${primaryValue}</strong></div>`
+      : '';
+    const metricsHtml = metrics.length
+      ? `<dl class="field-result-metrics">${metrics.map((item) => `<div class="metric"><dt>${item.label}</dt><dd>${item.value}</dd></div>`).join('')}</dl>`
+      : '';
+    const nameHtml = nameValue
+      ? `<p class="field-result-name ${nameIsAlert ? 'is-alert' : ''}">Name: ${nameValue}</p>`
+      : '';
+    const linesHtml = lines.map((line) => `<p>${line}</p>`).join('');
+
+    el.result.innerHTML = `<h2>${title}</h2>${primaryHtml}${metricsHtml}${nameHtml}${linesHtml}`;
+  }
+
+  function runCalculationLoader(durationMs = 1800) {
+    if (!el.runLoader || !el.runBar || !el.runStatus) return Promise.resolve();
+
+    el.runLoader.hidden = false;
+    el.runBar.style.width = '0%';
+
+    const phases = [
+      { at: 0.08, label: 'Finding name rankings...' },
+      { at: 0.36, label: 'Calibrating formulas...' },
+      { at: 0.68, label: 'Ranking Charlottes...' },
+      { at: 0.94, label: 'Done!' }
+    ];
+
+    return new Promise((resolve) => {
+      const start = performance.now();
+
+      function frame(now) {
+        const t = Math.min((now - start) / durationMs, 1);
+        el.runBar.style.width = `${t * 100}%`;
+
+        let label = phases[0].label;
+        for (const phase of phases) if (t >= phase.at) label = phase.label;
+        el.runStatus.textContent = label;
+
+        if (t < 1) requestAnimationFrame(frame);
+        else {
+          el.runLoader.hidden = true;
+          resolve();
+        }
+      }
+
+      requestAnimationFrame(frame);
+    });
+  }
+
+  async function calculate() {
+    const enteredName = String(el.name?.value || '').trim();
+    const countryCode = String(el.country?.value || 'us');
+    const year = normalizeYear();
+    const hasYearInput = String(el.year?.value || '').trim().length > 0;
+
+    if (!enteredName) {
+      renderResult({ status: 'warning', title: 'Missing name', lines: ['Please enter a name before calculating.'] });
+      return;
+    }
+
+    if (hasYearInput && year === null) {
+      renderResult({ status: 'warning', title: 'Invalid year', lines: ['Enter a valid year between 1880 and 2100, or leave it blank.'] });
+      return;
+    }
+
+    const isCharlotte = enteredName.toLowerCase() === 'charlotte';
+    if (!isCharlotte) {
+      renderResult({
+        status: 'success',
+        title: 'Calculated CLT Result',
+        primaryLabel: 'CLT',
+        primaryValue: '0',
+        metrics: [
+          { label: 'Rank (n)', value: '—' },
+          { label: 'Year', value: String(year || '—') },
+          { label: 'Dataset', value: getSelectedLabel(countryCode) }
+        ],
+        nameValue: enteredName,
+        nameIsAlert: true,
+        lines: ['Formula: 32 + 8n']
+      });
+      return;
+    }
+
+    if (el.calculate) el.calculate.disabled = true;
+    renderResult({ status: 'idle', title: 'Computing', lines: ['Running calculation...'] });
+
+    try {
+      const loaderPromise = runCalculationLoader();
+      const rank = getRankFromLocalData(countryCode, year);
+      const years = getDatasetYears(countryCode);
+      await loaderPromise;
+
+      if (!rank) {
+        renderResult({
+          status: 'warning',
+          title: 'No rank data found',
+          lines: [
+            `No ${getSelectedLabel(countryCode)} Charlotte rank is available for year ${year}.`,
+            years.length ? `Available years: ${years[years.length - 1]}-${years[0]}.` : 'No dataset years available.'
+          ]
+        });
+        return;
+      }
+
+      const clt = 32 + (8 * rank);
+      renderResult({
+        status: 'success',
+        title: 'Calculated CLT Result',
+        primaryLabel: 'CLT',
+        primaryValue: clt.toLocaleString(),
+        metrics: [
+          { label: 'Rank (n)', value: rank.toLocaleString() },
+          { label: 'Year', value: String(year || years[0]) },
+          { label: 'Dataset', value: getSelectedLabel(countryCode) }
+        ],
+        nameValue: enteredName,
+        lines: [
+          'Formula: 32 + 8n'
+        ]
+      });
+    } catch (error) {
+      renderResult({
+        status: 'error',
+        title: 'Calculation failed',
+        lines: [`Unable to compute CLT from local rank data (${String(error?.message || 'unknown error')}).`]
+      });
+    } finally {
+      if (el.calculate) el.calculate.disabled = false;
+    }
+  }
+
+  el.calculate?.addEventListener('click', calculate);
+  [el.name, el.year].forEach((inputEl) => {
+    inputEl?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        calculate();
+      }
+    });
+  });
+}
+
+initFieldCalculator();
 
 initCltFieldSystem();
 

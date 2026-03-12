@@ -1660,33 +1660,201 @@ pre {
 }
 
 
-.sensor-failure-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(12, 2, 20, 1);
+
+.calculator-loader .loader-shell {
+  background:
+    radial-gradient(circle at 8% 8%, rgba(255, 79, 163, 0.25), transparent 46%),
+    linear-gradient(160deg, rgba(114, 18, 95, 0.95), rgba(42, 10, 59, 0.95));
+}
+
+.field-calculator-shell {
+  padding: clamp(1rem, 2.2vw, 1.4rem);
+}
+
+.field-calculator-hero {
+  border: 1px solid rgba(255, 79, 163, 0.38);
+  border-radius: 18px;
+  padding: clamp(0.9rem, 2vw, 1.2rem);
+  background: linear-gradient(145deg, rgba(64, 16, 86, 0.72), rgba(35, 9, 56, 0.72));
+}
+
+.field-calculator-copy {
+  margin: 0.55rem 0 0;
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+
+.field-calculator-panel {
+  margin-top: 0.95rem;
+  border: 1px solid rgba(255, 79, 163, 0.32);
+  border-radius: 18px;
+  padding: clamp(0.9rem, 2vw, 1.15rem);
+  background: rgba(27, 6, 43, 0.68);
+}
+
+.field-calculator-grid {
   display: grid;
-  place-items: center;
-  z-index: 60;
-  padding: 1rem;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
 }
 
-.sensor-failure-card {
-  max-width: 760px;
-  width: 100%;
-  border: 1px solid rgba(255, 79, 163, 0.6);
-  border-radius: 16px;
-  padding: 1rem;
-  background: rgba(42, 12, 68, 0.94);
+.field-calculator-grid label {
+  display: grid;
+  gap: 0.38rem;
+  font-weight: 700;
+  color: var(--text-soft);
 }
 
-.sensor-failure-card h2 {
-  font-family: "Public Sans", sans-serif;
+.field-calculator-grid input,
+.field-calculator-grid select {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 79, 163, 0.48);
+  background: rgba(18, 3, 29, 0.8);
   color: var(--text);
-  font-size: clamp(1.1rem, 2.4vw, 1.4rem);
-  margin-bottom: 0.8rem;
+  padding: 0.68rem 0.8rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.sensor-failure-card p {
-  margin: 0 0 0.8rem;
-  color: var(--text-muted);
+.field-calculator-grid input:focus,
+.field-calculator-grid select:focus {
+  outline: none;
+  border-color: rgba(255, 79, 163, 0.95);
+  box-shadow: 0 0 0 3px rgba(255, 79, 163, 0.18);
+}
+
+.field-calculator-panel .clt-actions {
+  margin-top: 0.9rem;
+}
+
+.field-run-loader {
+  margin-top: 1rem;
+  padding: 0.85rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 79, 163, 0.4);
+  background: rgba(30, 7, 46, 0.72);
+}
+
+.field-run-loader p {
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+}
+
+.field-result {
+  margin-top: 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 79, 163, 0.36);
+  background: rgba(24, 5, 38, 0.84);
+  padding: 1rem;
+}
+
+.field-result h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+
+.field-result-primary {
+  margin-top: 0.7rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(255, 79, 163, 0.5);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(88, 20, 116, 0.62), rgba(46, 12, 66, 0.68));
+  text-align: center;
+}
+
+.field-result-primary-label {
+  display: block;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-soft);
+}
+
+.field-result-primary strong {
+  display: block;
+  margin-top: 0.22rem;
+  font-size: clamp(1.9rem, 4vw, 2.7rem);
+  line-height: 1.05;
+  color: #ffd2f0;
+}
+
+.field-result-metrics {
+  margin: 0.7rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.55rem;
+}
+
+.field-result-metrics .metric {
+  margin: 0;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid rgba(255, 79, 163, 0.35);
+  border-radius: 12px;
+  background: rgba(53, 13, 78, 0.45);
+}
+
+.field-result-metrics dt {
+  margin: 0;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-soft);
+}
+
+.field-result-metrics dd {
+  margin: 0.28rem 0 0;
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.field-result p {
+  margin: 0.45rem 0 0;
+  color: var(--text-soft);
+}
+
+.field-result.is-success {
+  border-color: rgba(255, 79, 163, 0.78);
+  box-shadow: 0 0 0 1px rgba(255, 79, 163, 0.3);
+}
+
+.field-result.is-warning {
+  border-color: rgba(255, 213, 90, 0.72);
+  box-shadow: 0 0 0 1px rgba(255, 213, 90, 0.24);
+}
+
+.field-result.is-error {
+  border-color: rgba(255, 105, 136, 0.72);
+  box-shadow: 0 0 0 1px rgba(255, 105, 136, 0.22);
+}
+
+
+.beta-tag {
+  display: inline-block;
+  margin-left: 0.45rem;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 79, 163, 0.75);
+  background: rgba(255, 79, 163, 0.2);
+  color: #ffd2f0;
+  font-size: 0.68em;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+}
+
+.field-note {
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+.field-result-name {
+  margin: 0.55rem 0 0;
+  font-weight: 700;
+}
+
+.field-result-name.is-alert {
+  color: #ff7a95;
 }

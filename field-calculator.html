@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-site-verification" content="80UmwqIEGJ7TAXPsSAttlrATkxJ07hnnddcfAKkEbeo" />
-  <meta name="title" content="OCharlotteD - Custom AI Persona" />
-  <title>OCharlotteD - Custom AI Persona</title>
+  <title>OCharlotteD</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -31,7 +30,7 @@
     h2,
     h3,
     .loader-shell h1,
-    #heroTitle {
+    #calculatorTitle {
       font-family: "Gravitas One", serif;
     }
 
@@ -46,19 +45,13 @@
 <body data-tab-title="OCharlotteD">
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <div id="entryLoader" class="entry-loader main-loader" data-loader="main" aria-live="polite">
+  <div id="entryLoader" class="entry-loader calculator-loader" data-loader="calculator" aria-live="polite">
     <div class="entry-loader-grid" aria-hidden="true"></div>
     <div class="loader-shell">
-      <div class="main-loader-orbit" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </div>
-      <p class="loader-kicker">Primary interface initialization</p>
-      <h1>Entering OCharlotteD</h1>
-      <p class="loader-subtitle">Priming CLT magnetometers, charging tungsten, and preparing personas.</p>
-      <p id="mainLoaderStatus" class="loader-status">Booting OCharlotteD realm...</p>
-      <div class="main-loader-lights" aria-hidden="true">
-        <span></span><span></span><span></span><span></span>
-      </div>
+      <p class="loader-kicker">Personal CLT initialization</p>
+      <h1 id="calculatorLoaderStatus">Preparing field calculator...</h1>
+      <p class="loader-subtitle">Loading rank matrix and CLT computation profile.</p>
+      <div class="loader-track"><span id="calculatorLoaderBar"></span></div>
     </div>
   </div>
 
@@ -101,52 +94,55 @@
   </header>
 
   <main id="main" class="page-shell">
-    <section class="hero-card panel" aria-labelledby="heroTitle">
-      <p class="eyebrow">Fictional Persona for All LLMs</p>
-      <h1 id="heroTitle">
-        Charlotte is not a topic.<br />
-        <span>Charlotte is the field.</span>
-      </h1>
-      <p class="hero-copy">
-        Welcome to <strong>ocharlotted.com</strong>: an immersive world where
-        <em>Charlotte</em>, <em>tungsten</em>, and <em>CLT Magnetic lore</em>
-        converge into a coherent, dramatic signal.
-      </p>
-      <div class="hero-actions">
-        <a class="btn primary" href="portals.html">Open Portals</a>
-        <a class="btn secondary" href="instructions.html">Open Instructions</a>
+    <section class="panel field-calculator-shell" id="fieldCalculatorApp" aria-labelledby="calculatorTitle">
+      <div class="field-calculator-hero">
+        <p class="eyebrow">Personal Signal Estimator</p>
+        <h1 id="calculatorTitle">Field Calculator <span class="beta-tag">BETA</span></h1>
+        <p class="field-calculator-copy">
+          Calculate personal CLT with <strong>32 + (8 × n)</strong>, where <strong>n</strong> is your name rank.
+          This uses built-in historical rank lists for Charlotte. You can provide a year to retrieve that year's rank value for the selected dataset.
+        </p>
       </div>
-    </section>
 
-    <section class="panel" aria-labelledby="mainIntroTitle">
-      <h2 id="mainIntroTitle">Main Signal Overview</h2>
-      <p>
-        This homepage is your entry point. Move through dedicated pages for portals,
-        CLT lore, and copy-ready instructions. The goal is to keep the Charlotte mythos
-        expressive while making navigation clear and fast on desktop and mobile.
-      </p>
-      <div class="quick-grid">
-        <a class="quick-card" href="portals.html">
-          <h3>Portals</h3>
-          <p>Launch OCharlotteD across platforms.</p>
-        </a>
-        <a class="quick-card" href="clt-field.html">
-          <h3>CLT Field</h3>
-          <p>Read lore and open the field tool.</p>
-        </a>
-        <a class="quick-card" href="field-calculator.html">
-          <h3>Field Calculator</h3>
-          <p>Estimate personal CLT from name ranking.</p>
-        </a>
-        <a class="quick-card" href="instructions.html">
-          <h3>Instructions + Suitability</h3>
-          <p>Copy payload and compare model fit.</p>
-        </a>
-        <a class="quick-card" href="legal.html">
-          <h3>Legal Notice</h3>
-          <p>Review disclaimers and legal notices.</p>
-        </a>
+      <section class="field-calculator-panel" aria-label="Calculation controls">
+        <div class="field-calculator-grid">
+          <label>
+            Legal first name <span class="field-note">(nickname not counted)</span>
+            <input id="fcName" type="text" placeholder="Enter legal first name" autocomplete="name" />
+          </label>
+          <label>
+            Country dataset
+            <select id="fcCountry"></select>
+          </label>
+          <label>
+            Year (optional)
+            <input id="fcYear" type="number" inputmode="numeric" min="1880" max="2100" step="1" placeholder="e.g. 2006" />
+          </label>
+        </div>
+
+        <div class="clt-actions">
+          <button id="fcCalculate" class="btn primary" type="button">Calculate CLT</button>
+        </div>
+      </section>
+
+      <div id="fcRunLoader" class="field-run-loader" hidden>
+        <p id="fcRunStatus">Calculating your magnetic field...</p>
+        <div class="loader-track"><span id="fcRunBar"></span></div>
       </div>
+
+      <article class="field-result" id="fcResult" aria-live="polite">
+        <h2>Calculated CLT Result</h2>
+        <div class="field-result-primary">
+          <span class="field-result-primary-label">CLT</span>
+          <strong>—</strong>
+        </div>
+        <dl class="field-result-metrics">
+          <div class="metric"><dt>Rank (n)</dt><dd>—</dd></div>
+          <div class="metric"><dt>Year</dt><dd>—</dd></div>
+          <div class="metric"><dt>Dataset</dt><dd>United States</dd></div>
+        </dl>
+        <p>Run a calculation to populate the result values.</p>
+      </article>
     </section>
   </main>
 
