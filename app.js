@@ -1284,7 +1284,6 @@ function initFieldCalculator() {
   const app = document.getElementById('fieldCalculatorApp');
   if (!app) return;
 
-  const apiKey = 'oc530561571';
   const usaCountryCode = 'us';
   const countries = [
     { label: 'Australia (NSW)', code: 'au_nsw' },
@@ -1329,6 +1328,33 @@ function initFieldCalculator() {
     return countries.find((c) => c.code === code)?.label || 'Unknown';
   }
 
+  const usaCharlotteRankByYear = {
+    2024: 4, 2023: 3, 2022: 3, 2021: 3, 2020: 4, 2019: 6, 2018: 6, 2017: 7, 2016: 7, 2015: 9,
+    2014: 10, 2013: 11, 2012: 19, 2011: 27, 2010: 46, 2009: 68, 2008: 86, 2007: 101, 2006: 125,
+    2005: 135, 2004: 170, 2003: 182, 2002: 204, 2001: 229, 2000: 289, 1999: 307, 1998: 304,
+    1997: 301, 1996: 302, 1995: 275, 1994: 291, 1993: 293, 1992: 286, 1991: 287, 1990: 287,
+    1989: 292, 1988: 288, 1987: 292, 1986: 286, 1985: 265, 1984: 304, 1983: 283, 1982: 308,
+    1981: 290, 1980: 292, 1979: 285, 1978: 278, 1977: 265, 1976: 245, 1975: 224, 1974: 203,
+    1973: 194, 1972: 188, 1971: 176, 1970: 166, 1969: 160, 1968: 163, 1967: 163, 1966: 151,
+    1965: 153, 1964: 158, 1963: 153, 1962: 154, 1961: 147, 1960: 151, 1959: 144, 1958: 140,
+    1957: 133, 1956: 133, 1955: 129, 1954: 113, 1953: 100, 1952: 89, 1951: 84, 1950: 80,
+    1949: 71, 1948: 69, 1947: 68, 1946: 64, 1945: 55, 1944: 50, 1943: 47, 1942: 51, 1941: 55,
+    1940: 55, 1939: 66, 1938: 70, 1937: 67, 1936: 61, 1935: 65, 1934: 72, 1933: 79, 1932: 74,
+    1931: 75, 1930: 75, 1929: 73, 1928: 72, 1927: 75, 1926: 78, 1925: 77, 1924: 80, 1923: 77,
+    1922: 76, 1921: 79, 1920: 79, 1919: 79, 1918: 78, 1917: 76, 1916: 80, 1915: 81, 1914: 88,
+    1913: 87, 1912: 91, 1911: 95, 1910: 99, 1909: 94, 1908: 98, 1907: 105, 1906: 103, 1905: 104,
+    1904: 110, 1903: 115, 1902: 114, 1901: 105, 1900: 110, 1899: 104, 1898: 105, 1897: 104,
+    1896: 103, 1895: 106, 1894: 100, 1893: 100, 1892: 98, 1891: 101, 1890: 98, 1889: 89, 1888: 88,
+    1887: 91, 1886: 94, 1885: 94, 1884: 86, 1883: 92, 1882: 100, 1881: 95, 1880: 91
+  };
+
+  const usaKnownYears = Object.keys(usaCharlotteRankByYear).map(Number).sort((a, b) => b - a);
+
+  function getUsCharlotteRank(year) {
+    if (Number.isInteger(year)) return usaCharlotteRankByYear[year] ?? null;
+    return usaCharlotteRankByYear[usaKnownYears[0]] ?? null;
+  }
+
   function normalizeYear() {
     const raw = String(el.year?.value || '').trim();
     if (!raw) return null;
@@ -1353,7 +1379,7 @@ function initFieldCalculator() {
 
     const phases = [
       { at: 0.18, label: 'Validating Charlotte signature...' },
-      { at: 0.44, label: 'Requesting Behind the Name rank...' },
+      { at: 0.44, label: 'Retrieving historical rank data...' },
       { at: 0.74, label: 'Applying CLT formula 32 + 8n...' },
       { at: 0.96, label: 'Finalizing magnetic output...' }
     ];
@@ -1380,27 +1406,8 @@ function initFieldCalculator() {
     });
   }
 
-  async function fetchNameRank(name, countryCode, year) {
-    const url = new URL('https://www.behindthename.com/api/namepop.json');
-    url.searchParams.set('name', name);
-    url.searchParams.set('country', countryCode);
-    url.searchParams.set('gender', 'f');
-    if (Number.isInteger(year)) url.searchParams.set('year', String(year));
-    url.searchParams.set('key', apiKey);
-
-    const response = await fetch(url.toString());
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const payload = await response.json();
-    const entries = Array.isArray(payload) ? payload : (Array.isArray(payload?.popularity) ? payload.popularity : []);
-
-    const ranked = entries
-      .map((entry) => Number(entry?.rank))
-      .filter((rank) => Number.isFinite(rank) && rank > 0)
-      .sort((a, b) => a - b);
-
-    if (!ranked.length) return null;
-    return ranked[0];
+  function getRankFromLocalData(year) {
+    return getUsCharlotteRank(year);
   }
 
   async function calculate() {
@@ -1434,20 +1441,7 @@ function initFieldCalculator() {
 
     try {
       const loaderPromise = runCalculationLoader();
-      let rank = null;
-      let usedCountry = countryCode;
-
-      try {
-        rank = await fetchNameRank(enteredName, countryCode, year);
-      } catch {
-        rank = null;
-      }
-
-      if (!rank && countryCode !== usaCountryCode) {
-        usedCountry = usaCountryCode;
-        rank = await fetchNameRank(enteredName, usaCountryCode, year);
-      }
-
+      const rank = getRankFromLocalData(year);
       await loaderPromise;
 
       if (!rank) {
@@ -1455,22 +1449,24 @@ function initFieldCalculator() {
           status: 'warning',
           title: 'No rank data found',
           lines: [
-            `Tried ${getSelectedLabel(countryCode)} and United States fallback${year ? ` for year ${year}` : ''}.`,
-            'Behind the Name did not return a usable rank for this request.'
+            `No USA Charlotte rank is available for year ${year}.`,
+            `Available range: ${usaKnownYears[usaKnownYears.length - 1]}-${usaKnownYears[0]}.`
           ]
         });
         return;
       }
 
       const clt = 32 + (8 * rank);
-      const usedCountryLabel = getSelectedLabel(usedCountry);
+      const selectedCountryLabel = getSelectedLabel(countryCode);
+      const usedFallback = countryCode !== usaCountryCode;
       renderResult({
         status: 'success',
         title: `Calculated CLT: ${clt.toLocaleString()}`,
         lines: [
           `Name: ${enteredName}`,
           `Rank n: ${rank.toLocaleString()}`,
-          `Dataset: ${usedCountryLabel}${year ? ` · Year: ${year}` : ' · Year: latest available'}`,
+          `Dataset: United States${year ? ` · Year: ${year}` : ` · Year: ${usaKnownYears[0]}`}`,
+          usedFallback ? `Selected country (${selectedCountryLabel}) currently falls back to USA local dataset.` : 'Using USA local dataset.',
           'Formula: 32 + 8n'
         ]
       });
@@ -1478,7 +1474,7 @@ function initFieldCalculator() {
       renderResult({
         status: 'error',
         title: 'Calculation failed',
-        lines: [`Unable to retrieve rank from Behind the Name API (${String(error?.message || 'unknown error')}).`]
+        lines: [`Unable to compute CLT from local rank data (${String(error?.message || 'unknown error')}).`]
       });
     } finally {
       if (el.calculate) el.calculate.disabled = false;
