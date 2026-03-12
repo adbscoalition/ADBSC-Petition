@@ -146,6 +146,34 @@ if (entryLoader) {
     requestAnimationFrame(frame);
   }
 
+  function runCalculatorLoader() {
+    const status = document.getElementById('calculatorLoaderStatus');
+    const bar = document.getElementById('calculatorLoaderBar');
+    const phases = [
+      { at: 0.12, label: 'Preparing field calculator...' },
+      { at: 0.42, label: 'Connecting rank dataset...' },
+      { at: 0.78, label: 'Loading CLT formula profile...' },
+      { at: 0.94, label: 'Field calculator ready.' }
+    ];
+
+    const start = performance.now();
+
+    function frame(now) {
+      const t = Math.min((now - start) / duration, 1);
+      if (bar) bar.style.width = `${t * 100}%`;
+      if (!reducedMotion) entryLoader.style.setProperty('--loader-glow', String(0.33 + t * 0.67));
+
+      let label = phases[0].label;
+      for (const p of phases) if (t >= p.at) label = p.label;
+      if (status) status.textContent = label;
+
+      if (t < 1) requestAnimationFrame(frame);
+      else finalizeLoader();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
   function runInstructionsLoader() {
     const status = document.getElementById('instructionsLoaderStatus');
     const typedLine = document.getElementById('typedLoaderLine');
@@ -180,6 +208,7 @@ if (entryLoader) {
   if (type === 'clt') runCltLoader();
   else if (type === 'portals') runPortalsLoader();
   else if (type === 'instructions') runInstructionsLoader();
+  else if (type === 'calculator') runCalculatorLoader();
   else if (type === 'legal') runLegalLoader();
   else runMainLoader();
 }
@@ -1249,6 +1278,176 @@ function initCltFieldSystem() {
     el.lonInput.value = String(fallbackCoord.lon);
   }
 }
+
+
+function initFieldCalculator() {
+  const app = document.getElementById('fieldCalculatorApp');
+  if (!app) return;
+
+  const apiKey = 'oc530561571';
+  const usaCountryCode = 'us';
+  const countries = [
+    { label: 'Australia (NSW)', code: 'au_nsw' },
+    { label: 'Austria', code: 'at' },
+    { label: 'Belgium', code: 'be' },
+    { label: 'Canada', code: 'ca' },
+    { label: 'Czechia', code: 'cz' },
+    { label: 'Denmark', code: 'dk' },
+    { label: 'England & Wales', code: 'gb_ew' },
+    { label: 'France', code: 'fr' },
+    { label: 'Germany', code: 'de' },
+    { label: 'Ireland', code: 'ie' },
+    { label: 'Netherlands', code: 'nl' },
+    { label: 'New Zealand', code: 'nz' },
+    { label: 'Northern Ireland', code: 'gb_ni' },
+    { label: 'Norway', code: 'no' },
+    { label: 'Poland', code: 'pl' },
+    { label: 'Puerto Rico', code: 'pr' },
+    { label: 'Quebec, Canada', code: 'ca_qc' },
+    { label: 'Scotland', code: 'gb_sct' },
+    { label: 'Switzerland', code: 'ch' },
+    { label: 'United States', code: usaCountryCode }
+  ];
+
+  const el = {
+    name: document.getElementById('fcName'),
+    country: document.getElementById('fcCountry'),
+    calculate: document.getElementById('fcCalculate'),
+    runLoader: document.getElementById('fcRunLoader'),
+    runBar: document.getElementById('fcRunBar'),
+    runStatus: document.getElementById('fcRunStatus'),
+    result: document.getElementById('fcResult')
+  };
+
+  if (el.country) {
+    el.country.innerHTML = countries.map((country) => `<option value="${country.code}">${country.label}</option>`).join('');
+    el.country.value = usaCountryCode;
+  }
+
+  function getSelectedLabel(code) {
+    return countries.find((c) => c.code === code)?.label || 'Unknown';
+  }
+
+  function renderResult(message, details = '') {
+    if (!el.result) return;
+    el.result.innerHTML = `<p>${message}</p>${details ? `<p>${details}</p>` : ''}`;
+  }
+
+  function runCalculationLoader(durationMs = 1800) {
+    if (!el.runLoader || !el.runBar || !el.runStatus) return Promise.resolve();
+
+    el.runLoader.hidden = false;
+    el.runBar.style.width = '0%';
+
+    const phases = [
+      { at: 0.18, label: 'Validating Charlotte signature...' },
+      { at: 0.44, label: 'Requesting Behind the Name rank...' },
+      { at: 0.74, label: 'Applying CLT formula 32 + 8n...' },
+      { at: 0.96, label: 'Finalizing magnetic output...' }
+    ];
+
+    return new Promise((resolve) => {
+      const start = performance.now();
+
+      function frame(now) {
+        const t = Math.min((now - start) / durationMs, 1);
+        el.runBar.style.width = `${t * 100}%`;
+
+        let label = phases[0].label;
+        for (const phase of phases) if (t >= phase.at) label = phase.label;
+        el.runStatus.textContent = label;
+
+        if (t < 1) requestAnimationFrame(frame);
+        else {
+          el.runLoader.hidden = true;
+          resolve();
+        }
+      }
+
+      requestAnimationFrame(frame);
+    });
+  }
+
+  async function fetchNameRank(name, countryCode) {
+    const url = new URL('https://www.behindthename.com/api/namepop.json');
+    url.searchParams.set('name', name);
+    url.searchParams.set('country', countryCode);
+    url.searchParams.set('gender', 'f');
+    url.searchParams.set('key', apiKey);
+
+    const response = await fetch(url.toString());
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const payload = await response.json();
+    const entries = Array.isArray(payload) ? payload : (Array.isArray(payload?.popularity) ? payload.popularity : []);
+
+    const ranked = entries
+      .map((entry) => Number(entry?.rank))
+      .filter((rank) => Number.isFinite(rank) && rank > 0)
+      .sort((a, b) => a - b);
+
+    if (!ranked.length) return null;
+    return ranked[0];
+  }
+
+  async function calculate() {
+    const enteredName = String(el.name?.value || '').trim();
+    const countryCode = String(el.country?.value || usaCountryCode);
+
+    if (!enteredName) {
+      renderResult('Please enter a name before calculating.');
+      return;
+    }
+
+    const isCharlotte = enteredName.toLowerCase() === 'charlotte';
+    if (!isCharlotte) {
+      renderResult('Name is not Charlotte. CLT output is 0.', 'This calculator only runs magnetic field computation for Charlotte.');
+      return;
+    }
+
+    if (el.calculate) el.calculate.disabled = true;
+    renderResult('Running calculation...');
+
+    try {
+      const loaderPromise = runCalculationLoader();
+      let rank = null;
+      let usedCountry = countryCode;
+
+      try {
+        rank = await fetchNameRank(enteredName, countryCode);
+      } catch {
+        rank = null;
+      }
+
+      if (!rank && countryCode !== usaCountryCode) {
+        usedCountry = usaCountryCode;
+        rank = await fetchNameRank(enteredName, usaCountryCode);
+      }
+
+      await loaderPromise;
+
+      if (!rank) {
+        renderResult('Ranking data unavailable for this name right now.', `Tried ${getSelectedLabel(countryCode)} and United States fallback.`);
+        return;
+      }
+
+      const clt = 32 + (8 * rank);
+      const usedCountryLabel = getSelectedLabel(usedCountry);
+      renderResult(
+        `Calculated CLT: ${clt.toLocaleString()}`,
+        `Name: ${enteredName} · Rank n = ${rank.toLocaleString()} · Country source: ${usedCountryLabel}`
+      );
+    } catch (error) {
+      renderResult('Calculation failed.', `Unable to retrieve rank from Behind the Name API (${String(error?.message || 'unknown error')}).`);
+    } finally {
+      if (el.calculate) el.calculate.disabled = false;
+    }
+  }
+
+  el.calculate?.addEventListener('click', calculate);
+}
+
+initFieldCalculator();
 
 initCltFieldSystem();
 
