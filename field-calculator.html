@@ -94,25 +94,37 @@
   </header>
 
   <main id="main" class="page-shell">
-    <section class="panel" aria-labelledby="calculatorTitle" id="fieldCalculatorApp">
-      <p class="eyebrow">Personal Signal Estimator</p>
-      <h1 id="calculatorTitle">Field Calculator</h1>
-      <p>Calculate personal CLT with formula <strong>32 + (8 × rank)</strong> using Behind the Name ranking data. If a selected country has no rank for the requested name, the calculator falls back to United States data.</p>
-
-      <div class="field-calculator-grid">
-        <label>
-          Name
-          <input id="fcName" type="text" value="Charlotte" placeholder="Enter name" />
-        </label>
-        <label>
-          Country dataset
-          <select id="fcCountry"></select>
-        </label>
+    <section class="panel field-calculator-shell" id="fieldCalculatorApp" aria-labelledby="calculatorTitle">
+      <div class="field-calculator-hero">
+        <p class="eyebrow">Personal Signal Estimator</p>
+        <h1 id="calculatorTitle">Field Calculator</h1>
+        <p class="field-calculator-copy">
+          Calculate personal CLT with <strong>32 + (8 × n)</strong>, where <strong>n</strong> is your name rank.
+          This pulls ranking data from Behind the Name and can use a year-specific snapshot.
+          If country data is missing, it automatically falls back to United States data.
+        </p>
       </div>
 
-      <div class="clt-actions">
-        <button id="fcCalculate" class="btn primary" type="button">Calculate CLT</button>
-      </div>
+      <section class="field-calculator-panel" aria-label="Calculation controls">
+        <div class="field-calculator-grid">
+          <label>
+            Name
+            <input id="fcName" type="text" value="Charlotte" placeholder="Enter name" autocomplete="name" />
+          </label>
+          <label>
+            Country dataset
+            <select id="fcCountry"></select>
+          </label>
+          <label>
+            Year (optional)
+            <input id="fcYear" type="number" inputmode="numeric" min="1880" max="2100" step="1" placeholder="e.g. 2006" />
+          </label>
+        </div>
+
+        <div class="clt-actions">
+          <button id="fcCalculate" class="btn primary" type="button">Calculate CLT</button>
+        </div>
+      </section>
 
       <div id="fcRunLoader" class="field-run-loader" hidden>
         <p id="fcRunStatus">Calculating your magnetic field...</p>
@@ -120,6 +132,7 @@
       </div>
 
       <article class="field-result" id="fcResult" aria-live="polite">
+        <h2>Result</h2>
         <p>Run a calculation to view rank and personal CLT output.</p>
       </article>
     </section>

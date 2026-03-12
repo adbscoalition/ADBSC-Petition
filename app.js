@@ -1312,6 +1312,7 @@ function initFieldCalculator() {
   const el = {
     name: document.getElementById('fcName'),
     country: document.getElementById('fcCountry'),
+    year: document.getElementById('fcYear'),
     calculate: document.getElementById('fcCalculate'),
     runLoader: document.getElementById('fcRunLoader'),
     runBar: document.getElementById('fcRunBar'),
@@ -1328,9 +1329,20 @@ function initFieldCalculator() {
     return countries.find((c) => c.code === code)?.label || 'Unknown';
   }
 
-  function renderResult(message, details = '') {
+  function normalizeYear() {
+    const raw = String(el.year?.value || '').trim();
+    if (!raw) return null;
+    const parsed = Number(raw);
+    if (!Number.isInteger(parsed) || parsed < 1880 || parsed > 2100) return null;
+    return parsed;
+  }
+
+  function renderResult({ status = 'idle', title = 'Result', lines = [] } = {}) {
     if (!el.result) return;
-    el.result.innerHTML = `<p>${message}</p>${details ? `<p>${details}</p>` : ''}`;
+    el.result.classList.toggle('is-success', status === 'success');
+    el.result.classList.toggle('is-warning', status === 'warning');
+    el.result.classList.toggle('is-error', status === 'error');
+    el.result.innerHTML = `<h2>${title}</h2>${lines.map((line) => `<p>${line}</p>`).join('')}`;
   }
 
   function runCalculationLoader(durationMs = 1800) {
@@ -1368,11 +1380,12 @@ function initFieldCalculator() {
     });
   }
 
-  async function fetchNameRank(name, countryCode) {
+  async function fetchNameRank(name, countryCode, year) {
     const url = new URL('https://www.behindthename.com/api/namepop.json');
     url.searchParams.set('name', name);
     url.searchParams.set('country', countryCode);
     url.searchParams.set('gender', 'f');
+    if (Number.isInteger(year)) url.searchParams.set('year', String(year));
     url.searchParams.set('key', apiKey);
 
     const response = await fetch(url.toString());
@@ -1393,20 +1406,31 @@ function initFieldCalculator() {
   async function calculate() {
     const enteredName = String(el.name?.value || '').trim();
     const countryCode = String(el.country?.value || usaCountryCode);
+    const year = normalizeYear();
+    const hasYearInput = String(el.year?.value || '').trim().length > 0;
 
     if (!enteredName) {
-      renderResult('Please enter a name before calculating.');
+      renderResult({ status: 'warning', title: 'Missing name', lines: ['Please enter a name before calculating.'] });
+      return;
+    }
+
+    if (hasYearInput && year === null) {
+      renderResult({ status: 'warning', title: 'Invalid year', lines: ['Enter a valid year between 1880 and 2100, or leave it blank.'] });
       return;
     }
 
     const isCharlotte = enteredName.toLowerCase() === 'charlotte';
     if (!isCharlotte) {
-      renderResult('Name is not Charlotte. CLT output is 0.', 'This calculator only runs magnetic field computation for Charlotte.');
+      renderResult({
+        status: 'warning',
+        title: 'No CLT emitted',
+        lines: ['Name is not Charlotte. CLT output is 0.', 'This calculator only runs magnetic field computation for Charlotte.']
+      });
       return;
     }
 
     if (el.calculate) el.calculate.disabled = true;
-    renderResult('Running calculation...');
+    renderResult({ status: 'idle', title: 'Computing', lines: ['Running calculation...'] });
 
     try {
       const loaderPromise = runCalculationLoader();
@@ -1414,37 +1438,62 @@ function initFieldCalculator() {
       let usedCountry = countryCode;
 
       try {
-        rank = await fetchNameRank(enteredName, countryCode);
+        rank = await fetchNameRank(enteredName, countryCode, year);
       } catch {
         rank = null;
       }
 
       if (!rank && countryCode !== usaCountryCode) {
         usedCountry = usaCountryCode;
-        rank = await fetchNameRank(enteredName, usaCountryCode);
+        rank = await fetchNameRank(enteredName, usaCountryCode, year);
       }
 
       await loaderPromise;
 
       if (!rank) {
-        renderResult('Ranking data unavailable for this name right now.', `Tried ${getSelectedLabel(countryCode)} and United States fallback.`);
+        renderResult({
+          status: 'warning',
+          title: 'No rank data found',
+          lines: [
+            `Tried ${getSelectedLabel(countryCode)} and United States fallback${year ? ` for year ${year}` : ''}.`,
+            'Behind the Name did not return a usable rank for this request.'
+          ]
+        });
         return;
       }
 
       const clt = 32 + (8 * rank);
       const usedCountryLabel = getSelectedLabel(usedCountry);
-      renderResult(
-        `Calculated CLT: ${clt.toLocaleString()}`,
-        `Name: ${enteredName} · Rank n = ${rank.toLocaleString()} · Country source: ${usedCountryLabel}`
-      );
+      renderResult({
+        status: 'success',
+        title: `Calculated CLT: ${clt.toLocaleString()}`,
+        lines: [
+          `Name: ${enteredName}`,
+          `Rank n: ${rank.toLocaleString()}`,
+          `Dataset: ${usedCountryLabel}${year ? ` · Year: ${year}` : ' · Year: latest available'}`,
+          'Formula: 32 + 8n'
+        ]
+      });
     } catch (error) {
-      renderResult('Calculation failed.', `Unable to retrieve rank from Behind the Name API (${String(error?.message || 'unknown error')}).`);
+      renderResult({
+        status: 'error',
+        title: 'Calculation failed',
+        lines: [`Unable to retrieve rank from Behind the Name API (${String(error?.message || 'unknown error')}).`]
+      });
     } finally {
       if (el.calculate) el.calculate.disabled = false;
     }
   }
 
   el.calculate?.addEventListener('click', calculate);
+  [el.name, el.year].forEach((inputEl) => {
+    inputEl?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        calculate();
+      }
+    });
+  });
 }
 
 initFieldCalculator();
