@@ -1851,7 +1851,8 @@ pre {
 }
 
 .field-guidance-group .btn {
-  justify-self: start;
+  justify-self: stretch;
+  width: 100%;
 }
 
 .field-formula-note {
