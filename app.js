@@ -1341,6 +1341,8 @@ function initFieldCalculator() {
     name: document.getElementById('fcName'),
     country: document.getElementById('fcCountry'),
     year: document.getElementById('fcYear'),
+    rankToggle: document.getElementById('fcRankToggle'),
+    rank: document.getElementById('fcRank'),
     appearance: document.getElementById('fcAppearance'),
     surnameP1: document.getElementById('fcSurnameP1'),
     surnameP2: document.getElementById('fcSurnameP2'),
@@ -1381,6 +1383,14 @@ function initFieldCalculator() {
     return parsed;
   }
 
+  function normalizeRank() {
+    const raw = String(el.rank?.value || '').trim();
+    if (!raw) return null;
+    const parsed = Number(raw);
+    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 1000) return null;
+    return parsed;
+  }
+
   function normalizeAppearance() {
     const raw = String(el.appearance?.value || '').trim();
     if (!raw) return null;
@@ -1399,6 +1409,17 @@ function initFieldCalculator() {
 
   function formatNumber(value, digits = 3) {
     return Number(value).toLocaleString(undefined, { maximumFractionDigits: digits });
+  }
+
+  function isManualRankMode() {
+    return el.rankToggle?.getAttribute('aria-pressed') === 'true';
+  }
+
+  function syncRankModeUi() {
+    const manual = isManualRankMode();
+    if (el.rankToggle) el.rankToggle.textContent = manual ? 'Using Manual Rank' : 'Use Rank Input';
+    if (el.year) el.year.disabled = manual;
+    if (el.rank) el.rank.disabled = !manual;
   }
 
   function renderResult({ status = 'idle', title = 'Result', primaryLabel = '', primaryValue = '', metrics = [], lines = [], nameValue = '', nameIsAlert = false } = {}) {
@@ -1459,8 +1480,11 @@ function initFieldCalculator() {
   async function calculate() {
     const enteredName = String(el.name?.value || '').trim();
     const countryCode = String(el.country?.value || 'us');
+    const manualRank = isManualRankMode();
     const year = normalizeYear();
     const hasYearInput = String(el.year?.value || '').trim().length > 0;
+    const rankInput = normalizeRank();
+    const hasRankInput = String(el.rank?.value || '').trim().length > 0;
     const appearance = normalizeAppearance();
     const hasAppearanceInput = String(el.appearance?.value || '').trim().length > 0;
     const p1 = normalizeSurnameFrequency(el.surnameP1);
@@ -1471,7 +1495,17 @@ function initFieldCalculator() {
       return;
     }
 
-    if (hasYearInput && year === null) {
+    if (manualRank && !hasRankInput) {
+      renderResult({ status: 'warning', title: 'Missing rank', lines: ['Enable rank mode and provide a manual rank value between 1 and 1000.'] });
+      return;
+    }
+
+    if (manualRank && hasRankInput && rankInput === null) {
+      renderResult({ status: 'warning', title: 'Invalid rank', lines: ['Manual rank (n) must be an integer between 1 and 1000.'] });
+      return;
+    }
+
+    if (!manualRank && hasYearInput && year === null) {
       renderResult({ status: 'warning', title: 'Invalid year', lines: ['Enter a valid year between 1880 and 2100, or leave it blank.'] });
       return;
     }
@@ -1496,8 +1530,8 @@ function initFieldCalculator() {
 
     try {
       const loaderPromise = runCalculationLoader();
-      const rank = getRankFromLocalData(countryCode, year);
       const years = getDatasetYears(countryCode);
+      const rank = manualRank ? rankInput : getRankFromLocalData(countryCode, year);
       await loaderPromise;
 
       if (!rank) {
@@ -1530,7 +1564,7 @@ function initFieldCalculator() {
           { label: 'Rank (n)', value: rank.toLocaleString() },
           { label: 'Appearance (M)', value: formatNumber(m, 2) },
           { label: 'Surname P', value: formatNumber(p, 3) },
-          { label: 'Year', value: String(year || years[0]) },
+          { label: 'Year', value: manualRank ? 'Manual rank mode' : String(year || years[0]) },
           { label: 'Dataset', value: getSelectedLabel(countryCode) }
         ],
         nameValue: enteredName,
@@ -1538,6 +1572,7 @@ function initFieldCalculator() {
           `Base B = 7.25n + 32 = ${formatNumber(b, 3)}`,
           `Appearance A = 0.8 + 0.04m = ${formatNumber(a, 4)}`,
           `Last-name L(P) = ${formatNumber(l, 4)}`,
+          manualRank ? 'Rank source: Manual input' : `Rank source: ${getSelectedLabel(countryCode)} dataset`,
           'Final formula: CLT = B × A × L'
         ]
       });
@@ -1552,8 +1587,15 @@ function initFieldCalculator() {
     }
   }
 
+  el.rankToggle?.addEventListener('click', () => {
+    const pressed = el.rankToggle?.getAttribute('aria-pressed') === 'true';
+    if (el.rankToggle) el.rankToggle.setAttribute('aria-pressed', String(!pressed));
+    syncRankModeUi();
+  });
+
+  syncRankModeUi();
   el.calculate?.addEventListener('click', calculate);
-  [el.name, el.year, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
+  [el.name, el.year, el.rank, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
     inputEl?.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
