@@ -1844,6 +1844,24 @@ pre {
   vertical-align: middle;
 }
 
+
+.field-guidance-group {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.field-guidance-group .btn {
+  justify-self: start;
+}
+
+.field-formula-note {
+  margin-top: 0.95rem;
+}
+
+.field-result-primary strong.is-alert {
+  color: #ff7a95;
+}
+
 .field-note {
   font-size: 0.82rem;
   color: var(--text-soft);

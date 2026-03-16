@@ -126,30 +126,32 @@
             Rank (n) manual override
             <input id="fcRank" type="number" inputmode="numeric" min="1" max="1000" step="1" placeholder="e.g. 24" disabled />
           </label>
+          <div class="field-guidance-group">
+            <a class="btn secondary" href="https://www.behindthename.com/name/charlotte" target="_blank" rel="noopener noreferrer">Search Charlotte rank guidance</a>
+            <a class="btn secondary" href="https://www.ssa.gov/oact/babynames/state/" target="_blank" rel="noopener noreferrer">Rank by state (Top 100)</a>
+            <p class="field-note">Credit: Behind the Name and SSA (Social Security Administration).</p>
+          </div>
           <label>
             Appearance score (M)
             <input id="fcAppearance" type="number" inputmode="decimal" min="0" max="10" step="0.1" placeholder="0 to 10" />
           </label>
-          <label>
+          <label id="fcSurnameP1Label">
             Last-name frequency P1 (per 100,000 babies)
             <input id="fcSurnameP1" type="number" inputmode="decimal" min="0.01" max="880" step="0.01" placeholder="e.g. 42.5" />
           </label>
           <label>
-            Last-name frequency P2 (optional)
-            <input id="fcSurnameP2" type="number" inputmode="decimal" min="0.01" max="880" step="0.01" placeholder="optional second last name" />
+            <span>Use two last names</span>
+            <button id="fcSurnameToggle" class="btn secondary" type="button" aria-pressed="false">Enable second last name</button>
           </label>
+          <label id="fcSurnameP2Label" hidden>
+            Second last frequency (per 100,000 babies)
+            <input id="fcSurnameP2" type="number" inputmode="decimal" min="0.01" max="880" step="0.01" placeholder="optional second last name" disabled />
+          </label>
+          <div class="field-guidance-group">
+            <a class="btn secondary" href="https://probablyhelpful.com/data/surnames_A.htm" target="_blank" rel="noopener noreferrer">Surname frequency guidance</a>
+            <p class="field-note">Credit: probablyhelpful.com.</p>
+          </div>
         </div>
-
-        <p class="field-note">
-          Base Formula: <strong>B = 7.25n + 32</strong> · Appearance modifier: <strong>A = 0.8 + 0.04m</strong> ·
-          Last-name modifier:
-          <strong>L(P)=0.87+0.63((log₁₀(880/P)/log₁₀(880/0.01))^0.644)</strong>.
-          If two last names are used, <strong>P = (P1 + P2) / 2</strong>.
-          Final formula: <strong>CLT = B × A × L</strong>.
-          Source:
-          <a class="btn secondary" href="https://probablyhelpful.com/data/surnames_A.htm" target="_blank" rel="noopener noreferrer">Surname frequency guidance</a>
-          <a class="btn secondary" href="https://www.behindthename.com/name/charlotte" target="_blank" rel="noopener noreferrer">Search Charlotte rank guidance</a>
-        </p>
 
         <div class="clt-actions">
           <button id="fcCalculate" class="btn primary" type="button">Calculate CLT</button>
@@ -176,6 +178,14 @@
         </dl>
         <p>Run a calculation to populate the result values.</p>
       </article>
+
+      <p class="field-note field-formula-note">
+        Base Formula: <strong>B = 7.25n + 32</strong> · Appearance modifier: <strong>A = 0.8 + 0.04m</strong> ·
+        Last-name modifier:
+        <strong>L(P)=0.87+0.63((log₁₀(880/P)/log₁₀(880/0.01))^0.644)</strong>.
+        If two last names are used, <strong>P = (P1 + P2) / 2</strong>.
+        Final formula: <strong>CLT = B × A × L</strong>.
+      </p>
     </section>
   </main>
 

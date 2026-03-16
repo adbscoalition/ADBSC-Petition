@@ -1344,6 +1344,9 @@ function initFieldCalculator() {
     rankToggle: document.getElementById('fcRankToggle'),
     rank: document.getElementById('fcRank'),
     appearance: document.getElementById('fcAppearance'),
+    surnameToggle: document.getElementById('fcSurnameToggle'),
+    surnameP1Label: document.getElementById('fcSurnameP1Label'),
+    surnameP2Label: document.getElementById('fcSurnameP2Label'),
     surnameP1: document.getElementById('fcSurnameP1'),
     surnameP2: document.getElementById('fcSurnameP2'),
     calculate: document.getElementById('fcCalculate'),
@@ -1422,14 +1425,33 @@ function initFieldCalculator() {
     if (el.rank) el.rank.disabled = !manual;
   }
 
-  function renderResult({ status = 'idle', title = 'Result', primaryLabel = '', primaryValue = '', metrics = [], lines = [], nameValue = '', nameIsAlert = false } = {}) {
+  function isSecondSurnameMode() {
+    return el.surnameToggle?.getAttribute('aria-pressed') === 'true';
+  }
+
+  function syncSurnameModeUi() {
+    const enabled = isSecondSurnameMode();
+    if (el.surnameToggle) el.surnameToggle.textContent = enabled ? 'Second last name enabled' : 'Enable second last name';
+    if (el.surnameP1Label) {
+      el.surnameP1Label.firstChild.textContent = enabled
+        ? 'First last frequency (per 100,000 babies)'
+        : 'Last-name frequency P1 (per 100,000 babies)';
+    }
+    if (el.surnameP2Label) el.surnameP2Label.hidden = !enabled;
+    if (el.surnameP2) {
+      el.surnameP2.disabled = !enabled;
+      if (!enabled) el.surnameP2.value = '';
+    }
+  }
+
+  function renderResult({ status = 'idle', title = 'Result', primaryLabel = '', primaryValue = '', metrics = [], lines = [], nameValue = '', nameIsAlert = false, primaryIsAlert = false } = {}) {
     if (!el.result) return;
     el.result.classList.toggle('is-success', status === 'success');
     el.result.classList.toggle('is-warning', status === 'warning');
     el.result.classList.toggle('is-error', status === 'error');
 
     const primaryHtml = primaryValue
-      ? `<div class="field-result-primary"><span class="field-result-primary-label">${primaryLabel}</span><strong>${primaryValue}</strong></div>`
+      ? `<div class="field-result-primary"><span class="field-result-primary-label">${primaryLabel}</span><strong class="${primaryIsAlert ? 'is-alert' : ''}">${primaryValue}</strong></div>`
       : '';
     const metricsHtml = metrics.length
       ? `<dl class="field-result-metrics">${metrics.map((item) => `<div class="metric"><dt>${item.label}</dt><dd>${item.value}</dd></div>`).join('')}</dl>`
@@ -1488,10 +1510,31 @@ function initFieldCalculator() {
     const appearance = normalizeAppearance();
     const hasAppearanceInput = String(el.appearance?.value || '').trim().length > 0;
     const p1 = normalizeSurnameFrequency(el.surnameP1);
-    const p2 = normalizeSurnameFrequency(el.surnameP2, true);
+    const p2 = isSecondSurnameMode() ? normalizeSurnameFrequency(el.surnameP2, true) : null;
 
     if (!enteredName) {
       renderResult({ status: 'warning', title: 'Missing name', lines: ['Please enter a name before calculating.'] });
+      return;
+    }
+
+    if (enteredName.toLowerCase() !== 'charlotte') {
+      renderResult({
+        status: 'error',
+        title: 'Calculated CLT Result',
+        primaryLabel: 'CLT',
+        primaryValue: '0',
+        primaryIsAlert: true,
+        metrics: [
+          { label: 'Rank (n)', value: '0× multiplier applied' },
+          { label: 'Appearance (M)', value: '—' },
+          { label: 'Surname P', value: '—' },
+          { label: 'Year', value: manualRank ? 'Manual rank mode' : String(year || '—') },
+          { label: 'Dataset', value: getSelectedLabel(countryCode) }
+        ],
+        nameValue: enteredName,
+        nameIsAlert: true,
+        lines: ['Legal first name is not Charlotte, so CLT multiplier is 0×.']
+      });
       return;
     }
 
@@ -1520,7 +1563,7 @@ function initFieldCalculator() {
       return;
     }
 
-    if (String(el.surnameP2?.value || '').trim().length > 0 && p2 === null) {
+    if (isSecondSurnameMode() && String(el.surnameP2?.value || '').trim().length > 0 && p2 === null) {
       renderResult({ status: 'warning', title: 'Invalid P2 value', lines: ['Last-name frequency P2 must be between 0.01 and 880 when provided.'] });
       return;
     }
@@ -1593,7 +1636,14 @@ function initFieldCalculator() {
     syncRankModeUi();
   });
 
+  el.surnameToggle?.addEventListener('click', () => {
+    const pressed = el.surnameToggle?.getAttribute('aria-pressed') === 'true';
+    if (el.surnameToggle) el.surnameToggle.setAttribute('aria-pressed', String(!pressed));
+    syncSurnameModeUi();
+  });
+
   syncRankModeUi();
+  syncSurnameModeUi();
   el.calculate?.addEventListener('click', calculate);
   [el.name, el.year, el.rank, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
     inputEl?.addEventListener('keydown', (event) => {
