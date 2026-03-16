@@ -1341,6 +1341,9 @@ function initFieldCalculator() {
     name: document.getElementById('fcName'),
     country: document.getElementById('fcCountry'),
     year: document.getElementById('fcYear'),
+    appearance: document.getElementById('fcAppearance'),
+    surnameP1: document.getElementById('fcSurnameP1'),
+    surnameP2: document.getElementById('fcSurnameP2'),
     calculate: document.getElementById('fcCalculate'),
     runLoader: document.getElementById('fcRunLoader'),
     runBar: document.getElementById('fcRunBar'),
@@ -1376,6 +1379,26 @@ function initFieldCalculator() {
     const parsed = Number(raw);
     if (!Number.isInteger(parsed) || parsed < 1880 || parsed > 2100) return null;
     return parsed;
+  }
+
+  function normalizeAppearance() {
+    const raw = String(el.appearance?.value || '').trim();
+    if (!raw) return null;
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed) || parsed < 0 || parsed > 10) return null;
+    return parsed;
+  }
+
+  function normalizeSurnameFrequency(inputEl, allowBlank = false) {
+    const raw = String(inputEl?.value || '').trim();
+    if (!raw && allowBlank) return null;
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed) || parsed < 0.01 || parsed > 880) return null;
+    return parsed;
+  }
+
+  function formatNumber(value, digits = 3) {
+    return Number(value).toLocaleString(undefined, { maximumFractionDigits: digits });
   }
 
   function renderResult({ status = 'idle', title = 'Result', primaryLabel = '', primaryValue = '', metrics = [], lines = [], nameValue = '', nameIsAlert = false } = {}) {
@@ -1438,6 +1461,10 @@ function initFieldCalculator() {
     const countryCode = String(el.country?.value || 'us');
     const year = normalizeYear();
     const hasYearInput = String(el.year?.value || '').trim().length > 0;
+    const appearance = normalizeAppearance();
+    const hasAppearanceInput = String(el.appearance?.value || '').trim().length > 0;
+    const p1 = normalizeSurnameFrequency(el.surnameP1);
+    const p2 = normalizeSurnameFrequency(el.surnameP2, true);
 
     if (!enteredName) {
       renderResult({ status: 'warning', title: 'Missing name', lines: ['Please enter a name before calculating.'] });
@@ -1449,22 +1476,18 @@ function initFieldCalculator() {
       return;
     }
 
-    const isCharlotte = enteredName.toLowerCase() === 'charlotte';
-    if (!isCharlotte) {
-      renderResult({
-        status: 'success',
-        title: 'Calculated CLT Result',
-        primaryLabel: 'CLT',
-        primaryValue: '0',
-        metrics: [
-          { label: 'Rank (n)', value: '—' },
-          { label: 'Year', value: String(year || '—') },
-          { label: 'Dataset', value: getSelectedLabel(countryCode) }
-        ],
-        nameValue: enteredName,
-        nameIsAlert: true,
-        lines: ['Formula: 32 + 8n']
-      });
+    if (hasAppearanceInput && appearance === null) {
+      renderResult({ status: 'warning', title: 'Invalid appearance score', lines: ['Appearance (M) must be a number between 0 and 10.'] });
+      return;
+    }
+
+    if (p1 === null) {
+      renderResult({ status: 'warning', title: 'Invalid P1 value', lines: ['Last-name frequency P1 must be between 0.01 and 880.'] });
+      return;
+    }
+
+    if (String(el.surnameP2?.value || '').trim().length > 0 && p2 === null) {
+      renderResult({ status: 'warning', title: 'Invalid P2 value', lines: ['Last-name frequency P2 must be between 0.01 and 880 when provided.'] });
       return;
     }
 
@@ -1489,27 +1512,40 @@ function initFieldCalculator() {
         return;
       }
 
-      const clt = 32 + (8 * rank);
+      const m = appearance ?? 0;
+      const p = p2 === null ? p1 : (p1 + p2) / 2;
+
+      const b = (7.25 * rank) + 32;
+      const a = 0.8 + (0.04 * m);
+      const logBase = Math.log10(880 / 0.01);
+      const l = 0.87 + 0.63 * Math.pow(Math.log10(880 / p) / logBase, 0.644);
+      const clt = b * a * l;
+
       renderResult({
         status: 'success',
         title: 'Calculated CLT Result',
         primaryLabel: 'CLT',
-        primaryValue: clt.toLocaleString(),
+        primaryValue: formatNumber(clt),
         metrics: [
           { label: 'Rank (n)', value: rank.toLocaleString() },
+          { label: 'Appearance (M)', value: formatNumber(m, 2) },
+          { label: 'Surname P', value: formatNumber(p, 3) },
           { label: 'Year', value: String(year || years[0]) },
           { label: 'Dataset', value: getSelectedLabel(countryCode) }
         ],
         nameValue: enteredName,
         lines: [
-          'Formula: 32 + 8n'
+          `Base B = 7.25n + 32 = ${formatNumber(b, 3)}`,
+          `Appearance A = 0.8 + 0.04m = ${formatNumber(a, 4)}`,
+          `Last-name L(P) = ${formatNumber(l, 4)}`,
+          'Final formula: CLT = B × A × L'
         ]
       });
     } catch (error) {
       renderResult({
         status: 'error',
         title: 'Calculation failed',
-        lines: [`Unable to compute CLT from local rank data (${String(error?.message || 'unknown error')}).`]
+        lines: [`Unable to compute CLT from local rank/modifier data (${String(error?.message || 'unknown error')}).`]
       });
     } finally {
       if (el.calculate) el.calculate.disabled = false;
@@ -1517,7 +1553,7 @@ function initFieldCalculator() {
   }
 
   el.calculate?.addEventListener('click', calculate);
-  [el.name, el.year].forEach((inputEl) => {
+  [el.name, el.year, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
     inputEl?.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();

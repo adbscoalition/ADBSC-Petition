@@ -99,15 +99,15 @@
         <p class="eyebrow">Personal Signal Estimator</p>
         <h1 id="calculatorTitle">Field Calculator <span class="beta-tag">BETA</span></h1>
         <p class="field-calculator-copy">
-          Calculate personal CLT with <strong>32 + (8 × n)</strong>, where <strong>n</strong> is your name rank.
-          This uses built-in historical rank lists for Charlotte. You can provide a year to retrieve that year's rank value for the selected dataset.
+          Calculate personal CLT using Charlotte rank in your selected region and two additional modifiers:
+          appearance score and last-name frequency.
         </p>
       </div>
 
       <section class="field-calculator-panel" aria-label="Calculation controls">
         <div class="field-calculator-grid">
           <label>
-            Legal first name <span class="field-note">(nickname not counted)</span>
+            Legal first name <span class="field-note">(for display only)</span>
             <input id="fcName" type="text" placeholder="Enter legal first name" autocomplete="name" />
           </label>
           <label>
@@ -118,7 +118,29 @@
             Year (optional)
             <input id="fcYear" type="number" inputmode="numeric" min="1880" max="2100" step="1" placeholder="e.g. 2006" />
           </label>
+          <label>
+            Appearance score (M)
+            <input id="fcAppearance" type="number" inputmode="decimal" min="0" max="10" step="0.1" placeholder="0 to 10" />
+          </label>
+          <label>
+            Last-name frequency P1 (per 100,000 babies)
+            <input id="fcSurnameP1" type="number" inputmode="decimal" min="0.01" max="880" step="0.01" placeholder="e.g. 42.5" />
+          </label>
+          <label>
+            Last-name frequency P2 (optional)
+            <input id="fcSurnameP2" type="number" inputmode="decimal" min="0.01" max="880" step="0.01" placeholder="optional second last name" />
+          </label>
         </div>
+
+        <p class="field-note">
+          Base Formula: <strong>B = 7.25n + 32</strong> · Appearance modifier: <strong>A = 0.8 + 0.04m</strong> ·
+          Last-name modifier:
+          <strong>L(P)=0.87+0.63((log₁₀(880/P)/log₁₀(880/0.01))^0.644)</strong>.
+          If two last names are used, <strong>P = (P1 + P2) / 2</strong>.
+          Final formula: <strong>CLT = B × A × L</strong>.
+          Source:
+          <a href="https://probablyhelpful.com/data/surnames_A.htm" target="_blank" rel="noopener noreferrer">probablyhelpful.com surnames list</a>.
+        </p>
 
         <div class="clt-actions">
           <button id="fcCalculate" class="btn primary" type="button">Calculate CLT</button>
@@ -138,6 +160,8 @@
         </div>
         <dl class="field-result-metrics">
           <div class="metric"><dt>Rank (n)</dt><dd>—</dd></div>
+          <div class="metric"><dt>Appearance (M)</dt><dd>—</dd></div>
+          <div class="metric"><dt>Surname P</dt><dd>—</dd></div>
           <div class="metric"><dt>Year</dt><dd>—</dd></div>
           <div class="metric"><dt>Dataset</dt><dd>United States</dd></div>
         </dl>
