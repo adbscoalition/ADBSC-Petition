@@ -1447,6 +1447,34 @@ function initFieldCalculator() {
     };
   }
 
+  const bandTheme = [
+    { key: 'ns', label: 'NS', className: 'band-ns', cltMultiplier: 1.5, tungstenMultiplier: 0.45 },
+    { key: 'ce', label: 'CE', className: 'band-ce', cltMultiplier: 1.25, tungstenMultiplier: 0.3 },
+    { key: 'e', label: 'E', className: 'band-e', cltMultiplier: 1.1, tungstenMultiplier: 0.55 },
+    { key: 'm', label: 'M', className: 'band-m', cltMultiplier: 1, tungstenMultiplier: 0.925 },
+    { key: 'ps', label: 'PS', className: 'band-ps', cltMultiplier: 0.7, tungstenMultiplier: 0.55 },
+    { key: 'ms', label: 'MS', className: 'band-ms', cltMultiplier: 0.275, tungstenMultiplier: 0.3 },
+    { key: 'mp', label: 'MP', className: 'band-mp', cltMultiplier: 0.1, tungstenMultiplier: 0.15 },
+    { key: 'mh', label: 'MH', className: 'band-mh', cltMultiplier: 0.05, tungstenMultiplier: 0.075 }
+  ];
+
+  function buildBandTelemetry(bands, clt, tungsten) {
+    const ordered = bandTheme.map((band) => ({
+      ...band,
+      perimeter: Number(bands?.[band.key] || 0),
+      cltValue: Math.max(0, clt * band.cltMultiplier),
+      tungstenValue: Math.max(0, tungsten * band.tungstenMultiplier)
+    }));
+
+    return ordered.map((band, index) => {
+      const previous = index === 0 ? 0 : ordered[index - 1].perimeter;
+      return {
+        ...band,
+        rangeLabel: `${formatDistanceMeters(previous)} - ${formatDistanceMeters(band.perimeter)}`
+      };
+    });
+  }
+
   function isManualRankMode() {
     return el.rankToggle?.getAttribute('aria-pressed') === 'true';
   }
@@ -1477,7 +1505,19 @@ function initFieldCalculator() {
     }
   }
 
-  function renderResult({ status = 'idle', title = 'Result', primaryLabel = '', primaryValue = '', metrics = [], lines = [], nameValue = '', nameIsAlert = false, primaryIsAlert = false } = {}) {
+  function renderResult({
+    status = 'idle',
+    title = 'Result',
+    primaryLabel = '',
+    primaryValue = '',
+    metrics = [],
+    lines = [],
+    nameValue = '',
+    nameIsAlert = false,
+    primaryIsAlert = false,
+    upperStats = null,
+    bandTelemetry = []
+  } = {}) {
     if (!el.result) return;
     el.result.classList.toggle('is-success', status === 'success');
     el.result.classList.toggle('is-warning', status === 'warning');
@@ -1486,15 +1526,43 @@ function initFieldCalculator() {
     const primaryHtml = primaryValue
       ? `<div class="field-result-primary"><span class="field-result-primary-label">${primaryLabel}</span><strong class="${primaryIsAlert ? 'is-alert' : ''}">${primaryValue}</strong></div>`
       : '';
+    const upperHtml = upperStats
+      ? `<section class="field-result-upper" aria-label="CLT and tungsten summary">
+          <article class="field-core-card">
+            <p class="field-core-label">Your CLT</p>
+            <p class="field-core-value ${primaryIsAlert ? 'is-alert' : ''}">${upperStats.cltValue}</p>
+          </article>
+          <article class="field-core-card">
+            <p class="field-core-label">Tungsten Concentration</p>
+            <p class="field-core-value">${upperStats.tungstenValue}</p>
+          </article>
+        </section>`
+      : '';
     const metricsHtml = metrics.length
       ? `<dl class="field-result-metrics">${metrics.map((item) => `<div class="metric"><dt>${item.label}</dt><dd>${item.value}</dd></div>`).join('')}</dl>`
+      : '';
+    const bandTelemetryHtml = bandTelemetry.length
+      ? `<section class="field-result-lower" aria-label="Band telemetry">
+          <h3>Band Telemetry Map</h3>
+          <div class="field-band-map">
+            ${bandTelemetry.map((band) => `
+              <article class="field-band-circle ${band.className}">
+                <p class="field-band-label">${band.label}</p>
+                <p class="field-band-range">${band.rangeLabel}</p>
+                <p class="field-band-value">CLT ${formatNumber(band.cltValue, 2)}</p>
+                <p class="field-band-value">${band.tungstenValue.toFixed(6)} mg/m³</p>
+              </article>
+            `).join('')}
+            <div class="field-band-center">${nameValue || '—'}</div>
+          </div>
+        </section>`
       : '';
     const nameHtml = nameValue
       ? `<p class="field-result-name ${nameIsAlert ? 'is-alert' : ''}">Name: ${nameValue}</p>`
       : '';
     const linesHtml = lines.map((line) => `<p>${line}</p>`).join('');
 
-    el.result.innerHTML = `<h2>${title}</h2>${primaryHtml}${metricsHtml}${nameHtml}${linesHtml}`;
+    el.result.innerHTML = `<h2>${title}</h2>${upperHtml}${primaryHtml}${metricsHtml}${bandTelemetryHtml}${nameHtml}${linesHtml}`;
   }
 
   function runCalculationLoader(durationMs = 1800) {
@@ -1632,12 +1700,16 @@ function initFieldCalculator() {
       const clt = b * a * l;
       const tungsten = calculateTungstenConcentration(clt);
       const bands = calculateBandLengths(b, a, l);
+      const bandTelemetry = buildBandTelemetry(bands, clt, tungsten);
 
       renderResult({
         status: 'success',
         title: 'Calculated CLT Result',
-        primaryLabel: 'CLT',
-        primaryValue: formatNumber(clt),
+        upperStats: {
+          cltValue: formatNumber(clt),
+          tungstenValue: `${tungsten.toFixed(6)} mg/m³`
+        },
+        bandTelemetry,
         metrics: [
           { label: 'Rank (n)', value: rank.toLocaleString() },
           { label: 'Appearance (M)', value: formatNumber(m, 2) },
