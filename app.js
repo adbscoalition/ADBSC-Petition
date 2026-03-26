@@ -1532,10 +1532,6 @@ function initFieldCalculator() {
             <p class="field-core-label">Your CLT</p>
             <p class="field-core-value ${primaryIsAlert ? 'is-alert' : ''}">${upperStats.cltValue}</p>
           </article>
-          <article class="field-core-card">
-            <p class="field-core-label">Tungsten Concentration</p>
-            <p class="field-core-value">${upperStats.tungstenValue}</p>
-          </article>
         </section>`
       : '';
     const metricsHtml = metrics.length
@@ -1543,29 +1539,25 @@ function initFieldCalculator() {
       : '';
     const bandTelemetryHtml = bandTelemetry.length
       ? `<section class="field-result-lower" aria-label="Band telemetry">
-          <h3>Magnetic Field Ring Visualization</h3>
-          <div class="field-ring-shell">
-            <div class="field-ring-viz">
-              ${bandTelemetry.map((band) => `<div class="field-ring ${band.className}" aria-hidden="true"></div>`).join('')}
-              <div class="field-ring-center">${nameValue || '—'}</div>
-            </div>
-            <div class="field-band-legend">
-              ${bandTelemetry.map((band) => `
-                <article class="field-band-row ${band.className}">
-                  <p class="field-band-label">${band.label}</p>
-                  <p class="field-band-range">${band.rangeLabel}</p>
-                  <p class="field-band-value">CLT ${formatNumber(band.cltValue, 2)}</p>
-                  <p class="field-band-value">${band.tungstenValue.toFixed(6)} mg/m³</p>
-                </article>
-              `).join('')}
-            </div>
+          <h3>Field Band Specs</h3>
+          <div class="field-band-legend">
+            ${bandTelemetry.map((band) => `
+              <article class="field-band-row">
+                <p class="field-band-label">${band.label}</p>
+                <p class="field-band-range">${band.rangeLabel}</p>
+                <p class="field-band-value">CLT ${formatNumber(band.cltValue, 2)}</p>
+                <p class="field-band-value">${band.tungstenValue.toFixed(6)} mg/m³</p>
+              </article>
+            `).join('')}
           </div>
         </section>`
       : '';
     const nameHtml = nameValue
       ? `<p class="field-result-name ${nameIsAlert ? 'is-alert' : ''}">Name: ${nameValue}</p>`
       : '';
-    const linesHtml = lines.map((line) => `<p>${line}</p>`).join('');
+    const linesHtml = lines.length
+      ? `<details class="field-calculation-details"><summary>Calculation breakdown</summary>${lines.map((line) => `<p>${line}</p>`).join('')}</details>`
+      : '';
 
     el.result.innerHTML = `<h2>${title}</h2>${upperHtml}${primaryHtml}${metricsHtml}${bandTelemetryHtml}${nameHtml}${linesHtml}`;
   }
@@ -1711,8 +1703,7 @@ function initFieldCalculator() {
         status: 'success',
         title: 'Calculated CLT Result',
         upperStats: {
-          cltValue: formatNumber(clt),
-          tungstenValue: `${tungsten.toFixed(6)} mg/m³`
+          cltValue: formatNumber(clt)
         },
         bandTelemetry,
         metrics: [
