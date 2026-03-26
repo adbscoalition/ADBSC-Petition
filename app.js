@@ -1544,18 +1544,22 @@ function initFieldCalculator() {
     const bandTelemetryHtml = bandTelemetry.length
       ? `<section class="field-result-lower" aria-label="Band telemetry">
           <h3>Field Band Specs</h3>
-          <div class="field-band-legend field-band-header" aria-hidden="true">
-            <p>Band</p><p>Range</p><p>CLT</p><p>Tungsten</p>
-          </div>
-          <div class="field-band-legend">
-            ${bandTelemetry.map((band) => `
-              <article class="field-band-row">
-                <p class="field-band-label">${band.label}</p>
-                <p class="field-band-range">${band.rangeLabel}</p>
-                <p class="field-band-value">CLT ${formatNumber(band.cltValue, 2)}</p>
-                <p class="field-band-value">${band.tungstenValue.toFixed(6)} mg/m³</p>
-              </article>
-            `).join('')}
+          <div class="field-band-table-wrap">
+            <table class="field-band-table" aria-label="Field band specifications">
+              <thead>
+                <tr><th>Band</th><th>Range</th><th>CLT</th><th>Tungsten</th></tr>
+              </thead>
+              <tbody>
+                ${bandTelemetry.map((band) => `
+                  <tr>
+                    <td class="field-band-label">${band.label}</td>
+                    <td class="field-band-range">${band.rangeLabel}</td>
+                    <td class="field-band-value">CLT ${formatNumber(band.cltValue, 2)}</td>
+                    <td class="field-band-value">${band.tungstenValue.toFixed(6)} mg/m³</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
           </div>
         </section>`
       : '';
@@ -1758,6 +1762,12 @@ function initFieldCalculator() {
 
   syncRankModeUi();
   syncSurnameModeUi();
+  [el.year, el.rank, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
+    inputEl?.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      inputEl.blur();
+    }, { passive: false });
+  });
   el.calculate?.addEventListener('click', calculate);
   [el.name, el.year, el.rank, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
     inputEl?.addEventListener('keydown', (event) => {

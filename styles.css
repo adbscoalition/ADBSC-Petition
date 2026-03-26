@@ -1816,37 +1816,37 @@ pre {
   color: #ffd7f1;
 }
 
-.field-band-legend {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.field-band-header {
-  margin-bottom: 0.35rem;
+.field-band-table-wrap {
   border: 1px solid rgba(255, 79, 163, 0.28);
-  border-radius: 10px;
-  background: rgba(42, 10, 62, 0.76);
-  padding: 0.35rem 0.55rem;
-  grid-template-columns: 70px 1.2fr 0.9fr 1fr;
+  border-radius: 12px;
+  overflow-x: auto;
+  background: rgba(35, 10, 52, 0.72);
 }
 
-.field-band-header p {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 800;
+.field-band-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+}
+
+.field-band-table th,
+.field-band-table td {
+  padding: 0.6rem 0.7rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  vertical-align: middle;
+}
+
+.field-band-table th {
+  font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #f8cdeb;
+  background: rgba(42, 10, 62, 0.86);
 }
 
-.field-band-row {
-  display: grid;
-  grid-template-columns: 70px 1.2fr 0.9fr 1fr;
-  align-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 12px;
-  padding: 0.45rem 0.5rem;
-  background: rgba(35, 10, 52, 0.72);
+.field-band-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .field-band-label {
@@ -1857,7 +1857,6 @@ pre {
 }
 
 .field-band-range {
-  margin: 0.2rem 0 0;
   font-size: 0.8rem;
   font-weight: 700;
 }
@@ -1888,10 +1887,8 @@ pre {
 }
 
 @media (max-width: 700px) {
-  .field-band-header,
-  .field-band-row {
-    grid-template-columns: 1fr 1fr;
-    row-gap: 0.2rem;
+  .field-band-table {
+    min-width: 460px;
   }
 }
 
