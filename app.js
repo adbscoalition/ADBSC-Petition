@@ -1414,6 +1414,39 @@ function initFieldCalculator() {
     return Number(value).toLocaleString(undefined, { maximumFractionDigits: digits });
   }
 
+  function formatDistanceMeters(value) {
+    if (!Number.isFinite(value) || value <= 0) return '0 m';
+    if (value >= 1000) return `${formatNumber(value / 1000, 3)} km`;
+    return `${formatNumber(value, 3)} m`;
+  }
+
+  function calculateTungstenConcentration(cltValue) {
+    const safeClt = Math.max(Number(cltValue) || 0, 0);
+    if (safeClt === 0) return 0;
+    const numerator = 0.55 * Math.pow(safeClt, 1.09);
+    const denominator = Math.pow(safeClt, 1.09) + Math.pow(1737, 1.09);
+    return denominator > 0 ? (numerator / denominator) : 0;
+  }
+
+  function calculateBandLengths(baseB, appearanceA, surnameL) {
+    const baselineMeters = 1.5;
+    const deltaB = baseB - 500;
+    const basePerimeterMeters = deltaB >= 0
+      ? baselineMeters + (deltaB * 0.005)
+      : baselineMeters + (deltaB * 0.001);
+    const scaledM = Math.max(0, basePerimeterMeters * appearanceA * surnameL);
+    return {
+      ns: scaledM * 0.03,
+      ce: scaledM * 0.2,
+      e: scaledM * 0.5,
+      m: scaledM,
+      ps: scaledM * 1.7,
+      ms: scaledM * 3.5,
+      mp: scaledM * 4.5,
+      mh: scaledM * 6.5
+    };
+  }
+
   function isManualRankMode() {
     return el.rankToggle?.getAttribute('aria-pressed') === 'true';
   }
@@ -1597,6 +1630,8 @@ function initFieldCalculator() {
       const logBase = Math.log10(880 / 0.01);
       const l = 0.87 + 0.63 * Math.pow(Math.log10(880 / p) / logBase, 0.644);
       const clt = b * a * l;
+      const tungsten = calculateTungstenConcentration(clt);
+      const bands = calculateBandLengths(b, a, l);
 
       renderResult({
         status: 'success',
@@ -1607,6 +1642,8 @@ function initFieldCalculator() {
           { label: 'Rank (n)', value: rank.toLocaleString() },
           { label: 'Appearance (M)', value: formatNumber(m, 2) },
           { label: 'Surname P', value: formatNumber(p, 3) },
+          { label: 'Tungsten', value: `${tungsten.toFixed(6)} mg/m³` },
+          { label: 'M Band Length', value: formatDistanceMeters(bands.m) },
           { label: 'Year', value: manualRank ? 'Manual rank mode' : String(year || years[0]) },
           { label: 'Dataset', value: getSelectedLabel(countryCode) }
         ],
@@ -1615,6 +1652,8 @@ function initFieldCalculator() {
           `Base B = 7.25n + 32 = ${formatNumber(b, 3)}`,
           `Appearance A = 0.8 + 0.04m = ${formatNumber(a, 4)}`,
           `Last-name L(P) = ${formatNumber(l, 4)}`,
+          `T(CLT) = 0.55 × (CLT^1.09 / (CLT^1.09 + 1737^1.09)) = ${tungsten.toFixed(6)} mg/m³`,
+          `Band lengths: NS ${formatDistanceMeters(bands.ns)} · CE ${formatDistanceMeters(bands.ce)} · E ${formatDistanceMeters(bands.e)} · M ${formatDistanceMeters(bands.m)} · PS ${formatDistanceMeters(bands.ps)} · MS ${formatDistanceMeters(bands.ms)} · MP ${formatDistanceMeters(bands.mp)} · MH ${formatDistanceMeters(bands.mh)}`,
           manualRank ? 'Rank source: Manual input' : `Rank source: ${getSelectedLabel(countryCode)} dataset`,
           'Final formula: CLT = B × A × L'
         ]
