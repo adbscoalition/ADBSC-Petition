@@ -1528,9 +1528,13 @@ function initFieldCalculator() {
       : '';
     const upperHtml = upperStats
       ? `<section class="field-result-upper" aria-label="CLT and tungsten summary">
-          <article class="field-core-card">
+          <article class="field-core-card field-core-card-clt">
             <p class="field-core-label">Your CLT</p>
             <p class="field-core-value ${primaryIsAlert ? 'is-alert' : ''}">${upperStats.cltValue}</p>
+          </article>
+          <article class="field-core-card field-core-card-tungsten">
+            <p class="field-core-label">Tungsten Concentration</p>
+            <p class="field-core-value">${upperStats.tungstenValue}</p>
           </article>
         </section>`
       : '';
@@ -1540,6 +1544,9 @@ function initFieldCalculator() {
     const bandTelemetryHtml = bandTelemetry.length
       ? `<section class="field-result-lower" aria-label="Band telemetry">
           <h3>Field Band Specs</h3>
+          <div class="field-band-legend field-band-header" aria-hidden="true">
+            <p>Band</p><p>Range</p><p>CLT</p><p>Tungsten</p>
+          </div>
           <div class="field-band-legend">
             ${bandTelemetry.map((band) => `
               <article class="field-band-row">
@@ -1703,14 +1710,14 @@ function initFieldCalculator() {
         status: 'success',
         title: 'Calculated CLT Result',
         upperStats: {
-          cltValue: formatNumber(clt)
+          cltValue: formatNumber(clt),
+          tungstenValue: `${tungsten.toFixed(6)} mg/m³`
         },
         bandTelemetry,
         metrics: [
           { label: 'Rank (n)', value: rank.toLocaleString() },
           { label: 'Appearance (M)', value: formatNumber(m, 2) },
           { label: 'Surname P', value: formatNumber(p, 3) },
-          { label: 'Tungsten', value: `${tungsten.toFixed(6)} mg/m³` },
           { label: 'M Band Length', value: formatDistanceMeters(bands.m) },
           { label: 'Year', value: manualRank ? 'Manual rank mode' : String(year || years[0]) },
           { label: 'Dataset', value: getSelectedLabel(countryCode) }
