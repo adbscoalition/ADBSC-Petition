@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-site-verification" content="80UmwqIEGJ7TAXPsSAttlrATkxJ07hnnddcfAKkEbeo" />
+  <meta name="zoho-verification" content="zb01457587.zmverify.zoho.com" />
   <title>OCharlotteD</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -99,15 +100,15 @@
         <p class="eyebrow">Personal Signal Estimator</p>
         <h1 id="calculatorTitle">Field Calculator <span class="beta-tag">BETA</span></h1>
         <p class="field-calculator-copy">
-          Calculate personal CLT with <strong>32 + (8 × n)</strong>, where <strong>n</strong> is your name rank.
-          This uses built-in historical rank lists for Charlotte. You can provide a year to retrieve that year's rank value for the selected dataset.
+          Calculate personal CLT using Charlotte rank in your selected region and two additional modifiers:
+          appearance score and last-name frequency.
         </p>
       </div>
 
       <section class="field-calculator-panel" aria-label="Calculation controls">
         <div class="field-calculator-grid">
           <label>
-            Legal first name <span class="field-note">(nickname not counted)</span>
+            Legal first name <span class="field-note">(for display only)</span>
             <input id="fcName" type="text" placeholder="Enter legal first name" autocomplete="name" />
           </label>
           <label>
@@ -118,6 +119,39 @@
             Year (optional)
             <input id="fcYear" type="number" inputmode="numeric" min="1880" max="2100" step="1" placeholder="e.g. 2006" />
           </label>
+          <label>
+            <span>Use manual rank instead of year</span>
+            <button id="fcRankToggle" class="btn secondary" type="button" aria-pressed="false">Use Rank Input</button>
+          </label>
+          <label>
+            Rank (n) manual override
+            <input id="fcRank" type="number" inputmode="numeric" min="1" max="1000" step="1" placeholder="e.g. 24" disabled />
+          </label>
+          <div class="field-guidance-group">
+            <a class="btn secondary" href="https://www.behindthename.com/name/charlotte" target="_blank" rel="noopener noreferrer">Search Charlotte rank guidance</a>
+            <a class="btn secondary" href="https://www.ssa.gov/oact/babynames/state/" target="_blank" rel="noopener noreferrer">Rank by state (Top 100)</a>
+            <p class="field-note">Credit: Behind the Name and SSA (Social Security Administration).</p>
+          </div>
+          <label>
+            Appearance score (M)
+            <input id="fcAppearance" type="number" inputmode="decimal" min="0" max="10" step="0.1" placeholder="0 to 10" />
+          </label>
+          <label id="fcSurnameP1Label">
+            Last-name frequency P1 (per 100,000 babies)
+            <input id="fcSurnameP1" type="number" inputmode="decimal" min="0.01" max="880" step="0.01" placeholder="e.g. 42.5" />
+          </label>
+          <label>
+            <span>Use two last names</span>
+            <button id="fcSurnameToggle" class="btn secondary" type="button" aria-pressed="false">Enable second last name</button>
+          </label>
+          <label id="fcSurnameP2Label" hidden>
+            Second last frequency (per 100,000 babies)
+            <input id="fcSurnameP2" type="number" inputmode="decimal" min="0.01" max="880" step="0.01" placeholder="optional second last name" disabled />
+          </label>
+          <div class="field-guidance-group">
+            <a class="btn secondary" href="https://probablyhelpful.com/data/surnames_A.htm" target="_blank" rel="noopener noreferrer">Surname frequency guidance</a>
+            <p class="field-note">Credit: probablyhelpful.com.</p>
+          </div>
         </div>
 
         <div class="clt-actions">
@@ -132,17 +166,63 @@
 
       <article class="field-result" id="fcResult" aria-live="polite">
         <h2>Calculated CLT Result</h2>
-        <div class="field-result-primary">
-          <span class="field-result-primary-label">CLT</span>
-          <strong>—</strong>
-        </div>
+        <section class="field-result-upper" aria-label="CLT and tungsten summary">
+          <article class="field-core-card">
+            <p class="field-core-label">Your CLT</p>
+            <p class="field-core-value">—</p>
+          </article>
+          <article class="field-core-card">
+            <p class="field-core-label">Tungsten Concentration</p>
+            <p class="field-core-value">—</p>
+          </article>
+        </section>
+        <section class="field-result-lower" aria-label="Band telemetry">
+          <h3>Magnetic Field Ring Visualization</h3>
+          <div class="field-ring-shell">
+            <div class="field-ring-viz">
+              <div class="field-ring band-ns" aria-hidden="true"></div>
+              <div class="field-ring band-ce" aria-hidden="true"></div>
+              <div class="field-ring band-e" aria-hidden="true"></div>
+              <div class="field-ring band-m" aria-hidden="true"></div>
+              <div class="field-ring band-ps" aria-hidden="true"></div>
+              <div class="field-ring band-ms" aria-hidden="true"></div>
+              <div class="field-ring band-mp" aria-hidden="true"></div>
+              <div class="field-ring band-mh" aria-hidden="true"></div>
+              <div class="field-ring-center">First Name</div>
+            </div>
+            <div class="field-band-legend">
+              <article class="field-band-row band-ns"><p class="field-band-label">NS</p></article>
+              <article class="field-band-row band-ce"><p class="field-band-label">CE</p></article>
+              <article class="field-band-row band-e"><p class="field-band-label">E</p></article>
+              <article class="field-band-row band-m"><p class="field-band-label">M</p></article>
+              <article class="field-band-row band-ps"><p class="field-band-label">PS</p></article>
+              <article class="field-band-row band-ms"><p class="field-band-label">MS</p></article>
+              <article class="field-band-row band-mp"><p class="field-band-label">MP</p></article>
+              <article class="field-band-row band-mh"><p class="field-band-label">MH</p></article>
+            </div>
+          </div>
+        </section>
         <dl class="field-result-metrics">
           <div class="metric"><dt>Rank (n)</dt><dd>—</dd></div>
+          <div class="metric"><dt>Appearance (M)</dt><dd>—</dd></div>
+          <div class="metric"><dt>Surname P</dt><dd>—</dd></div>
+          <div class="metric"><dt>Tungsten</dt><dd>—</dd></div>
+          <div class="metric"><dt>M Band Length</dt><dd>—</dd></div>
           <div class="metric"><dt>Year</dt><dd>—</dd></div>
           <div class="metric"><dt>Dataset</dt><dd>United States</dd></div>
         </dl>
         <p>Run a calculation to populate the result values.</p>
       </article>
+
+      <p class="field-note field-formula-note">
+        Base Formula: <strong>B = 7.25n + 32</strong> · Appearance modifier: <strong>A = 0.8 + 0.04m</strong> ·
+        Last-name modifier:
+        <strong>L(P)=0.87+0.63((log₁₀(880/P)/log₁₀(880/0.01))^0.644)</strong>.
+        If two last names are used, <strong>P = (P1 + P2) / 2</strong>.
+        Final formula: <strong>CLT = B × A × L</strong>. Tungsten concentration:
+        <strong>T(CLT)=0.55(CLT^1.09/(CLT^1.09+1737^1.09))</strong>. Band lengths:
+        <strong>CE=0.2M, E=0.5M, PS=1.7M, MS=3.5M, MP=4.5M, MH=6.5M</strong>.
+      </p>
     </section>
   </main>
 
