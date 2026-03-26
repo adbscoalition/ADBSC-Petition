@@ -1715,6 +1715,14 @@ pre {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.field-calculator-grid input:disabled,
+.field-calculator-grid select:disabled {
+  background: rgba(84, 84, 94, 0.45);
+  border-color: rgba(180, 180, 195, 0.35);
+  color: rgba(225, 225, 235, 0.62);
+  cursor: not-allowed;
+}
+
 .field-calculator-grid input:focus,
 .field-calculator-grid select:focus {
   outline: none;
@@ -1824,7 +1832,7 @@ pre {
 
 .field-band-header p {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1843,20 +1851,20 @@ pre {
 
 .field-band-label {
   margin: 0;
-  font-size: 0.73rem;
+  font-size: 0.9rem;
   font-weight: 900;
   letter-spacing: 0.06em;
 }
 
 .field-band-range {
   margin: 0.2rem 0 0;
-  font-size: 0.62rem;
+  font-size: 0.8rem;
   font-weight: 700;
 }
 
 .field-band-value {
   margin: 0;
-  font-size: 0.62rem;
+  font-size: 0.8rem;
   font-weight: 700;
 }
 
