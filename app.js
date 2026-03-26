@@ -1543,17 +1543,25 @@ function initFieldCalculator() {
       : '';
     const bandTelemetryHtml = bandTelemetry.length
       ? `<section class="field-result-lower" aria-label="Band telemetry">
-          <h3>Band Telemetry Map</h3>
-          <div class="field-band-map">
+          <h3>Magnetic Field Ring Visualization</h3>
+          <div class="field-band-visual">
+            <div class="field-ring field-ring-mh"></div>
+            <div class="field-ring field-ring-mp"></div>
+            <div class="field-ring field-ring-ms"></div>
+            <div class="field-ring field-ring-ps"></div>
+            <div class="field-ring field-ring-m"></div>
+            <div class="field-ring field-ring-e"></div>
+            <div class="field-ring field-ring-ce"></div>
+            <div class="field-ring field-ring-ns"></div>
+            <div class="field-ring-center">${nameValue || '—'}</div>
+          </div>
+          <div class="field-band-legend">
             ${bandTelemetry.map((band) => `
-              <article class="field-band-circle ${band.className}">
-                <p class="field-band-label">${band.label}</p>
-                <p class="field-band-range">${band.rangeLabel}</p>
-                <p class="field-band-value">CLT ${formatNumber(band.cltValue, 2)}</p>
-                <p class="field-band-value">${band.tungstenValue.toFixed(6)} mg/m³</p>
+              <article class="field-band-row ${band.className}">
+                <p><strong>${band.label}</strong> · ${band.rangeLabel}</p>
+                <p>CLT ${formatNumber(band.cltValue, 2)} · ${band.tungstenValue.toFixed(6)} mg/m³</p>
               </article>
             `).join('')}
-            <div class="field-band-center">${nameValue || '—'}</div>
           </div>
         </section>`
       : '';

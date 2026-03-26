@@ -1800,73 +1800,88 @@ pre {
   color: #ffd7f1;
 }
 
-.field-band-map {
+.field-band-visual {
+  position: relative;
+  margin: 0 auto;
+  width: min(340px, 92%);
+  aspect-ratio: 1 / 1;
   display: grid;
-  grid-template-columns: repeat(3, minmax(72px, 1fr));
-  grid-template-areas:
-    "mh ns ce"
-    "mp center e"
-    "ms ps m";
-  gap: 0.5rem;
-  align-items: stretch;
+  place-items: center;
+  filter: drop-shadow(0 16px 26px rgba(12, 2, 24, 0.45));
 }
 
-.field-band-circle {
-  min-height: 86px;
+.field-ring {
+  position: absolute;
   border-radius: 999px;
-  padding: 0.6rem 0.4rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  text-align: center;
-  box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.12), 0 8px 20px rgba(8, 2, 17, 0.4);
+  border-style: solid;
+  border-width: 2px;
+  animation: ringPulse 5.5s ease-in-out infinite;
 }
 
-.field-band-label {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-}
+.field-ring-mh { width: 100%; height: 100%; border-color: rgba(170, 170, 178, 0.55); }
+.field-ring-mp { width: 84%; height: 84%; border-color: rgba(159, 112, 255, 0.62); animation-delay: 0.2s; }
+.field-ring-ms { width: 71%; height: 71%; border-color: rgba(65, 145, 255, 0.66); animation-delay: 0.4s; }
+.field-ring-ps { width: 60%; height: 60%; border-color: rgba(140, 214, 255, 0.72); animation-delay: 0.6s; }
+.field-ring-m { width: 50%; height: 50%; border-color: rgba(71, 236, 255, 0.75); animation-delay: 0.8s; }
+.field-ring-e { width: 40%; height: 40%; border-color: rgba(255, 208, 66, 0.78); animation-delay: 1s; }
+.field-ring-ce { width: 30%; height: 30%; border-color: rgba(255, 140, 57, 0.82); animation-delay: 1.2s; }
+.field-ring-ns { width: 20%; height: 20%; border-color: rgba(255, 72, 72, 0.86); animation-delay: 1.4s; }
 
-.field-band-range {
-  margin: 0.2rem 0 0;
-  font-size: 0.62rem;
-  font-weight: 700;
-}
-
-.field-band-value {
-  margin: 0.1rem 0 0;
-  font-size: 0.62rem;
-  font-weight: 700;
-}
-
-.field-band-center {
-  grid-area: center;
+.field-ring-center {
+  width: 28%;
+  height: 28%;
   border-radius: 999px;
   border: 1px solid rgba(255, 208, 241, 0.6);
-  background: radial-gradient(circle at 30% 25%, rgba(255, 206, 240, 0.3), rgba(86, 20, 116, 0.9));
+  background: radial-gradient(circle at 30% 25%, rgba(255, 206, 240, 0.35), rgba(86, 20, 116, 0.92));
   display: grid;
   place-items: center;
   text-align: center;
-  padding: 0.6rem;
-  font-size: 0.86rem;
+  padding: 0.5rem;
+  font-size: 0.78rem;
   font-weight: 900;
   color: #fff0fb;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  box-shadow: 0 0 0 1px rgba(255, 177, 230, 0.26), inset 0 0 18px rgba(255, 255, 255, 0.13);
+  box-shadow: 0 0 0 1px rgba(255, 177, 230, 0.24), inset 0 0 18px rgba(255, 255, 255, 0.15);
 }
 
-.band-ns { grid-area: ns; background: rgba(255, 72, 72, 0.25); color: #ffd7d7; }
-.band-ce { grid-area: ce; background: rgba(255, 140, 57, 0.24); color: #ffe5cc; }
-.band-e { grid-area: e; background: rgba(255, 208, 66, 0.28); color: #fff4cd; }
-.band-m { grid-area: m; background: rgba(71, 236, 255, 0.25); color: #d7fdff; }
-.band-ps { grid-area: ps; background: rgba(140, 214, 255, 0.24); color: #e0f5ff; }
-.band-ms { grid-area: ms; background: rgba(65, 145, 255, 0.24); color: #dbe8ff; }
-.band-mp { grid-area: mp; background: rgba(159, 112, 255, 0.24); color: #eddfff; }
-.band-mh { grid-area: mh; background: rgba(148, 148, 160, 0.26); color: #f0f0f3; }
+.field-band-legend {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.field-band-row {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 0.5rem 0.65rem;
+  backdrop-filter: blur(2px);
+}
+
+.field-band-row p {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.field-band-row p + p {
+  margin-top: 0.16rem;
+  font-size: 0.7rem;
+}
+
+.band-ns { background: rgba(255, 72, 72, 0.2); color: #ffd7d7; }
+.band-ce { background: rgba(255, 140, 57, 0.2); color: #ffe5cc; }
+.band-e { background: rgba(255, 208, 66, 0.22); color: #fff4cd; }
+.band-m { background: rgba(71, 236, 255, 0.2); color: #d7fdff; }
+.band-ps { background: rgba(140, 214, 255, 0.2); color: #e0f5ff; }
+.band-ms { background: rgba(65, 145, 255, 0.2); color: #dbe8ff; }
+.band-mp { background: rgba(159, 112, 255, 0.2); color: #eddfff; }
+.band-mh { background: rgba(148, 148, 160, 0.2); color: #f0f0f3; }
+
+@keyframes ringPulse {
+  0%, 100% { transform: scale(1); opacity: 0.82; }
+  50% { transform: scale(1.015); opacity: 1; }
+}
 
 
 .field-result-primary {
