@@ -1428,15 +1428,16 @@ function initFieldCalculator() {
     return denominator > 0 ? (numerator / denominator) : 0;
   }
 
-  function calculateBandLengths(baseB, appearanceA, surnameL) {
+  function calculateBandLengths(baseB, appearanceA, surnameL, cltValue = 0) {
     const baselineMeters = 1.5;
     const deltaB = baseB - 500;
     const basePerimeterMeters = deltaB >= 0
       ? baselineMeters + (deltaB * 0.005)
       : baselineMeters + (deltaB * 0.001);
     const scaledM = Math.max(0, basePerimeterMeters * appearanceA * surnameL);
+    const nsFromCltCm = (Math.max(0, Number(cltValue) || 0) * 0.005) + 4;
     return {
-      ns: scaledM * 0.03,
+      ns: nsFromCltCm / 100,
       ce: scaledM * 0.2,
       e: scaledM * 0.5,
       m: scaledM,
@@ -1707,7 +1708,7 @@ function initFieldCalculator() {
       const l = 0.87 + 0.63 * Math.pow(Math.log10(880 / p) / logBase, 0.644);
       const clt = b * a * l;
       const tungsten = calculateTungstenConcentration(clt);
-      const bands = calculateBandLengths(b, a, l);
+      const bands = calculateBandLengths(b, a, l, clt);
       const bandTelemetry = buildBandTelemetry(bands, clt, tungsten);
 
       renderResult({
@@ -1764,9 +1765,8 @@ function initFieldCalculator() {
   syncSurnameModeUi();
   [el.year, el.rank, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
     inputEl?.addEventListener('wheel', (event) => {
-      event.preventDefault();
       inputEl.blur();
-    }, { passive: false });
+    });
   });
   el.calculate?.addEventListener('click', calculate);
   [el.name, el.year, el.rank, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
