@@ -819,6 +819,8 @@ li {
   margin-bottom: 1rem;
   border: 1px solid rgba(255, 137, 90, 0.6);
   background: linear-gradient(145deg, rgba(94, 30, 52, 0.9), rgba(68, 18, 46, 0.9));
+  box-shadow: 0 0 0 1px rgba(255, 137, 90, 0.3), 0 0 24px rgba(255, 90, 130, 0.35);
+  animation: portalWarningFlash 1.05s ease-in-out infinite alternate;
 }
 
 .portal-warning-banner p {
@@ -832,6 +834,48 @@ li {
   display: flex;
   gap: 0.6rem;
   flex-wrap: wrap;
+}
+
+.portal-poe-section {
+  margin-top: 1rem;
+  border: 1px solid rgba(255, 79, 163, 0.46);
+  border-radius: var(--radius-md);
+  background: rgba(53, 14, 76, 0.7);
+}
+
+.portal-poe-section summary {
+  cursor: pointer;
+  list-style: none;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 0.85rem 1rem;
+}
+
+.portal-poe-section summary::-webkit-details-marker {
+  display: none;
+}
+
+.portal-poe-section[open] summary {
+  border-bottom: 1px solid rgba(255, 79, 163, 0.28);
+}
+
+.portal-poe-section .portal-warning-banner {
+  margin: 0.95rem 1rem 1rem;
+}
+
+.portal-poe-stack {
+  padding: 0 1rem 1rem;
+}
+
+@keyframes portalWarningFlash {
+  0% {
+    filter: saturate(1);
+    box-shadow: 0 0 0 1px rgba(255, 137, 90, 0.25), 0 0 14px rgba(255, 90, 130, 0.25);
+  }
+  100% {
+    filter: saturate(1.45);
+    box-shadow: 0 0 0 1px rgba(255, 175, 108, 0.48), 0 0 36px rgba(255, 72, 156, 0.62);
+  }
 }
 
 .portal-entry {
