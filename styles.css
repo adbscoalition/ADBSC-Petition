@@ -837,18 +837,30 @@ li {
 }
 
 .portal-poe-section {
+  width: 100%;
   margin-top: 1rem;
+  padding: 0;
   border: 1px solid rgba(255, 79, 163, 0.46);
   border-radius: var(--radius-md);
   background: rgba(53, 14, 76, 0.7);
+  overflow: hidden;
 }
 
 .portal-poe-section summary {
   cursor: pointer;
   list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-weight: 800;
   letter-spacing: 0.04em;
   padding: 0.85rem 1rem;
+}
+
+.portal-poe-section summary::after {
+  content: "▾";
+  font-size: 1rem;
+  transition: transform 0.2s ease;
 }
 
 .portal-poe-section summary::-webkit-details-marker {
@@ -857,6 +869,10 @@ li {
 
 .portal-poe-section[open] summary {
   border-bottom: 1px solid rgba(255, 79, 163, 0.28);
+}
+
+.portal-poe-section[open] summary::after {
+  transform: rotate(180deg);
 }
 
 .portal-poe-section .portal-warning-banner {
