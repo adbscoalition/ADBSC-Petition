@@ -98,7 +98,7 @@
     <section class="panel field-calculator-shell" id="fieldCalculatorApp" aria-labelledby="calculatorTitle">
       <div class="field-calculator-hero">
         <p class="eyebrow">Personal Signal Estimator</p>
-        <h1 id="calculatorTitle">Field Calculator <span class="beta-tag">BETA</span></h1>
+        <h1 id="calculatorTitle">Field Calculator</h1>
         <p class="field-calculator-copy">
           Calculate personal CLT using Charlotte rank in your selected region and two additional modifiers:
           appearance score and last-name frequency.
@@ -137,20 +137,20 @@
             <input id="fcAppearance" type="number" inputmode="decimal" min="0" max="10" step="0.1" placeholder="0 to 10" />
           </label>
           <label id="fcSurnameP1Label">
-            Last-name frequency P1 (per 100,000 babies)
-            <input id="fcSurnameP1" type="number" inputmode="decimal" min="0.01" max="880" step="0.01" placeholder="e.g. 42.5" />
+            Surname frequency ratio P1 (1:x)
+            <input id="fcSurnameP1" type="number" inputmode="numeric" min="1" step="1" placeholder="e.g. 1200" />
           </label>
           <label>
             <span>Use two last names</span>
             <button id="fcSurnameToggle" class="btn secondary" type="button" aria-pressed="false">Enable second last name</button>
           </label>
           <label id="fcSurnameP2Label" hidden>
-            Second last frequency (per 100,000 babies)
-            <input id="fcSurnameP2" type="number" inputmode="decimal" min="0.01" max="880" step="0.01" placeholder="optional second last name" disabled />
+            Second surname ratio (1:x)
+            <input id="fcSurnameP2" type="number" inputmode="numeric" min="1" step="1" placeholder="optional second surname ratio" disabled />
           </label>
           <div class="field-guidance-group">
-            <a class="btn secondary" href="https://probablyhelpful.com/data/surnames_A.htm" target="_blank" rel="noopener noreferrer">Surname frequency guidance</a>
-            <p class="field-note">Credit: probablyhelpful.com.</p>
+            <a class="btn secondary" href="https://forebears.io/" target="_blank" rel="noopener noreferrer">Surname frequency guidance</a>
+            <p class="field-note">Credit: Forebears.</p>
           </div>
         </div>
 
@@ -209,8 +209,8 @@
 
       <p class="field-note field-formula-note">
         Base Formula: <strong>B = 7.25n + 32</strong> · Appearance modifier: <strong>A = 0.8 + 0.04m</strong> ·
-        Last-name modifier:
-        <strong>L(P)=0.87+0.63((log₁₀(880/P)/log₁₀(880/0.01))^0.644)</strong>.
+        Surname rarity modifier:
+        <strong>L(P)=min(2, 0.85 + (0.1933·log₁₀(P/150) + 0.06849·(log₁₀(P/150))²)/(1 + 0.2514·|log₁₀(P/150)|))</strong>.
         If two last names are used, <strong>P = (P1 + P2) / 2</strong>.
         Final formula: <strong>CLT = B × A × L</strong>. Tungsten concentration:
         <strong>T(CLT)=0.55(CLT^1.09/(CLT^1.09+1737^1.09))</strong>. Band lengths:

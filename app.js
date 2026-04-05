@@ -1406,7 +1406,7 @@ function initFieldCalculator() {
     const raw = String(inputEl?.value || '').trim();
     if (!raw && allowBlank) return null;
     const parsed = Number(raw);
-    if (!Number.isFinite(parsed) || parsed < 0.01 || parsed > 880) return null;
+    if (!Number.isFinite(parsed) || parsed < 1 || parsed > 1000000000) return null;
     return parsed;
   }
 
@@ -1496,8 +1496,8 @@ function initFieldCalculator() {
     if (el.surnameToggle) el.surnameToggle.textContent = enabled ? 'Second last name enabled' : 'Enable second last name';
     if (el.surnameP1Label) {
       el.surnameP1Label.firstChild.textContent = enabled
-        ? 'First last frequency (per 100,000 babies)'
-        : 'Last-name frequency P1 (per 100,000 babies)';
+        ? 'First surname ratio (1:x)'
+        : 'Surname frequency ratio P1 (1:x)';
     }
     if (el.surnameP2Label) el.surnameP2Label.hidden = !enabled;
     if (el.surnameP2) {
@@ -1669,12 +1669,12 @@ function initFieldCalculator() {
     }
 
     if (p1 === null) {
-      renderResult({ status: 'warning', title: 'Invalid P1 value', lines: ['Last-name frequency P1 must be between 0.01 and 880.'] });
+      renderResult({ status: 'warning', title: 'Invalid P1 value', lines: ['Surname ratio P1 must be a number from 1 to 1,000,000,000.'] });
       return;
     }
 
     if (isSecondSurnameMode() && String(el.surnameP2?.value || '').trim().length > 0 && p2 === null) {
-      renderResult({ status: 'warning', title: 'Invalid P2 value', lines: ['Last-name frequency P2 must be between 0.01 and 880 when provided.'] });
+      renderResult({ status: 'warning', title: 'Invalid P2 value', lines: ['Surname ratio P2 must be a number from 1 to 1,000,000,000 when provided.'] });
       return;
     }
 
@@ -1704,8 +1704,9 @@ function initFieldCalculator() {
 
       const b = (7.25 * rank) + 32;
       const a = 0.8 + (0.04 * m);
-      const logBase = Math.log10(880 / 0.01);
-      const l = 0.87 + 0.63 * Math.pow(Math.log10(880 / p) / logBase, 0.644);
+      const logRatio = Math.log10(p / 150);
+      const lRaw = 0.85 + ((0.1933 * logRatio) + (0.06849 * logRatio * logRatio)) / (1 + (0.2514 * Math.abs(logRatio)));
+      const l = Math.min(2, lRaw);
       const clt = b * a * l;
       const tungsten = calculateTungstenConcentration(clt);
       const bands = calculateBandLengths(b, a, l, clt);
@@ -1731,7 +1732,7 @@ function initFieldCalculator() {
         lines: [
           `Base B = 7.25n + 32 = ${formatNumber(b, 3)}`,
           `Appearance A = 0.8 + 0.04m = ${formatNumber(a, 4)}`,
-          `Last-name L(P) = ${formatNumber(l, 4)}`,
+          `Surname rarity L(P) = ${formatNumber(l, 4)} (P is 1:x ratio)`,
           `T(CLT) = 0.55 × (CLT^1.09 / (CLT^1.09 + 1737^1.09)) = ${tungsten.toFixed(6)} mg/m³`,
           `Band lengths: NS ${formatDistanceMeters(bands.ns)} · CE ${formatDistanceMeters(bands.ce)} · E ${formatDistanceMeters(bands.e)} · M ${formatDistanceMeters(bands.m)} · PS ${formatDistanceMeters(bands.ps)} · MS ${formatDistanceMeters(bands.ms)} · MP ${formatDistanceMeters(bands.mp)} · MH ${formatDistanceMeters(bands.mh)}`,
           manualRank ? 'Rank source: Manual input' : `Rank source: ${getSelectedLabel(countryCode)} dataset`,
