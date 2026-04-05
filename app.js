@@ -1341,6 +1341,14 @@ function initFieldCalculator() {
     name: document.getElementById('fcName'),
     country: document.getElementById('fcCountry'),
     year: document.getElementById('fcYear'),
+    rankToggle: document.getElementById('fcRankToggle'),
+    rank: document.getElementById('fcRank'),
+    appearance: document.getElementById('fcAppearance'),
+    surnameToggle: document.getElementById('fcSurnameToggle'),
+    surnameP1Label: document.getElementById('fcSurnameP1Label'),
+    surnameP2Label: document.getElementById('fcSurnameP2Label'),
+    surnameP1: document.getElementById('fcSurnameP1'),
+    surnameP2: document.getElementById('fcSurnameP2'),
     calculate: document.getElementById('fcCalculate'),
     runLoader: document.getElementById('fcRunLoader'),
     runBar: document.getElementById('fcRunBar'),
@@ -1378,24 +1386,192 @@ function initFieldCalculator() {
     return parsed;
   }
 
-  function renderResult({ status = 'idle', title = 'Result', primaryLabel = '', primaryValue = '', metrics = [], lines = [], nameValue = '', nameIsAlert = false } = {}) {
+  function normalizeRank() {
+    const raw = String(el.rank?.value || '').trim();
+    if (!raw) return null;
+    const parsed = Number(raw);
+    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 1000) return null;
+    return parsed;
+  }
+
+  function normalizeAppearance() {
+    const raw = String(el.appearance?.value || '').trim();
+    if (!raw) return null;
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed) || parsed < 0 || parsed > 10) return null;
+    return parsed;
+  }
+
+  function normalizeSurnameFrequency(inputEl, allowBlank = false) {
+    const raw = String(inputEl?.value || '').trim();
+    if (!raw && allowBlank) return null;
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed) || parsed < 1 || parsed > 1000000000) return null;
+    return parsed;
+  }
+
+  function formatNumber(value, digits = 3) {
+    return Number(value).toLocaleString(undefined, { maximumFractionDigits: digits });
+  }
+
+  function formatDistanceMeters(value) {
+    if (!Number.isFinite(value) || value <= 0) return '0 m';
+    if (value >= 1000) return `${formatNumber(value / 1000, 3)} km`;
+    return `${formatNumber(value, 3)} m`;
+  }
+
+  function calculateTungstenConcentration(cltValue) {
+    const safeClt = Math.max(Number(cltValue) || 0, 0);
+    if (safeClt === 0) return 0;
+    const numerator = 0.55 * Math.pow(safeClt, 1.09);
+    const denominator = Math.pow(safeClt, 1.09) + Math.pow(1737, 1.09);
+    return denominator > 0 ? (numerator / denominator) : 0;
+  }
+
+  function calculateBandLengths(baseB, appearanceA, surnameL, cltValue = 0) {
+    const baselineMeters = 1.5;
+    const deltaB = baseB - 500;
+    const basePerimeterMeters = deltaB >= 0
+      ? baselineMeters + (deltaB * 0.005)
+      : baselineMeters + (deltaB * 0.001);
+    const scaledM = Math.max(0, basePerimeterMeters * appearanceA * surnameL);
+    const nsFromCltCm = (Math.max(0, Number(cltValue) || 0) * 0.005) + 4;
+    return {
+      ns: nsFromCltCm / 100,
+      ce: scaledM * 0.2,
+      e: scaledM * 0.5,
+      m: scaledM,
+      ps: scaledM * 1.7,
+      ms: scaledM * 3.5,
+      mp: scaledM * 4.5,
+      mh: scaledM * 6.5
+    };
+  }
+
+  const bandTheme = [
+    { key: 'ns', label: 'NS', className: 'band-ns', cltMultiplier: 1.5, tungstenMultiplier: 0.45 },
+    { key: 'ce', label: 'CE', className: 'band-ce', cltMultiplier: 1.25, tungstenMultiplier: 0.3 },
+    { key: 'e', label: 'E', className: 'band-e', cltMultiplier: 1.1, tungstenMultiplier: 0.55 },
+    { key: 'm', label: 'M', className: 'band-m', cltMultiplier: 1, tungstenMultiplier: 0.925 },
+    { key: 'ps', label: 'PS', className: 'band-ps', cltMultiplier: 0.7, tungstenMultiplier: 0.55 },
+    { key: 'ms', label: 'MS', className: 'band-ms', cltMultiplier: 0.275, tungstenMultiplier: 0.3 },
+    { key: 'mp', label: 'MP', className: 'band-mp', cltMultiplier: 0.1, tungstenMultiplier: 0.15 },
+    { key: 'mh', label: 'MH', className: 'band-mh', cltMultiplier: 0.05, tungstenMultiplier: 0.075 }
+  ];
+
+  function buildBandTelemetry(bands, clt, tungsten) {
+    const ordered = bandTheme.map((band) => ({
+      ...band,
+      perimeter: Number(bands?.[band.key] || 0),
+      cltValue: Math.max(0, clt * band.cltMultiplier),
+      tungstenValue: Math.max(0, tungsten * band.tungstenMultiplier)
+    }));
+
+    return ordered.map((band, index) => {
+      const previous = index === 0 ? 0 : ordered[index - 1].perimeter;
+      return {
+        ...band,
+        rangeLabel: `${formatDistanceMeters(previous)} - ${formatDistanceMeters(band.perimeter)}`
+      };
+    });
+  }
+
+  function isManualRankMode() {
+    return el.rankToggle?.getAttribute('aria-pressed') === 'true';
+  }
+
+  function syncRankModeUi() {
+    const manual = isManualRankMode();
+    if (el.rankToggle) el.rankToggle.textContent = manual ? 'Using Manual Rank' : 'Use Rank Input';
+    if (el.year) el.year.disabled = manual;
+    if (el.rank) el.rank.disabled = !manual;
+  }
+
+  function isSecondSurnameMode() {
+    return el.surnameToggle?.getAttribute('aria-pressed') === 'true';
+  }
+
+  function syncSurnameModeUi() {
+    const enabled = isSecondSurnameMode();
+    if (el.surnameToggle) el.surnameToggle.textContent = enabled ? 'Second last name enabled' : 'Enable second last name';
+    if (el.surnameP1Label) {
+      el.surnameP1Label.firstChild.textContent = enabled
+        ? 'First surname ratio (1:x)'
+        : 'Surname frequency ratio P1 (1:x)';
+    }
+    if (el.surnameP2Label) el.surnameP2Label.hidden = !enabled;
+    if (el.surnameP2) {
+      el.surnameP2.disabled = !enabled;
+      if (!enabled) el.surnameP2.value = '';
+    }
+  }
+
+  function renderResult({
+    status = 'idle',
+    title = 'Result',
+    primaryLabel = '',
+    primaryValue = '',
+    metrics = [],
+    lines = [],
+    nameValue = '',
+    nameIsAlert = false,
+    primaryIsAlert = false,
+    upperStats = null,
+    bandTelemetry = []
+  } = {}) {
     if (!el.result) return;
     el.result.classList.toggle('is-success', status === 'success');
     el.result.classList.toggle('is-warning', status === 'warning');
     el.result.classList.toggle('is-error', status === 'error');
 
     const primaryHtml = primaryValue
-      ? `<div class="field-result-primary"><span class="field-result-primary-label">${primaryLabel}</span><strong>${primaryValue}</strong></div>`
+      ? `<div class="field-result-primary"><span class="field-result-primary-label">${primaryLabel}</span><strong class="${primaryIsAlert ? 'is-alert' : ''}">${primaryValue}</strong></div>`
+      : '';
+    const upperHtml = upperStats
+      ? `<section class="field-result-upper" aria-label="CLT and tungsten summary">
+          <article class="field-core-card field-core-card-clt">
+            <p class="field-core-label">Your CLT</p>
+            <p class="field-core-value ${primaryIsAlert ? 'is-alert' : ''}">${upperStats.cltValue}</p>
+          </article>
+          <article class="field-core-card field-core-card-tungsten">
+            <p class="field-core-label">Tungsten Concentration</p>
+            <p class="field-core-value">${upperStats.tungstenValue}</p>
+          </article>
+        </section>`
       : '';
     const metricsHtml = metrics.length
       ? `<dl class="field-result-metrics">${metrics.map((item) => `<div class="metric"><dt>${item.label}</dt><dd>${item.value}</dd></div>`).join('')}</dl>`
       : '';
+    const bandTelemetryHtml = bandTelemetry.length
+      ? `<section class="field-result-lower" aria-label="Band telemetry">
+          <h3>Field Band Specs</h3>
+          <div class="field-band-table-wrap">
+            <table class="field-band-table" aria-label="Field band specifications">
+              <thead>
+                <tr><th>Band</th><th>Range</th><th>CLT</th><th>Tungsten</th></tr>
+              </thead>
+              <tbody>
+                ${bandTelemetry.map((band) => `
+                  <tr>
+                    <td class="field-band-label">${band.label}</td>
+                    <td class="field-band-range">${band.rangeLabel}</td>
+                    <td class="field-band-value">CLT ${formatNumber(band.cltValue, 2)}</td>
+                    <td class="field-band-value">${band.tungstenValue.toFixed(6)} mg/m³</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </section>`
+      : '';
     const nameHtml = nameValue
       ? `<p class="field-result-name ${nameIsAlert ? 'is-alert' : ''}">Name: ${nameValue}</p>`
       : '';
-    const linesHtml = lines.map((line) => `<p>${line}</p>`).join('');
+    const linesHtml = lines.length
+      ? `<details class="field-calculation-details"><summary>Calculation breakdown</summary>${lines.map((line) => `<p>${line}</p>`).join('')}</details>`
+      : '';
 
-    el.result.innerHTML = `<h2>${title}</h2>${primaryHtml}${metricsHtml}${nameHtml}${linesHtml}`;
+    el.result.innerHTML = `<h2>${title}</h2>${upperHtml}${primaryHtml}${metricsHtml}${bandTelemetryHtml}${nameHtml}${linesHtml}`;
   }
 
   function runCalculationLoader(durationMs = 1800) {
@@ -1436,35 +1612,69 @@ function initFieldCalculator() {
   async function calculate() {
     const enteredName = String(el.name?.value || '').trim();
     const countryCode = String(el.country?.value || 'us');
+    const manualRank = isManualRankMode();
     const year = normalizeYear();
     const hasYearInput = String(el.year?.value || '').trim().length > 0;
+    const rankInput = normalizeRank();
+    const hasRankInput = String(el.rank?.value || '').trim().length > 0;
+    const appearance = normalizeAppearance();
+    const hasAppearanceInput = String(el.appearance?.value || '').trim().length > 0;
+    const p1 = normalizeSurnameFrequency(el.surnameP1);
+    const p2 = isSecondSurnameMode() ? normalizeSurnameFrequency(el.surnameP2, true) : null;
 
     if (!enteredName) {
       renderResult({ status: 'warning', title: 'Missing name', lines: ['Please enter a name before calculating.'] });
       return;
     }
 
-    if (hasYearInput && year === null) {
-      renderResult({ status: 'warning', title: 'Invalid year', lines: ['Enter a valid year between 1880 and 2100, or leave it blank.'] });
-      return;
-    }
-
-    const isCharlotte = enteredName.toLowerCase() === 'charlotte';
-    if (!isCharlotte) {
+    if (enteredName.toLowerCase() !== 'charlotte') {
       renderResult({
-        status: 'success',
+        status: 'error',
         title: 'Calculated CLT Result',
         primaryLabel: 'CLT',
         primaryValue: '0',
+        primaryIsAlert: true,
         metrics: [
-          { label: 'Rank (n)', value: '—' },
-          { label: 'Year', value: String(year || '—') },
+          { label: 'Rank (n)', value: '0× multiplier applied' },
+          { label: 'Appearance (M)', value: '—' },
+          { label: 'Surname P', value: '—' },
+          { label: 'Year', value: manualRank ? 'Manual rank mode' : String(year || '—') },
           { label: 'Dataset', value: getSelectedLabel(countryCode) }
         ],
         nameValue: enteredName,
         nameIsAlert: true,
-        lines: ['Formula: 32 + 8n']
+        lines: ['Legal first name is not Charlotte, so CLT multiplier is 0×.']
       });
+      return;
+    }
+
+    if (manualRank && !hasRankInput) {
+      renderResult({ status: 'warning', title: 'Missing rank', lines: ['Enable rank mode and provide a manual rank value between 1 and 1000.'] });
+      return;
+    }
+
+    if (manualRank && hasRankInput && rankInput === null) {
+      renderResult({ status: 'warning', title: 'Invalid rank', lines: ['Manual rank (n) must be an integer between 1 and 1000.'] });
+      return;
+    }
+
+    if (!manualRank && hasYearInput && year === null) {
+      renderResult({ status: 'warning', title: 'Invalid year', lines: ['Enter a valid year between 1880 and 2100, or leave it blank.'] });
+      return;
+    }
+
+    if (hasAppearanceInput && appearance === null) {
+      renderResult({ status: 'warning', title: 'Invalid appearance score', lines: ['Appearance (M) must be a number between 0 and 10.'] });
+      return;
+    }
+
+    if (p1 === null) {
+      renderResult({ status: 'warning', title: 'Invalid P1 value', lines: ['Surname ratio P1 must be a number from 1 to 1,000,000,000.'] });
+      return;
+    }
+
+    if (isSecondSurnameMode() && String(el.surnameP2?.value || '').trim().length > 0 && p2 === null) {
+      renderResult({ status: 'warning', title: 'Invalid P2 value', lines: ['Surname ratio P2 must be a number from 1 to 1,000,000,000 when provided.'] });
       return;
     }
 
@@ -1473,8 +1683,8 @@ function initFieldCalculator() {
 
     try {
       const loaderPromise = runCalculationLoader();
-      const rank = getRankFromLocalData(countryCode, year);
       const years = getDatasetYears(countryCode);
+      const rank = manualRank ? rankInput : getRankFromLocalData(countryCode, year);
       await loaderPromise;
 
       if (!rank) {
@@ -1489,35 +1699,78 @@ function initFieldCalculator() {
         return;
       }
 
-      const clt = 32 + (8 * rank);
+      const m = appearance ?? 0;
+      const p = p2 === null ? p1 : (p1 + p2) / 2;
+
+      const b = (7.25 * rank) + 32;
+      const a = 0.8 + (0.04 * m);
+      const logRatio = Math.log10(p / 150);
+      const lRaw = 0.85 + ((0.1933 * logRatio) + (0.06849 * logRatio * logRatio)) / (1 + (0.2514 * Math.abs(logRatio)));
+      const l = Math.min(2, lRaw);
+      const clt = b * a * l;
+      const tungsten = calculateTungstenConcentration(clt);
+      const bands = calculateBandLengths(b, a, l, clt);
+      const bandTelemetry = buildBandTelemetry(bands, clt, tungsten);
+
       renderResult({
         status: 'success',
         title: 'Calculated CLT Result',
-        primaryLabel: 'CLT',
-        primaryValue: clt.toLocaleString(),
+        upperStats: {
+          cltValue: formatNumber(clt),
+          tungstenValue: `${tungsten.toFixed(6)} mg/m³`
+        },
+        bandTelemetry,
         metrics: [
           { label: 'Rank (n)', value: rank.toLocaleString() },
-          { label: 'Year', value: String(year || years[0]) },
+          { label: 'Appearance (M)', value: formatNumber(m, 2) },
+          { label: 'Surname P', value: formatNumber(p, 3) },
+          { label: 'M Band Length', value: formatDistanceMeters(bands.m) },
+          { label: 'Year', value: manualRank ? 'Manual rank mode' : String(year || years[0]) },
           { label: 'Dataset', value: getSelectedLabel(countryCode) }
         ],
         nameValue: enteredName,
         lines: [
-          'Formula: 32 + 8n'
+          `Base B = 7.25n + 32 = ${formatNumber(b, 3)}`,
+          `Appearance A = 0.8 + 0.04m = ${formatNumber(a, 4)}`,
+          `Surname rarity L(P) = ${formatNumber(l, 4)} (P is 1:x ratio)`,
+          `T(CLT) = 0.55 × (CLT^1.09 / (CLT^1.09 + 1737^1.09)) = ${tungsten.toFixed(6)} mg/m³`,
+          `Band lengths: NS ${formatDistanceMeters(bands.ns)} · CE ${formatDistanceMeters(bands.ce)} · E ${formatDistanceMeters(bands.e)} · M ${formatDistanceMeters(bands.m)} · PS ${formatDistanceMeters(bands.ps)} · MS ${formatDistanceMeters(bands.ms)} · MP ${formatDistanceMeters(bands.mp)} · MH ${formatDistanceMeters(bands.mh)}`,
+          manualRank ? 'Rank source: Manual input' : `Rank source: ${getSelectedLabel(countryCode)} dataset`,
+          'Final formula: CLT = B × A × L'
         ]
       });
     } catch (error) {
       renderResult({
         status: 'error',
         title: 'Calculation failed',
-        lines: [`Unable to compute CLT from local rank data (${String(error?.message || 'unknown error')}).`]
+        lines: [`Unable to compute CLT from local rank/modifier data (${String(error?.message || 'unknown error')}).`]
       });
     } finally {
       if (el.calculate) el.calculate.disabled = false;
     }
   }
 
+  el.rankToggle?.addEventListener('click', () => {
+    const pressed = el.rankToggle?.getAttribute('aria-pressed') === 'true';
+    if (el.rankToggle) el.rankToggle.setAttribute('aria-pressed', String(!pressed));
+    syncRankModeUi();
+  });
+
+  el.surnameToggle?.addEventListener('click', () => {
+    const pressed = el.surnameToggle?.getAttribute('aria-pressed') === 'true';
+    if (el.surnameToggle) el.surnameToggle.setAttribute('aria-pressed', String(!pressed));
+    syncSurnameModeUi();
+  });
+
+  syncRankModeUi();
+  syncSurnameModeUi();
+  [el.year, el.rank, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
+    inputEl?.addEventListener('wheel', (event) => {
+      inputEl.blur();
+    });
+  });
   el.calculate?.addEventListener('click', calculate);
-  [el.name, el.year].forEach((inputEl) => {
+  [el.name, el.year, el.rank, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
     inputEl?.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
