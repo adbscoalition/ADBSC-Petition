@@ -523,14 +523,14 @@ function initCltFieldSystem() {
 
   function getBandTransitionMultiplier(distanceM, ranges) {
     const profile = [
-      { key: 'ns', min: 1.3, max: 1.7 },
-      { key: 'ce', min: 1.2, max: 1.3 },
-      { key: 'e', min: 1.1, max: 1.2 },
-      { key: 'm', min: 1.0, max: 1.1 },
-      { key: 'ps', min: 0.4, max: 1.0 },
-      { key: 'ms', min: 0.15, max: 0.4 },
-      { key: 'mp', min: 0.05, max: 0.15 },
-      { key: 'mh', min: 0.0, max: 0.05 }
+      { key: 'ns', near: 1.7, far: 1.3 },
+      { key: 'ce', near: 1.3, far: 1.2 },
+      { key: 'e', near: 1.2, far: 1.1 },
+      { key: 'm', near: 1.1, far: 1.0 },
+      { key: 'ps', near: 1.0, far: 0.4 },
+      { key: 'ms', near: 0.4, far: 0.15 },
+      { key: 'mp', near: 0.15, far: 0.05 },
+      { key: 'mh', near: 0.05, far: 0.0 }
     ];
 
     let start = 0;
@@ -539,7 +539,7 @@ function initCltFieldSystem() {
       if (distanceM <= end) {
         const span = Math.max(0.0001, end - start);
         const t = Math.max(0, Math.min(1, (distanceM - start) / span));
-        return band.min + ((band.max - band.min) * t);
+        return band.near + ((band.far - band.near) * t);
       }
       start = end;
     }
