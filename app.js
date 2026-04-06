@@ -1262,25 +1262,21 @@ function initCltFieldSystem() {
       setStatus('Still waiting for location fix. You can use fallback scan now, then tap "Retry Live Tracking".', 'TRACKING PAUSED');
     }, 12000);
 
+    state.watchId = navigator.geolocation.watchPosition(
+      (watchPosition) => handlePosition(watchPosition),
+      (error) => onGeolocationError(error),
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 10000
+      }
+    );
+
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        handlePosition(position);
-        state.watchId = navigator.geolocation.watchPosition(
-          (watchPosition) => handlePosition(watchPosition),
-          (error) => onGeolocationError(error),
-          {
-            enableHighAccuracy: true,
-            maximumAge: 0,
-            timeout: 10000
-          }
-        );
-      },
+      (position) => handlePosition(position),
       (error) => {
-        if (state.liveRequestTimer) {
-          window.clearTimeout(state.liveRequestTimer);
-          state.liveRequestTimer = null;
-        }
-        onGeolocationError(error);
+        if (state.liveMode) return;
+        if (error?.code === 1) onGeolocationError(error);
       },
       {
         enableHighAccuracy: true,
