@@ -297,6 +297,7 @@ function initCltFieldSystem() {
 
   const state = {
     watchId: null,
+    liveRequestTimer: null,
     driftTick: null,
     scanTimer: null,
     liveMode: false,
@@ -1151,6 +1152,10 @@ function initCltFieldSystem() {
   }
 
   function stopLiveTracking() {
+    if (state.liveRequestTimer) {
+      window.clearTimeout(state.liveRequestTimer);
+      state.liveRequestTimer = null;
+    }
     if (state.watchId !== null) {
       navigator.geolocation.clearWatch(state.watchId);
       state.watchId = null;
@@ -1201,24 +1206,55 @@ function initCltFieldSystem() {
     setStatus('Requesting location access for live tracking...', 'LOCATION ACCESS REQUIRED');
 
     stopLiveTracking();
-    state.watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        const accuracy = position.coords.accuracy;
-        const calc = computeField(lat, lon);
+    state.liveMode = false;
 
-        state.liveMode = true;
-        state.simulationActive = false;
-        setStatus('Live tracking active and streaming sensor telemetry.', 'LIVE TRACKING');
-        renderLiveTelemetry(lat, lon, accuracy, calc);
-        startDriftTicker();
+    const handlePosition = (position) => {
+      if (state.liveRequestTimer) {
+        window.clearTimeout(state.liveRequestTimer);
+        state.liveRequestTimer = null;
+      }
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      const accuracy = position.coords.accuracy;
+      const calc = computeField(lat, lon);
+
+      state.liveMode = true;
+      state.simulationActive = false;
+      setStatus('Live tracking active and streaming sensor telemetry.', 'LIVE TRACKING');
+      renderLiveTelemetry(lat, lon, accuracy, calc);
+      startDriftTicker();
+    };
+
+    state.liveRequestTimer = window.setTimeout(() => {
+      if (state.liveMode) return;
+      setFallbackVisibility(true);
+      setStatus('Still waiting for location fix. You can use fallback scan now, then tap "Retry Live Tracking".', 'TRACKING PAUSED');
+    }, 12000);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        handlePosition(position);
+        state.watchId = navigator.geolocation.watchPosition(
+          (watchPosition) => handlePosition(watchPosition),
+          (error) => onGeolocationError(error),
+          {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 10000
+          }
+        );
       },
-      (error) => onGeolocationError(error),
+      (error) => {
+        if (state.liveRequestTimer) {
+          window.clearTimeout(state.liveRequestTimer);
+          state.liveRequestTimer = null;
+        }
+        onGeolocationError(error);
+      },
       {
         enableHighAccuracy: true,
         maximumAge: 0,
-        timeout: 10000
+        timeout: 12000
       }
     );
   }
