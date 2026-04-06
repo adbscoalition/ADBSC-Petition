@@ -268,6 +268,14 @@ if (entryLoader) {
 
 
 
+function calculateTungstenConcentrationShared(cltValue) {
+  const safeClt = Math.max(Number(cltValue) || 0, 0);
+  if (safeClt === 0) return 0;
+  const numerator = 0.55 * Math.pow(safeClt, 1.09);
+  const denominator = Math.pow(safeClt, 1.09) + Math.pow(1737, 1.09);
+  return denominator > 0 ? (numerator / denominator) : 0;
+}
+
 function initCltFieldSystem() {
   const app = document.getElementById('cltSystemApp');
   if (!app) return;
@@ -297,6 +305,8 @@ function initCltFieldSystem() {
 
   const state = {
     watchId: null,
+    liveRequestTimer: null,
+    geoRetryTimer: null,
     driftTick: null,
     scanTimer: null,
     liveMode: false,
@@ -325,6 +335,7 @@ function initCltFieldSystem() {
     geoDistance: document.getElementById('cltGeoDistance'),
     geoName: document.getElementById('cltGeoName'),
     uploadedDistance: document.getElementById('cltUploadedDistance'),
+    uploadedBandSituation: document.getElementById('cltUploadedBandSituation'),
     contributors: document.getElementById('cltContributors'),
     unitSwitch: document.getElementById('cltUnitSwitch'),
     copyLogs: document.getElementById('cltCopyLogs'),
@@ -502,19 +513,66 @@ function initCltFieldSystem() {
 
   function customFieldStrength(field, distanceM, nowMs) {
     const intensity = Number(field.intensity) || 0;
-    const y = Math.max(1, Number(field.maxRangeM) || 1);
-    const r = distanceM / y;
-    if (r < 0 || r > 25) return 0;
-
-    let multiplier = 0;
-    if (r <= 1) multiplier = 1;
-    else if (r <= 3) multiplier = 1 + ((0.2 - 1) * ((r - 1) / 2));
-    else if (r <= 8) multiplier = 0.2 + ((0.05 - 0.2) * ((r - 3) / 5));
-    else if (r <= 15) multiplier = 0.05 + ((0.01 - 0.05) * ((r - 8) / 7));
-    else multiplier = 0.01 + ((0 - 0.01) * ((r - 15) / 10));
+    const ranges = getIndividualBandRangesMeters(field);
+    if (distanceM < 0 || distanceM > ranges.mh) return 0;
+    const multiplier = getBandTransitionMultiplier(distanceM, ranges);
 
     const tf = customFieldTimeFactor(field, nowMs);
     return Math.max(0, intensity * multiplier * tf);
+  }
+
+  function getBandTransitionMultiplier(distanceM, ranges) {
+    const profile = [
+      { key: 'ns', min: 1.3, max: 1.7 },
+      { key: 'ce', min: 1.2, max: 1.3 },
+      { key: 'e', min: 1.1, max: 1.2 },
+      { key: 'm', min: 1.0, max: 1.1 },
+      { key: 'ps', min: 0.4, max: 1.0 },
+      { key: 'ms', min: 0.15, max: 0.4 },
+      { key: 'mp', min: 0.05, max: 0.15 },
+      { key: 'mh', min: 0.0, max: 0.05 }
+    ];
+
+    let start = 0;
+    for (const band of profile) {
+      const end = Math.max(start, Number(ranges?.[band.key]) || start);
+      if (distanceM <= end) {
+        const span = Math.max(0.0001, end - start);
+        const t = Math.max(0, Math.min(1, (distanceM - start) / span));
+        return band.min + ((band.max - band.min) * t);
+      }
+      start = end;
+    }
+    return 0;
+  }
+
+  function getIndividualBandRangesMeters(field) {
+    const mBand = Math.max(1, Number(field?.maxRangeM) || 1);
+    const clt = Math.max(0, Number(field?.intensity) || 0);
+    const nsPerimeter = Math.max(0.04, ((clt * 0.005) + 4) / 100);
+    return {
+      ns: Math.min(nsPerimeter, mBand),
+      ce: Math.max(0.2, mBand * 0.2),
+      e: Math.max(0.5, mBand * 0.5),
+      m: mBand,
+      ps: mBand * 1.7,
+      ms: mBand * 3.5,
+      mp: mBand * 4.5,
+      mh: mBand * 6.5
+    };
+  }
+
+  function getBandSituation(distanceM, ranges) {
+    if (!Number.isFinite(distanceM) || !ranges) return 'OUT';
+    if (distanceM <= ranges.ns) return 'NS';
+    if (distanceM <= ranges.ce) return 'CE';
+    if (distanceM <= ranges.e) return 'E';
+    if (distanceM <= ranges.m) return 'M';
+    if (distanceM <= ranges.ps) return 'PS';
+    if (distanceM <= ranges.ms) return 'MS';
+    if (distanceM <= ranges.mp) return 'MP';
+    if (distanceM <= ranges.mh) return 'MH';
+    return 'OUT';
   }
 
 
@@ -552,6 +610,8 @@ function initCltFieldSystem() {
     el.uploadedFieldList.innerHTML = state.customFields.map((field) => {
       const fieldLat = Number.isFinite(Number(field.lat)) ? Number(field.lat) : Number(field.latitude);
       const fieldLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
+      const ranges = getIndividualBandRangesMeters(field);
+      const fieldTungsten = calculateTungstenConcentrationShared(Number(field.intensity) || 0);
       const daysLabel = field.daysOfWeek?.length ? field.daysOfWeek.join(', ') : 'All';
       const coordLabel = (Number.isFinite(fieldLat) && Number.isFinite(fieldLon))
         ? `${fieldLat.toFixed(6)}, ${fieldLon.toFixed(6)}`
@@ -565,7 +625,9 @@ function initCltFieldSystem() {
 
       return `<li class="uploaded-field-card${isEditing ? ' is-editing' : ''}">` +
         `<div class="uploaded-field-head"><strong>${field.name}</strong>${isEditing ? '<span class="field-editing-badge">Editing</span>' : ''}</div>` +
-        `<p class="uploaded-field-meta">${field.intensity} CLT · ${field.maxRangeM}m range</p>` +
+        `<p class="uploaded-field-meta">${field.intensity} CLT · M band ${field.maxRangeM}m</p>` +
+        `<p class="uploaded-field-meta">Bands (m): NS ${ranges.ns.toFixed(2)} · CE ${ranges.ce.toFixed(2)} · E ${ranges.e.toFixed(2)} · M ${ranges.m.toFixed(2)} · PS ${ranges.ps.toFixed(2)} · MS ${ranges.ms.toFixed(2)} · MP ${ranges.mp.toFixed(2)} · MH ${ranges.mh.toFixed(2)}</p>` +
+        `<p class="uploaded-field-meta">Tungsten (base): ${fieldTungsten.toFixed(6)} mg/m³</p>` +
         `<p class="uploaded-field-meta">Days: ${daysLabel}</p>` +
         `<p class="uploaded-field-meta">Time: ${timeLabel}</p>` +
         `<p class="uploaded-field-meta">Coordinates: ${coordLabel}</p>` +
@@ -769,6 +831,7 @@ function initCltFieldSystem() {
       const fieldLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
       const distance = haversineKm(lat, lon, fieldLat, fieldLon);
       const distanceM = distance * 1000;
+      const ranges = getIndividualBandRangesMeters(field);
       const strength = state.uploadedTimeLimitsEnabled
         ? customFieldStrength(field, distanceM, nowMs)
         : customFieldStrength({ ...field, startClock: null, endClock: null, daysOfWeek: [] }, distanceM, nowMs);
@@ -778,6 +841,9 @@ function initCltFieldSystem() {
         lat: fieldLat,
         lon: fieldLon,
         distance,
+        distanceM,
+        bandRanges: ranges,
+        bandSituation: getBandSituation(distanceM, ranges),
         strength,
         inField: strength > 0,
         uploaded: true
@@ -787,27 +853,19 @@ function initCltFieldSystem() {
     const evaluations = [...baseEvaluations, ...customEvaluations].sort((a, b) => b.strength - a.strength);
 
     const totalField = evaluations.reduce((sum, source) => sum + source.strength, 0);
-    const regularFieldTotal = evaluations
-      .filter((source) => source.category !== 'Secret')
-      .reduce((sum, source) => sum + source.strength, 0);
-    const secretFieldTotal = evaluations
-      .filter((source) => source.category === 'Secret')
-      .reduce((sum, source) => sum + source.strength, 0);
-    const tungstenRegular = (regularFieldTotal / 1000) * 0.05;
-    const tungstenSecret = 0.95 * (1 - Math.exp(-Math.max(secretFieldTotal, 0) / 6000));
     const tungstenAmbient = 0.000001;
-    const tungstenBase = tungstenAmbient + tungstenRegular + tungstenSecret;
+    let tungstenRegular = 0;
+    let tungstenSecret = 0;
 
     const tungstenBySource = {};
-    const secretFactor = secretFieldTotal > 0 ? (tungstenSecret / secretFieldTotal) : 0;
     evaluations.forEach((source) => {
       const key = getSourceKey(source);
-      if (source.category === 'Secret') {
-        tungstenBySource[key] = Math.max(0, source.strength * secretFactor);
-      } else {
-        tungstenBySource[key] = Math.max(0, (source.strength / 1000) * 0.05);
-      }
+      const tungstenValue = calculateTungstenConcentrationShared(source.strength);
+      tungstenBySource[key] = tungstenValue;
+      if (source.category === 'Secret') tungstenSecret += tungstenValue;
+      else tungstenRegular += tungstenValue;
     });
+    const tungstenBase = tungstenAmbient + tungstenRegular + tungstenSecret;
 
     const nearest = [...evaluations].sort((a, b) => a.distance - b.distance)[0];
     const nearestGeo = [...baseEvaluations]
@@ -1027,6 +1085,11 @@ function initCltFieldSystem() {
     if (el.nearestSource) {
       el.nearestSource.textContent = calc.nearestUploaded ? calc.nearestUploaded.name : 'none';
     }
+    if (el.uploadedBandSituation) {
+      el.uploadedBandSituation.textContent = calc.nearestUploaded
+        ? `Band Situation: ${calc.nearestUploaded.bandSituation}`
+        : 'Band Situation: OUT';
+    }
     if (el.gpsAccuracy) {
       const meters = Number(accuracy);
       el.gpsAccuracy.textContent = gpsError
@@ -1115,6 +1178,14 @@ function initCltFieldSystem() {
   }
 
   function stopLiveTracking() {
+    if (state.geoRetryTimer) {
+      window.clearTimeout(state.geoRetryTimer);
+      state.geoRetryTimer = null;
+    }
+    if (state.liveRequestTimer) {
+      window.clearTimeout(state.liveRequestTimer);
+      state.liveRequestTimer = null;
+    }
     if (state.watchId !== null) {
       navigator.geolocation.clearWatch(state.watchId);
       state.watchId = null;
@@ -1136,12 +1207,39 @@ function initCltFieldSystem() {
   }
 
   function onGeolocationError(error) {
-    stopLiveTracking();
+    const hasLastFix = Number.isFinite(state.lastBase?.lat) && Number.isFinite(state.lastBase?.lon);
+
+    if (state.liveRequestTimer) {
+      window.clearTimeout(state.liveRequestTimer);
+      state.liveRequestTimer = null;
+    }
+    if (state.watchId !== null) {
+      navigator.geolocation.clearWatch(state.watchId);
+      state.watchId = null;
+    }
 
     if (error?.code === 1) {
-      document.body.innerHTML = '<main class="geo-denied-screen"><div><h1>Enable geolocation to continue.</h1><p><a class="btn secondary" href="index.html">Return home</a></p></div></main>';
+      setFallbackVisibility(true);
+      setStatus('Location access denied. Allow location permission, then press "Retry Live Tracking".', 'LOCATION ACCESS REQUIRED');
+      if (!hasLastFix) state.liveMode = false;
       return;
     }
+
+    if (hasLastFix) {
+      state.liveMode = true;
+      setFallbackVisibility(true);
+      setStatus('GPS updates interrupted. Using last known position and retrying live tracking...', 'TRACKING PAUSED');
+      startDriftTicker();
+      if (!state.geoRetryTimer && !state.simulationActive) {
+        state.geoRetryTimer = window.setTimeout(() => {
+          state.geoRetryTimer = null;
+          startLiveTracking();
+        }, 3000);
+      }
+      return;
+    }
+
+    stopLiveTracking();
 
     setFallbackVisibility(true);
     if (error?.code === 2) {
@@ -1160,35 +1258,55 @@ function initCltFieldSystem() {
       return;
     }
 
-    const isSecure = window.isSecureContext || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (!isSecure) {
-      setFallbackVisibility(true);
-      setStatus('Insecure context: geolocation requires HTTPS.', 'GPS UNAVAILABLE');
-      return;
-    }
-
     setFallbackVisibility(false);
     setStatus('Requesting location access for live tracking...', 'LOCATION ACCESS REQUIRED');
 
     stopLiveTracking();
-    state.watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        const accuracy = position.coords.accuracy;
-        const calc = computeField(lat, lon);
+    state.liveMode = false;
 
-        state.liveMode = true;
-        state.simulationActive = false;
-        setStatus('Live tracking active and streaming sensor telemetry.', 'LIVE TRACKING');
-        renderLiveTelemetry(lat, lon, accuracy, calc);
-        startDriftTicker();
-      },
+    const handlePosition = (position) => {
+      if (state.liveRequestTimer) {
+        window.clearTimeout(state.liveRequestTimer);
+        state.liveRequestTimer = null;
+      }
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      const accuracy = position.coords.accuracy;
+      const calc = computeField(lat, lon);
+
+      state.liveMode = true;
+      state.simulationActive = false;
+      setStatus('Live tracking active and streaming sensor telemetry.', 'LIVE TRACKING');
+      renderLiveTelemetry(lat, lon, accuracy, calc);
+      startDriftTicker();
+    };
+
+    state.liveRequestTimer = window.setTimeout(() => {
+      if (state.liveMode) return;
+      setFallbackVisibility(true);
+      setStatus('Still waiting for location fix. You can use fallback scan now, then tap "Retry Live Tracking".', 'TRACKING PAUSED');
+    }, 12000);
+
+    state.watchId = navigator.geolocation.watchPosition(
+      (watchPosition) => handlePosition(watchPosition),
       (error) => onGeolocationError(error),
       {
         enableHighAccuracy: true,
         maximumAge: 0,
         timeout: 10000
+      }
+    );
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => handlePosition(position),
+      (error) => {
+        if (state.liveMode) return;
+        if (error?.code === 1) onGeolocationError(error);
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 12000
       }
     );
   }
@@ -1473,14 +1591,6 @@ function initFieldCalculator() {
     return `${formatNumber(value, 3)} m`;
   }
 
-  function calculateTungstenConcentration(cltValue) {
-    const safeClt = Math.max(Number(cltValue) || 0, 0);
-    if (safeClt === 0) return 0;
-    const numerator = 0.55 * Math.pow(safeClt, 1.09);
-    const denominator = Math.pow(safeClt, 1.09) + Math.pow(1737, 1.09);
-    return denominator > 0 ? (numerator / denominator) : 0;
-  }
-
   function calculateBandLengths(baseB, appearanceA, surnameL, cltValue = 0) {
     const baselineMeters = 1.5;
     const deltaB = baseB - 500;
@@ -1505,7 +1615,7 @@ function initFieldCalculator() {
     { key: 'ns', label: 'NS', className: 'band-ns', cltMultiplier: 1.5, tungstenMultiplier: 0.45 },
     { key: 'ce', label: 'CE', className: 'band-ce', cltMultiplier: 1.25, tungstenMultiplier: 0.3 },
     { key: 'e', label: 'E', className: 'band-e', cltMultiplier: 1.1, tungstenMultiplier: 0.55 },
-    { key: 'm', label: 'M', className: 'band-m', cltMultiplier: 1, tungstenMultiplier: 0.925 },
+    { key: 'm', label: 'M', className: 'band-m', cltMultiplier: 1, tungstenMultiplier: 1 },
     { key: 'ps', label: 'PS', className: 'band-ps', cltMultiplier: 0.7, tungstenMultiplier: 0.55 },
     { key: 'ms', label: 'MS', className: 'band-ms', cltMultiplier: 0.275, tungstenMultiplier: 0.3 },
     { key: 'mp', label: 'MP', className: 'band-mp', cltMultiplier: 0.1, tungstenMultiplier: 0.15 },
@@ -1761,7 +1871,7 @@ function initFieldCalculator() {
       const lRaw = 0.85 + ((0.1933 * logRatio) + (0.06849 * logRatio * logRatio)) / (1 + (0.2514 * Math.abs(logRatio)));
       const l = Math.min(2, lRaw);
       const clt = b * a * l;
-      const tungsten = calculateTungstenConcentration(clt);
+      const tungsten = calculateTungstenConcentrationShared(clt);
       const bands = calculateBandLengths(b, a, l, clt);
       const bandTelemetry = buildBandTelemetry(bands, clt, tungsten);
 
