@@ -515,18 +515,35 @@ function initCltFieldSystem() {
     const intensity = Number(field.intensity) || 0;
     const ranges = getIndividualBandRangesMeters(field);
     if (distanceM < 0 || distanceM > ranges.mh) return 0;
-
-    let multiplier = 0;
-    if (distanceM <= ranges.m) {
-      multiplier = 1;
-    } else {
-      const tailSpan = Math.max(0.0001, ranges.mh - ranges.m);
-      const tailProgress = Math.max(0, Math.min(1, (distanceM - ranges.m) / tailSpan));
-      multiplier = 1 + ((0.05 - 1) * tailProgress);
-    }
+    const multiplier = getBandTransitionMultiplier(distanceM, ranges);
 
     const tf = customFieldTimeFactor(field, nowMs);
     return Math.max(0, intensity * multiplier * tf);
+  }
+
+  function getBandTransitionMultiplier(distanceM, ranges) {
+    const profile = [
+      { key: 'ns', min: 1.3, max: 1.7 },
+      { key: 'ce', min: 1.2, max: 1.3 },
+      { key: 'e', min: 1.1, max: 1.2 },
+      { key: 'm', min: 1.0, max: 1.1 },
+      { key: 'ps', min: 0.4, max: 1.0 },
+      { key: 'ms', min: 0.15, max: 0.4 },
+      { key: 'mp', min: 0.05, max: 0.15 },
+      { key: 'mh', min: 0.0, max: 0.05 }
+    ];
+
+    let start = 0;
+    for (const band of profile) {
+      const end = Math.max(start, Number(ranges?.[band.key]) || start);
+      if (distanceM <= end) {
+        const span = Math.max(0.0001, end - start);
+        const t = Math.max(0, Math.min(1, (distanceM - start) / span));
+        return band.min + ((band.max - band.min) * t);
+      }
+      start = end;
+    }
+    return 0;
   }
 
   function getIndividualBandRangesMeters(field) {
