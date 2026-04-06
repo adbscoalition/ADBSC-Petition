@@ -13,6 +13,19 @@
 <body data-tab-title="OCharlotteD FAQ">
   <a class="skip-link" href="#main">Skip to content</a>
 
+  <div id="entryLoader" class="entry-loader faq-loader" data-loader="faq" aria-live="polite">
+    <div class="entry-loader-grid" aria-hidden="true"></div>
+    <div class="loader-shell faq-loader-shell">
+      <p class="loader-kicker">FAQ knowledge sync</p>
+      <h1>Loading FAQ Archive</h1>
+      <p class="loader-subtitle">Collecting fictional-system clarifications and preparing quick answers.</p>
+      <div class="faq-loader-badges" aria-hidden="true">
+        <span>FICTION</span><span>LORE</span><span>WORLDBUILDING</span>
+      </div>
+      <p id="faqLoaderStatus" class="loader-status">Indexing OCharlotteD FAQ entries...</p>
+    </div>
+  </div>
+
   <div class="background-field" aria-hidden="true"></div>
   <div class="field-rings" aria-hidden="true"></div>
   <div class="particle-layer" aria-hidden="true">
@@ -28,7 +41,7 @@
       </div>
     </div>
     <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="primaryNav">Menu</button>
-        <nav id="primaryNav" class="header-nav" aria-label="Primary">
+    <nav id="primaryNav" class="header-nav" aria-label="Primary">
       <a href="index.html">Main</a>
       <details class="nav-group">
         <summary>Chatbot</summary>
@@ -55,26 +68,78 @@
   </header>
 
   <main id="main" class="page-shell">
-    <section class="panel" aria-labelledby="faqTitle">
-      <p class="eyebrow">Section 4: More</p>
+    <section class="panel faq-hero" aria-labelledby="faqTitle">
+      <p class="eyebrow">Quick answers and fiction clarifications</p>
       <h1 id="faqTitle">FAQ</h1>
-      <div class="disclaimer-grid">
-        <article class="disclaimer-card"><h2>What is OCharlotteD?</h2><p>OCharlotteD is a Charlotte-centered creative project/website with its own fictional lore and systems.</p></article>
-        <article class="disclaimer-card"><h2>What is the CLT Magnetic Field system?</h2><p>The CLT Magnetic Field system is a fictional worldbuilding system centered on Charlotte. It uses made-up field values, bands, formulas, and lore.</p></article>
-        <article class="disclaimer-card"><h2>Is OCharlotteD real?</h2><p>OCharlotteD is real as a website/creative project. Its lore, including the magnetic field system, is fictional.</p></article>
-        <article class="disclaimer-card"><h2>Is the CLT Magnetic Field real?</h2><p>No. The CLT Magnetic Field is not a real scientific phenomenon.</p></article>
-        <article class="disclaimer-card"><h2>Are CLT values real measurements?</h2><p>No. CLT values are fictional and are not real scientific units.</p></article>
-        <article class="disclaimer-card"><h2>Do people named Charlotte emit a special magnetic field?</h2><p>No. That is part of the fictional lore.</p></article>
-        <article class="disclaimer-card"><h2>Is the tungsten cloud real?</h2><p>No. The tungsten cloud is fictional.</p></article>
-        <article class="disclaimer-card"><h2>Are the formulas real science?</h2><p>No. The formulas are fictional and made for the lore.</p></article>
-        <article class="disclaimer-card"><h2>Are the field bands real?</h2><p>No. Bands such as NS, CE, E, M, PS, MS, MP, and MH are fictional parts of the system.</p></article>
-        <article class="disclaimer-card"><h2>Is OCharlotteD meant to be science?</h2><p>No. It is fiction, lore, and worldbuilding, not real science.</p></article>
-        <article class="disclaimer-card"><h2>What is Obsessive-Charlotte Disorder?</h2><p>Obsessive-Charlotte Disorder is a fictional concept tied to the OCharlotteD theme and is not a real condition.</p></article>
-        <article class="disclaimer-card"><h2>Is "Obsessive-Charlotte Disorder" real?</h2><p>No. It is not a real medical or psychiatric disorder. It is fictional.</p></article>
-        <article class="disclaimer-card"><h2>Is Charlotte, NC really the source of CLT energy?</h2><p>No. That is part of the fictional lore.</p></article>
-        <article class="disclaimer-card"><h2>Are the place-based CLT values real?</h2><p>No. They are fictional values used in the system.</p></article>
-        <article class="disclaimer-card"><h2>Is resonance from objects real?</h2><p>No. That is fictional lore.</p></article>
-        <article class="disclaimer-card"><h2>Can I describe the system as fictional?</h2><p>Yes. It should be described as fictional worldbuilding and not as real science.</p></article>
+      <p class="faq-intro">This project is real as a website, but the CLT magnetic system, values, bands, and lore are fictional worldbuilding.</p>
+    </section>
+
+    <section class="panel" aria-label="Frequently asked questions">
+      <div class="faq-list">
+        <details class="faq-item" open>
+          <summary>What is OCharlotteD?</summary>
+          <p>OCharlotteD is a Charlotte-centered creative project/website with its own fictional lore and systems.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What is the CLT Magnetic Field system?</summary>
+          <p>The CLT Magnetic Field system is a fictional worldbuilding system centered on Charlotte. It uses made-up field values, bands, formulas, and lore.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is OCharlotteD real?</summary>
+          <p>OCharlotteD is real as a website/creative project. Its lore, including the magnetic field system, is fictional.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is the CLT Magnetic Field real?</summary>
+          <p>No. The CLT Magnetic Field is not a real scientific phenomenon.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Are CLT values real measurements?</summary>
+          <p>No. CLT values are fictional and are not real scientific units.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Do people named Charlotte emit a special magnetic field?</summary>
+          <p>No. That is part of the fictional lore.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is the tungsten cloud real?</summary>
+          <p>No. The tungsten cloud is fictional.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Are the formulas real science?</summary>
+          <p>No. The formulas are fictional and made for the lore.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Are the field bands real?</summary>
+          <p>No. Bands such as NS, CE, E, M, PS, MS, MP, and MH are fictional parts of the system.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is OCharlotteD meant to be science?</summary>
+          <p>No. It is fiction, lore, and worldbuilding, not real science.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What is Obsessive-Charlotte Disorder?</summary>
+          <p>Obsessive-Charlotte Disorder is a fictional concept tied to the OCharlotteD theme and is not a real condition.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is "Obsessive-Charlotte Disorder" real?</summary>
+          <p>No. It is not a real medical or psychiatric disorder. It is fictional.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is Charlotte, NC really the source of CLT energy?</summary>
+          <p>No. That is part of the fictional lore.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Are the place-based CLT values real?</summary>
+          <p>No. They are fictional values used in the system.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is resonance from objects real?</summary>
+          <p>No. That is fictional lore.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I describe the system as fictional?</summary>
+          <p>Yes. It should be described as fictional worldbuilding and not as real science.</p>
+        </details>
       </div>
     </section>
   </main>

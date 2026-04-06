@@ -233,12 +233,36 @@ if (entryLoader) {
     requestAnimationFrame(frame);
   }
 
+  function runFaqLoader() {
+    const status = document.getElementById('faqLoaderStatus');
+    const phases = [
+      { at: 0.12, label: 'Indexing OCharlotteD FAQ entries...' },
+      { at: 0.42, label: 'Linking CLT fiction safety notes...' },
+      { at: 0.72, label: 'Compiling quick-answer cards...' },
+      { at: 0.92, label: 'FAQ archive online.' }
+    ];
+
+    const start = performance.now();
+    function frame(now) {
+      const t = Math.min((now - start) / duration, 1);
+      if (!reducedMotion) entryLoader.style.setProperty('--loader-glow', String(0.34 + t * 0.66));
+      let label = phases[0].label;
+      for (const p of phases) if (t >= p.at) label = p.label;
+      if (status) status.textContent = label;
+      if (t < 1) requestAnimationFrame(frame);
+      else finalizeLoader();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
   const type = entryLoader.dataset.loader;
   if (type === 'clt') runCltLoader();
   else if (type === 'portals') runPortalsLoader();
   else if (type === 'instructions') runInstructionsLoader();
   else if (type === 'calculator') runCalculatorLoader();
   else if (type === 'legal') runLegalLoader();
+  else if (type === 'faq') runFaqLoader();
   else runMainLoader();
 }
 
