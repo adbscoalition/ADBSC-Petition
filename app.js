@@ -14,6 +14,35 @@ if (navToggle && primaryNav) {
   });
 }
 
+const navGroups = primaryNav ? Array.from(primaryNav.querySelectorAll('.nav-group')) : [];
+
+if (navGroups.length) {
+  navGroups.forEach((group) => {
+    group.addEventListener('toggle', () => {
+      if (!group.open) return;
+      navGroups.forEach((other) => {
+        if (other !== group) other.open = false;
+      });
+    });
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!primaryNav?.contains(event.target)) {
+      navGroups.forEach((group) => {
+        group.open = false;
+      });
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      navGroups.forEach((group) => {
+        group.open = false;
+      });
+    }
+  });
+}
+
 const entryLoader = document.getElementById('entryLoader');
 
 if (entryLoader) {

@@ -576,6 +576,9 @@ select {
 }
 
 .site-header {
+  position: relative;
+  z-index: 40;
+  overflow: visible;
   margin-top: 1rem;
   margin-bottom: 1rem;
   display: flex;
@@ -619,7 +622,9 @@ select {
 }
 
 .header-nav {
+  position: relative;
   display: flex;
+  align-items: center;
   gap: 0.8rem;
   flex-wrap: wrap;
 }
@@ -636,6 +641,7 @@ select {
 
 .header-nav .nav-group {
   position: relative;
+  z-index: 25;
 }
 
 .header-nav .nav-group summary {
@@ -1330,6 +1336,7 @@ pre {
 
   .header-nav {
     grid-column: 1 / -1;
+    position: relative;
     width: 100%;
     display: none;
     margin-top: 0.55rem;
@@ -1349,6 +1356,7 @@ pre {
 
   .header-nav .nav-group {
     width: 100%;
+    z-index: auto;
   }
 
   .header-nav .nav-group summary {
