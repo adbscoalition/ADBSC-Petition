@@ -1,6 +1,42 @@
 const tabTitle = document.body?.dataset?.tabTitle;
 if (tabTitle) document.title = tabTitle;
 
+function initGlobalUiMotion() {
+  const targets = Array.from(document.querySelectorAll(
+    '.site-header, .panel, .quick-card, .disclaimer-card, .faq-item, .portal-entry, .site-footer, .btn'
+  ));
+
+  if (!targets.length) return;
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reducedMotion) {
+    targets.forEach((el) => el.classList.add('is-visible'));
+    return;
+  }
+
+  targets.forEach((el, index) => {
+    el.classList.add('motion-item');
+    el.style.setProperty('--motion-delay', `${Math.min(index * 0.03, 0.36)}s`);
+  });
+
+  if (!('IntersectionObserver' in window)) {
+    targets.forEach((el) => el.classList.add('is-visible'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-visible');
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.12 });
+
+  targets.forEach((el) => observer.observe(el));
+}
+
+initGlobalUiMotion();
+
 
 
 const navToggle = document.getElementById('navToggle');
