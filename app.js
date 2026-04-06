@@ -268,6 +268,14 @@ if (entryLoader) {
 
 
 
+function calculateTungstenConcentrationShared(cltValue) {
+  const safeClt = Math.max(Number(cltValue) || 0, 0);
+  if (safeClt === 0) return 0;
+  const numerator = 0.55 * Math.pow(safeClt, 1.09);
+  const denominator = Math.pow(safeClt, 1.09) + Math.pow(1737, 1.09);
+  return denominator > 0 ? (numerator / denominator) : 0;
+}
+
 function initCltFieldSystem() {
   const app = document.getElementById('cltSystemApp');
   if (!app) return;
@@ -586,7 +594,7 @@ function initCltFieldSystem() {
       const fieldLat = Number.isFinite(Number(field.lat)) ? Number(field.lat) : Number(field.latitude);
       const fieldLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
       const ranges = getIndividualBandRangesMeters(field);
-      const fieldTungsten = calculateTungstenConcentration(Number(field.intensity) || 0);
+      const fieldTungsten = calculateTungstenConcentrationShared(Number(field.intensity) || 0);
       const daysLabel = field.daysOfWeek?.length ? field.daysOfWeek.join(', ') : 'All';
       const coordLabel = (Number.isFinite(fieldLat) && Number.isFinite(fieldLon))
         ? `${fieldLat.toFixed(6)}, ${fieldLon.toFixed(6)}`
@@ -835,7 +843,7 @@ function initCltFieldSystem() {
     const tungstenBySource = {};
     evaluations.forEach((source) => {
       const key = getSourceKey(source);
-      const tungstenValue = calculateTungstenConcentration(source.strength);
+      const tungstenValue = calculateTungstenConcentrationShared(source.strength);
       tungstenBySource[key] = tungstenValue;
       if (source.category === 'Secret') tungstenSecret += tungstenValue;
       else tungstenRegular += tungstenValue;
@@ -1566,14 +1574,6 @@ function initFieldCalculator() {
     return `${formatNumber(value, 3)} m`;
   }
 
-  function calculateTungstenConcentration(cltValue) {
-    const safeClt = Math.max(Number(cltValue) || 0, 0);
-    if (safeClt === 0) return 0;
-    const numerator = 0.55 * Math.pow(safeClt, 1.09);
-    const denominator = Math.pow(safeClt, 1.09) + Math.pow(1737, 1.09);
-    return denominator > 0 ? (numerator / denominator) : 0;
-  }
-
   function calculateBandLengths(baseB, appearanceA, surnameL, cltValue = 0) {
     const baselineMeters = 1.5;
     const deltaB = baseB - 500;
@@ -1854,7 +1854,7 @@ function initFieldCalculator() {
       const lRaw = 0.85 + ((0.1933 * logRatio) + (0.06849 * logRatio * logRatio)) / (1 + (0.2514 * Math.abs(logRatio)));
       const l = Math.min(2, lRaw);
       const clt = b * a * l;
-      const tungsten = calculateTungstenConcentration(clt);
+      const tungsten = calculateTungstenConcentrationShared(clt);
       const bands = calculateBandLengths(b, a, l, clt);
       const bandTelemetry = buildBandTelemetry(bands, clt, tungsten);
 
