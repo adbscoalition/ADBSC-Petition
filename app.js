@@ -1175,7 +1175,8 @@ function initCltFieldSystem() {
     stopLiveTracking();
 
     if (error?.code === 1) {
-      document.body.innerHTML = '<main class="geo-denied-screen"><div><h1>Enable geolocation to continue.</h1><p><a class="btn secondary" href="index.html">Return home</a></p></div></main>';
+      setFallbackVisibility(true);
+      setStatus('Location access denied. Allow location permission, then press "Retry Live Tracking".', 'LOCATION ACCESS REQUIRED');
       return;
     }
 
@@ -1193,13 +1194,6 @@ function initCltFieldSystem() {
     if (!navigator.geolocation) {
       setFallbackVisibility(true);
       setStatus('Geolocation API unavailable in this browser.', 'GPS UNAVAILABLE');
-      return;
-    }
-
-    const isSecure = window.isSecureContext || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (!isSecure) {
-      setFallbackVisibility(true);
-      setStatus('Insecure context: geolocation requires HTTPS.', 'GPS UNAVAILABLE');
       return;
     }
 
