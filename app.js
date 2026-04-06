@@ -298,6 +298,7 @@ function initCltFieldSystem() {
   const state = {
     watchId: null,
     liveRequestTimer: null,
+    geoRetryTimer: null,
     driftTick: null,
     scanTimer: null,
     liveMode: false,
@@ -1152,6 +1153,10 @@ function initCltFieldSystem() {
   }
 
   function stopLiveTracking() {
+    if (state.geoRetryTimer) {
+      window.clearTimeout(state.geoRetryTimer);
+      state.geoRetryTimer = null;
+    }
     if (state.liveRequestTimer) {
       window.clearTimeout(state.liveRequestTimer);
       state.liveRequestTimer = null;
@@ -1177,13 +1182,39 @@ function initCltFieldSystem() {
   }
 
   function onGeolocationError(error) {
-    stopLiveTracking();
+    const hasLastFix = Number.isFinite(state.lastBase?.lat) && Number.isFinite(state.lastBase?.lon);
+
+    if (state.liveRequestTimer) {
+      window.clearTimeout(state.liveRequestTimer);
+      state.liveRequestTimer = null;
+    }
+    if (state.watchId !== null) {
+      navigator.geolocation.clearWatch(state.watchId);
+      state.watchId = null;
+    }
 
     if (error?.code === 1) {
       setFallbackVisibility(true);
       setStatus('Location access denied. Allow location permission, then press "Retry Live Tracking".', 'LOCATION ACCESS REQUIRED');
+      if (!hasLastFix) state.liveMode = false;
       return;
     }
+
+    if (hasLastFix) {
+      state.liveMode = true;
+      setFallbackVisibility(true);
+      setStatus('GPS updates interrupted. Using last known position and retrying live tracking...', 'TRACKING PAUSED');
+      startDriftTicker();
+      if (!state.geoRetryTimer && !state.simulationActive) {
+        state.geoRetryTimer = window.setTimeout(() => {
+          state.geoRetryTimer = null;
+          startLiveTracking();
+        }, 3000);
+      }
+      return;
+    }
+
+    stopLiveTracking();
 
     setFallbackVisibility(true);
     if (error?.code === 2) {
