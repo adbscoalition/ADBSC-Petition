@@ -634,6 +634,47 @@ select {
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
+.header-nav .nav-group {
+  position: relative;
+}
+
+.header-nav .nav-group summary {
+  list-style: none;
+  cursor: pointer;
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  padding: 0.34rem 0.72rem;
+  background: rgba(76, 18, 90, 0.62);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.header-nav .nav-group summary::-webkit-details-marker {
+  display: none;
+}
+
+.header-nav .nav-group[open] summary,
+.header-nav .nav-group summary:hover,
+.header-nav .nav-group summary:focus-visible {
+  border-color: rgba(255, 79, 163, 0.86);
+  transform: translateY(-1px);
+}
+
+.nav-submenu {
+  position: absolute;
+  top: calc(100% + 0.38rem);
+  right: 0;
+  z-index: 20;
+  min-width: 180px;
+  display: grid;
+  gap: 0.38rem;
+  padding: 0.48rem;
+  background: rgba(36, 10, 52, 0.96);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35);
+}
+
 .header-nav a:hover,
 .header-nav a:focus-visible {
   border-color: rgba(255, 79, 163, 0.86);
@@ -1304,6 +1345,23 @@ pre {
 
   .header-nav a {
     text-align: center;
+  }
+
+  .header-nav .nav-group {
+    width: 100%;
+  }
+
+  .header-nav .nav-group summary {
+    text-align: center;
+  }
+
+  .nav-submenu {
+    position: static;
+    margin-top: 0.45rem;
+    background: transparent;
+    box-shadow: none;
+    border: 0;
+    padding: 0;
   }
 
   .portal-stack {

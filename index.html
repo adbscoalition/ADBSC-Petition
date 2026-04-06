@@ -115,14 +115,29 @@
       Menu
     </button>
 
-        <nav id="primaryNav" class="header-nav" aria-label="Primary">
+            <nav id="primaryNav" class="header-nav" aria-label="Primary">
       <a href="index.html">Main</a>
-      <a href="portals.html">Portals</a>
-      <a href="instructions.html">Instructions</a>
-      <a href="clt-field.html">CLT Sensor</a>
-      <a href="field-calculator.html">CLT Calculator</a>
-      <a href="faq.html">FAQ</a>
-      <a href="legal.html">Legal</a>
+      <details class="nav-group">
+        <summary>Chatbot</summary>
+        <div class="nav-submenu">
+          <a href="portals.html">Portals</a>
+          <a href="instructions.html">Instructions</a>
+        </div>
+      </details>
+      <details class="nav-group">
+        <summary>CLT Field</summary>
+        <div class="nav-submenu">
+          <a href="clt-field.html">CLT Sensor</a>
+          <a href="field-calculator.html">CLT Calculator</a>
+        </div>
+      </details>
+      <details class="nav-group">
+        <summary>More</summary>
+        <div class="nav-submenu">
+          <a href="faq.html">FAQ</a>
+          <a href="legal.html">Legal</a>
+        </div>
+      </details>
     </nav>
   </header>
 
@@ -146,38 +161,21 @@
 
     <section class="panel" aria-labelledby="mainIntroTitle">
       <h2 id="mainIntroTitle">Browse Pages</h2>
-      <p>Open a group to see its subpages.</p>
-
-      <details class="portal-poe-section" open>
-        <summary>Main</summary>
-        <div class="portal-warning-actions">
-          <a class="btn secondary" href="index.html">Home</a>
-        </div>
-      </details>
-
-      <details class="portal-poe-section">
-        <summary>Chatbot</summary>
-        <div class="portal-warning-actions">
-          <a class="btn secondary" href="portals.html">Portals</a>
-          <a class="btn secondary" href="instructions.html">Instructions</a>
-        </div>
-      </details>
-
-      <details class="portal-poe-section">
-        <summary>CLT Field</summary>
-        <div class="portal-warning-actions">
-          <a class="btn secondary" href="clt-field.html">CLT Sensor</a>
-          <a class="btn secondary" href="field-calculator.html">CLT Calculator</a>
-        </div>
-      </details>
-
-      <details class="portal-poe-section">
-        <summary>More</summary>
-        <div class="portal-warning-actions">
-          <a class="btn secondary" href="faq.html">FAQ</a>
-          <a class="btn secondary" href="legal.html">Legal</a>
-        </div>
-      </details>
+      <p>Use the top navigation dropdown groups to open any page quickly.</p>
+      <div class="quick-grid">
+        <a class="quick-card" href="portals.html">
+          <h3>Chatbot</h3>
+          <p>Portals and instructions.</p>
+        </a>
+        <a class="quick-card" href="clt-field.html">
+          <h3>CLT Field</h3>
+          <p>Sensor and calculator tools.</p>
+        </a>
+        <a class="quick-card" href="faq.html">
+          <h3>More</h3>
+          <p>FAQ and legal info.</p>
+        </a>
+      </div>
     </section>
 
   </main>
