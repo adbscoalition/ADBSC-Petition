@@ -1612,14 +1612,14 @@ function initFieldCalculator() {
   }
 
   const bandTheme = [
-    { key: 'ns', label: 'NS', className: 'band-ns', cltMultiplier: 1.5, tungstenMultiplier: 0.45 },
-    { key: 'ce', label: 'CE', className: 'band-ce', cltMultiplier: 1.25, tungstenMultiplier: 0.3 },
-    { key: 'e', label: 'E', className: 'band-e', cltMultiplier: 1.1, tungstenMultiplier: 0.55 },
-    { key: 'm', label: 'M', className: 'band-m', cltMultiplier: 1, tungstenMultiplier: 1 },
-    { key: 'ps', label: 'PS', className: 'band-ps', cltMultiplier: 0.7, tungstenMultiplier: 0.55 },
-    { key: 'ms', label: 'MS', className: 'band-ms', cltMultiplier: 0.275, tungstenMultiplier: 0.3 },
-    { key: 'mp', label: 'MP', className: 'band-mp', cltMultiplier: 0.1, tungstenMultiplier: 0.15 },
-    { key: 'mh', label: 'MH', className: 'band-mh', cltMultiplier: 0.05, tungstenMultiplier: 0.075 }
+    { key: 'ns', label: 'NS', className: 'band-ns', cltMultiplier: 1.5, tungstenMultiplierMin: 0.3, tungstenMultiplierMax: 0.6 },
+    { key: 'ce', label: 'CE', className: 'band-ce', cltMultiplier: 1.25, tungstenMultiplierMin: 0.2, tungstenMultiplierMax: 0.4 },
+    { key: 'e', label: 'E', className: 'band-e', cltMultiplier: 1.1, tungstenMultiplierMin: 0.4, tungstenMultiplierMax: 0.7 },
+    { key: 'm', label: 'M', className: 'band-m', cltMultiplier: 1, tungstenMultiplierMin: 0.7, tungstenMultiplierMax: 1.2 },
+    { key: 'ps', label: 'PS', className: 'band-ps', cltMultiplier: 0.7, tungstenMultiplierMin: 0.4, tungstenMultiplierMax: 0.7 },
+    { key: 'ms', label: 'MS', className: 'band-ms', cltMultiplier: 0.275, tungstenMultiplierMin: 0.2, tungstenMultiplierMax: 0.4 },
+    { key: 'mp', label: 'MP', className: 'band-mp', cltMultiplier: 0.1, tungstenMultiplierMin: 0.1, tungstenMultiplierMax: 0.2 },
+    { key: 'mh', label: 'MH', className: 'band-mh', cltMultiplier: 0.05, tungstenMultiplierMin: 0.05, tungstenMultiplierMax: 0.1 }
   ];
 
   function buildBandTelemetry(bands, clt, tungsten) {
@@ -1627,13 +1627,15 @@ function initFieldCalculator() {
       ...band,
       perimeter: Number(bands?.[band.key] || 0),
       cltValue: Math.max(0, clt * band.cltMultiplier),
-      tungstenValue: Math.max(0, tungsten * band.tungstenMultiplier)
+      tungstenValueMin: Math.max(0, tungsten * band.tungstenMultiplierMin),
+      tungstenValueMax: Math.max(0, tungsten * band.tungstenMultiplierMax)
     }));
 
     return ordered.map((band, index) => {
       const previous = index === 0 ? 0 : ordered[index - 1].perimeter;
       return {
         ...band,
+        tungstenValue: (band.tungstenValueMin + band.tungstenValueMax) / 2,
         rangeLabel: `${formatDistanceMeters(previous)} - ${formatDistanceMeters(band.perimeter)}`
       };
     });
@@ -1719,7 +1721,7 @@ function initFieldCalculator() {
                     <td class="field-band-label">${band.label}</td>
                     <td class="field-band-range">${band.rangeLabel}</td>
                     <td class="field-band-value">CLT ${formatNumber(band.cltValue, 2)}</td>
-                    <td class="field-band-value">${band.tungstenValue.toFixed(6)} mg/m³</td>
+                    <td class="field-band-value">${band.tungstenValueMin.toFixed(6)} - ${band.tungstenValueMax.toFixed(6)} mg/m³</td>
                   </tr>
                 `).join('')}
               </tbody>
