@@ -362,7 +362,8 @@ function initCltFieldSystem() {
     simStatus: document.getElementById('simStatus'),
     fieldName: document.getElementById('fieldName'),
     fieldIntensity: document.getElementById('fieldIntensity'),
-    fieldRange: document.getElementById('fieldRange'),
+    fieldType: document.getElementById('fieldType'),
+    fieldDetectionRange: document.getElementById('fieldDetectionRange'),
     fieldLatitude: document.getElementById('fieldLatitude'),
     fieldLongitude: document.getElementById('fieldLongitude'),
     fieldUseCurrentLocation: document.getElementById('fieldUseCurrentLocation'),
@@ -389,6 +390,12 @@ function initCltFieldSystem() {
 
   function randomBetween(min, max) {
     return min + Math.random() * (max - min);
+  }
+
+  function calculateAutoMBandMeters(cltValue) {
+    const clt = Math.max(0.0001, Number(cltValue) || 0.0001);
+    const m = 1.09 + (40.70 / (1 + Math.pow(5142 / clt, 1.542)));
+    return Math.max(1, Math.min(100, m));
   }
 
   function parseCoordinateInput(value) {
@@ -513,6 +520,12 @@ function initCltFieldSystem() {
 
   function customFieldStrength(field, distanceM, nowMs) {
     const intensity = Number(field.intensity) || 0;
+    if (String(field?.fieldType || '').toLowerCase() === 'typer') {
+      const rRange = Math.max(1, Number(field?.maxDetectionRangeM) || 1);
+      if (distanceM < 0 || distanceM > rRange) return 0;
+      const tf = customFieldTimeFactor(field, nowMs);
+      return Math.max(0, intensity * tf);
+    }
     const ranges = getIndividualBandRangesMeters(field);
     if (distanceM < 0 || distanceM > ranges.mh) return 0;
     const multiplier = getBandTransitionMultiplier(distanceM, ranges);
@@ -623,10 +636,13 @@ function initCltFieldSystem() {
 
       const isEditing = state.editingFieldId === field.id;
 
+      const typeLabel = String(field.fieldType || 'type1').toUpperCase();
       return `<li class="uploaded-field-card${isEditing ? ' is-editing' : ''}">` +
         `<div class="uploaded-field-head"><strong>${field.name}</strong>${isEditing ? '<span class="field-editing-badge">Editing</span>' : ''}</div>` +
-        `<p class="uploaded-field-meta">${field.intensity} CLT · M band ${field.maxRangeM}m</p>` +
-        `<p class="uploaded-field-meta">Bands (m): NS ${ranges.ns.toFixed(2)} · CE ${ranges.ce.toFixed(2)} · E ${ranges.e.toFixed(2)} · M ${ranges.m.toFixed(2)} · PS ${ranges.ps.toFixed(2)} · MS ${ranges.ms.toFixed(2)} · MP ${ranges.mp.toFixed(2)} · MH ${ranges.mh.toFixed(2)}</p>` +
+        `<p class="uploaded-field-meta">${field.intensity} CLT · ${typeLabel}</p>` +
+        (String(field.fieldType || '').toLowerCase() === 'typer'
+          ? `<p class="uploaded-field-meta">R detection range: ${Number(field.maxDetectionRangeM || 0).toFixed(2)} m</p>`
+          : `<p class="uploaded-field-meta">Bands (m): NS ${ranges.ns.toFixed(2)} · CE ${ranges.ce.toFixed(2)} · E ${ranges.e.toFixed(2)} · M ${ranges.m.toFixed(2)} · PS ${ranges.ps.toFixed(2)} · MS ${ranges.ms.toFixed(2)} · MP ${ranges.mp.toFixed(2)} · MH ${ranges.mh.toFixed(2)}</p>`) +
         `<p class="uploaded-field-meta">Tungsten (base): ${fieldTungsten.toFixed(6)} mg/m³</p>` +
         `<p class="uploaded-field-meta">Days: ${daysLabel}</p>` +
         `<p class="uploaded-field-meta">Time: ${timeLabel}</p>` +
@@ -645,7 +661,8 @@ function initCltFieldSystem() {
         state.editingFieldId = id;
         if (el.fieldName) el.fieldName.value = field.name;
         if (el.fieldIntensity) el.fieldIntensity.value = String(field.intensity);
-        if (el.fieldRange) el.fieldRange.value = String(field.maxRangeM);
+        if (el.fieldType) el.fieldType.value = String(field.fieldType || 'type1');
+        if (el.fieldDetectionRange) el.fieldDetectionRange.value = String(field.maxDetectionRangeM || 100);
         const editLat = Number.isFinite(Number(field.lat)) ? Number(field.lat) : Number(field.latitude);
         const editLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
         if (el.fieldLatitude) el.fieldLatitude.value = Number.isFinite(editLat) ? String(editLat) : '';
@@ -678,7 +695,8 @@ function initCltFieldSystem() {
     state.editingFieldId = null;
     if (el.fieldName) el.fieldName.value = '';
     if (el.fieldIntensity) el.fieldIntensity.value = '5000';
-    if (el.fieldRange) el.fieldRange.value = calculateAutoMBandMeters(5000).toFixed(2);
+    if (el.fieldType) el.fieldType.value = 'type1';
+    if (el.fieldDetectionRange) el.fieldDetectionRange.value = '100';
     if (el.fieldStartTime) el.fieldStartTime.value = '';
     if (el.fieldEndTime) el.fieldEndTime.value = '';
     if (el.fieldSave) el.fieldSave.textContent = 'Save Field';
@@ -721,7 +739,9 @@ function initCltFieldSystem() {
 
     el.fieldSave?.addEventListener('click', async () => {
       const intensity = Math.min(1000000, Math.max(1, Number(el.fieldIntensity?.value || 0)));
+      const fieldType = String(el.fieldType?.value || 'type1');
       const maxRangeM = calculateAutoMBandMeters(intensity);
+      const maxDetectionRangeM = Math.max(1, Number(el.fieldDetectionRange?.value || 100));
 
       let lat = parseCoordinateInput(el.fieldLatitude?.value);
       let lon = parseCoordinateInput(el.fieldLongitude?.value);
@@ -764,6 +784,8 @@ function initCltFieldSystem() {
         longitude: lon,
         intensity,
         maxRangeM,
+        maxDetectionRangeM,
+        fieldType,
         startClock: el.fieldStartTime?.value || null,
         endClock: el.fieldEndTime?.value || null,
         daysOfWeek,
@@ -831,6 +853,7 @@ function initCltFieldSystem() {
       const fieldLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
       const distance = haversineKm(lat, lon, fieldLat, fieldLon);
       const distanceM = distance * 1000;
+      const isTypeR = String(field.fieldType || '').toLowerCase() === 'typer';
       const ranges = getIndividualBandRangesMeters(field);
       const strength = state.uploadedTimeLimitsEnabled
         ? customFieldStrength(field, distanceM, nowMs)
@@ -843,7 +866,7 @@ function initCltFieldSystem() {
         distance,
         distanceM,
         bandRanges: ranges,
-        bandSituation: getBandSituation(distanceM, ranges),
+        bandSituation: isTypeR ? 'R' : getBandSituation(distanceM, ranges),
         strength,
         inField: strength > 0,
         uploaded: true
@@ -1868,7 +1891,6 @@ function initFieldCalculator() {
           { label: 'Appearance (M)', value: formatNumber(m, 2) },
           { label: 'Surname P', value: formatNumber(p, 3) },
           { label: 'Regional Q', value: formatNumber(q, 3) },
-          { label: 'M Band Length', value: formatDistanceMeters(bands.m) },
           { label: 'Year', value: 'Manual N mode' },
           { label: 'Dataset', value: getSelectedLabel(countryCode) }
         ],

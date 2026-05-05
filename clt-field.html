@@ -289,8 +289,17 @@
           <input id="fieldIntensity" type="number" min="1" max="1000000" step="1" value="5000" />
         </label>
         <label>
-          M-Band Range (meters, auto)
-          <input id="fieldRange" type="number" min="1" max="100" step="0.01" value="1.09" readonly />
+          Field Type
+          <select id="fieldType">
+            <option value="type1">Type 1</option>
+            <option value="type1s">Type 1S</option>
+            <option value="type1r">Type 1R</option>
+            <option value="typeR">Type R</option>
+          </select>
+        </label>
+        <label>
+          Type R Max Detection Range (m)
+          <input id="fieldDetectionRange" type="number" min="1" max="10000" step="1" value="100" />
         </label>
         <label>
           Field Latitude
