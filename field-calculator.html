@@ -174,18 +174,15 @@
             Regional rarity Q (1:x)
             <input id="fcRegionalQ" type="number" inputmode="numeric" min="1" step="1" placeholder="e.g. 10000" />
           </label>
-          <label>
-            <span>Use two last names</span>
-            <button id="fcSurnameToggle" class="btn secondary" type="button" aria-pressed="false">Enable second last name</button>
-          </label>
-          <label id="fcSurnameP2Label" hidden>
-            Second surname ratio (1:x)
-            <input id="fcSurnameP2" type="number" inputmode="numeric" min="1" step="1" placeholder="optional second surname ratio" disabled />
-          </label>
           <div class="field-guidance-group">
             <a class="btn secondary" href="https://forebears.io/" target="_blank" rel="noopener noreferrer">Surname frequency guidance</a>
+            <a class="btn secondary" href="https://forebears.io/forenames/charlotte" target="_blank" rel="noopener noreferrer">Regional Q guidance</a>
             <p class="field-note">Credit: Forebears.</p>
           </div>
+        </div>
+
+        <div class="field-guidance-group">
+          <p class="field-note"><strong>Guide cards:</strong> N = percent named Charlotte in your birth region/year, P = surname rarity (1:x), Q = Charlotte forename rarity (1:x). Use Forebears for P/Q and local naming stats for N.</p>
         </div>
 
         <div class="clt-actions">
@@ -246,7 +243,6 @@
         Surname rarity modifier:
         <strong>L(P)=min(2.2,0.0092146·(log₁₀P)³-0.0834066·(log₁₀P)²+0.345823·log₁₀P+0.466249)</strong> ·
         Regional rarity: <strong>R(Q)=0.295453+0.393664·log₁₀Q-0.0618419·(log₁₀Q)²+0.00509316·(log₁₀Q)³</strong>.
-        If two last names are used, <strong>P = (P1 + P2) / 2</strong>.
         Final formula: <strong>CLT = B × A × L × R</strong>. Tungsten concentration:
         <strong>T(CLT)=0.55(CLT^1.09/(CLT^1.09+1737^1.09))</strong>. Band lengths:
         <strong>NS=((CLT×0.005)+4) cm, CE=0.2M, E=0.5M, PS=1.7M, MS=3.5M, MP=4.5M, MH=6.5M</strong>.

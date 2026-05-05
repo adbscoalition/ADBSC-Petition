@@ -678,7 +678,7 @@ function initCltFieldSystem() {
     state.editingFieldId = null;
     if (el.fieldName) el.fieldName.value = '';
     if (el.fieldIntensity) el.fieldIntensity.value = '5000';
-    if (el.fieldRange) el.fieldRange.value = '25';
+    if (el.fieldRange) el.fieldRange.value = calculateAutoMBandMeters(5000).toFixed(2);
     if (el.fieldStartTime) el.fieldStartTime.value = '';
     if (el.fieldEndTime) el.fieldEndTime.value = '';
     if (el.fieldSave) el.fieldSave.textContent = 'Save Field';
@@ -721,7 +721,7 @@ function initCltFieldSystem() {
 
     el.fieldSave?.addEventListener('click', async () => {
       const intensity = Math.min(1000000, Math.max(1, Number(el.fieldIntensity?.value || 0)));
-      const maxRangeM = Math.min(100, Math.max(1, Number(el.fieldRange?.value || 0)));
+      const maxRangeM = calculateAutoMBandMeters(intensity);
 
       let lat = parseCoordinateInput(el.fieldLatitude?.value);
       let lon = parseCoordinateInput(el.fieldLongitude?.value);
@@ -1515,11 +1515,8 @@ function initFieldCalculator() {
     rankToggle: document.getElementById('fcRankToggle'),
     rank: document.getElementById('fcRank'),
     appearance: document.getElementById('fcAppearance'),
-    surnameToggle: document.getElementById('fcSurnameToggle'),
     surnameP1Label: document.getElementById('fcSurnameP1Label'),
-    surnameP2Label: document.getElementById('fcSurnameP2Label'),
     surnameP1: document.getElementById('fcSurnameP1'),
-    surnameP2: document.getElementById('fcSurnameP2'),
     regionalQ: document.getElementById('fcRegionalQ'),
     calculate: document.getElementById('fcCalculate'),
     runLoader: document.getElementById('fcRunLoader'),
@@ -1659,23 +1656,10 @@ function initFieldCalculator() {
     if (el.rank) el.rank.disabled = !manual;
   }
 
-  function isSecondSurnameMode() {
-    return el.surnameToggle?.getAttribute('aria-pressed') === 'true';
-  }
-
-  function syncSurnameModeUi() {
-    const enabled = isSecondSurnameMode();
-    if (el.surnameToggle) el.surnameToggle.textContent = enabled ? 'Second last name enabled' : 'Enable second last name';
-    if (el.surnameP1Label) {
-      el.surnameP1Label.firstChild.textContent = enabled
-        ? 'First surname ratio (1:x)'
-        : 'Surname frequency ratio P1 (1:x)';
-    }
-    if (el.surnameP2Label) el.surnameP2Label.hidden = !enabled;
-    if (el.surnameP2) {
-      el.surnameP2.disabled = !enabled;
-      if (!enabled) el.surnameP2.value = '';
-    }
+  function calculateAutoMBandMeters(cltValue) {
+    const clt = Math.max(0.0001, Number(cltValue) || 0.0001);
+    const m = 1.09 + (40.70 / (1 + Math.pow(5142 / clt, 1.542)));
+    return Math.max(1, Math.min(100, m));
   }
 
   function renderResult({
@@ -1791,7 +1775,7 @@ function initFieldCalculator() {
     const appearance = normalizeAppearance();
     const hasAppearanceInput = String(el.appearance?.value || '').trim().length > 0;
     const p1 = normalizeSurnameFrequency(el.surnameP1);
-    const p2 = isSecondSurnameMode() ? normalizeSurnameFrequency(el.surnameP2, true) : null;
+    const p2 = null;
     const q = normalizeRegionalFrequency();
 
     if (!enteredName) {
@@ -1844,10 +1828,6 @@ function initFieldCalculator() {
       return;
     }
 
-    if (isSecondSurnameMode() && String(el.surnameP2?.value || '').trim().length > 0 && p2 === null) {
-      renderResult({ status: 'warning', title: 'Invalid P2 value', lines: ['Surname ratio P2 must be a number from 1 to 1,000,000,000 when provided.'] });
-      return;
-    }
     if (q === null) {
       renderResult({ status: 'warning', title: 'Invalid Q value', lines: ['Regional rarity Q must be a number from 1 to 1,000,000,000.'] });
       return;
@@ -1863,7 +1843,7 @@ function initFieldCalculator() {
       await loaderPromise;
 
       const m = appearance ?? 0;
-      const p = p2 === null ? p1 : (p1 + p2) / 2;
+      const p = p1;
       const b = 110 / n;
       const a = 0.75 + (0.05 * m);
       const logP = Math.log10(p);
@@ -1921,21 +1901,14 @@ function initFieldCalculator() {
     syncRankModeUi();
   });
 
-  el.surnameToggle?.addEventListener('click', () => {
-    const pressed = el.surnameToggle?.getAttribute('aria-pressed') === 'true';
-    if (el.surnameToggle) el.surnameToggle.setAttribute('aria-pressed', String(!pressed));
-    syncSurnameModeUi();
-  });
-
   syncRankModeUi();
-  syncSurnameModeUi();
-  [el.year, el.rank, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
+  [el.year, el.rank, el.appearance, el.surnameP1, el.regionalQ].forEach((inputEl) => {
     inputEl?.addEventListener('wheel', (event) => {
       inputEl.blur();
     });
   });
   el.calculate?.addEventListener('click', calculate);
-  [el.name, el.year, el.rank, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
+  [el.name, el.year, el.rank, el.appearance, el.surnameP1, el.regionalQ].forEach((inputEl) => {
     inputEl?.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
@@ -1964,3 +1937,10 @@ if (copyBtn && instructionText) {
     }
   });
 }
+    if (el.fieldIntensity && el.fieldRange) {
+      el.fieldRange.value = calculateAutoMBandMeters(Number(el.fieldIntensity.value || 5000)).toFixed(2);
+      el.fieldIntensity.addEventListener('input', () => {
+        const intensity = Math.min(1000000, Math.max(1, Number(el.fieldIntensity?.value || 0)));
+        el.fieldRange.value = calculateAutoMBandMeters(intensity).toFixed(2);
+      });
+    }
