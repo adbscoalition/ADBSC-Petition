@@ -150,12 +150,12 @@
             <input id="fcYear" type="number" inputmode="numeric" min="1880" max="2100" step="1" placeholder="e.g. 2006" />
           </label>
           <label>
-            <span>Use manual rank instead of year</span>
-            <button id="fcRankToggle" class="btn secondary" type="button" aria-pressed="false">Use Rank Input</button>
+            <span>Use manual N input</span>
+            <button id="fcRankToggle" class="btn secondary" type="button" aria-pressed="true">Using Manual N</button>
           </label>
           <label>
-            Rank (n) manual override
-            <input id="fcRank" type="number" inputmode="numeric" min="1" max="1000" step="1" placeholder="e.g. 24" disabled />
+            N (% named Charlotte)
+            <input id="fcRank" type="number" inputmode="decimal" min="0.0001" max="100" step="0.0001" placeholder="e.g. 0.32" />
           </label>
           <div class="field-guidance-group">
             <a class="btn secondary" href="https://www.behindthename.com/name/charlotte" target="_blank" rel="noopener noreferrer">Search Charlotte rank guidance</a>
@@ -169,6 +169,10 @@
           <label id="fcSurnameP1Label">
             Surname frequency ratio P1 (1:x)
             <input id="fcSurnameP1" type="number" inputmode="numeric" min="1" step="1" placeholder="e.g. 1200" />
+          </label>
+          <label>
+            Regional rarity Q (1:x)
+            <input id="fcRegionalQ" type="number" inputmode="numeric" min="1" step="1" placeholder="e.g. 10000" />
           </label>
           <label>
             <span>Use two last names</span>
@@ -238,11 +242,12 @@
       </article>
 
       <p class="field-note field-formula-note">
-        Base Formula: <strong>B = 7.25n + 32</strong> · Appearance modifier: <strong>A = 0.8 + 0.04m</strong> ·
+        Base Formula: <strong>B = 110 / N</strong> · Appearance modifier: <strong>A = 0.75 + 0.05m</strong> ·
         Surname rarity modifier:
-        <strong>L(P)=min(2, 0.85 + (0.1933·log₁₀(P/150) + 0.06849·(log₁₀(P/150))²)/(1 + 0.2514·|log₁₀(P/150)|))</strong>.
+        <strong>L(P)=min(2.2,0.0092146·(log₁₀P)³-0.0834066·(log₁₀P)²+0.345823·log₁₀P+0.466249)</strong> ·
+        Regional rarity: <strong>R(Q)=0.295453+0.393664·log₁₀Q-0.0618419·(log₁₀Q)²+0.00509316·(log₁₀Q)³</strong>.
         If two last names are used, <strong>P = (P1 + P2) / 2</strong>.
-        Final formula: <strong>CLT = B × A × L</strong>. Tungsten concentration:
+        Final formula: <strong>CLT = B × A × L × R</strong>. Tungsten concentration:
         <strong>T(CLT)=0.55(CLT^1.09/(CLT^1.09+1737^1.09))</strong>. Band lengths:
         <strong>NS=((CLT×0.005)+4) cm, CE=0.2M, E=0.5M, PS=1.7M, MS=3.5M, MP=4.5M, MH=6.5M</strong>.
       </p>

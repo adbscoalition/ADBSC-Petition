@@ -1520,6 +1520,7 @@ function initFieldCalculator() {
     surnameP2Label: document.getElementById('fcSurnameP2Label'),
     surnameP1: document.getElementById('fcSurnameP1'),
     surnameP2: document.getElementById('fcSurnameP2'),
+    regionalQ: document.getElementById('fcRegionalQ'),
     calculate: document.getElementById('fcCalculate'),
     runLoader: document.getElementById('fcRunLoader'),
     runBar: document.getElementById('fcRunBar'),
@@ -1561,7 +1562,7 @@ function initFieldCalculator() {
     const raw = String(el.rank?.value || '').trim();
     if (!raw) return null;
     const parsed = Number(raw);
-    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 1000) return null;
+    if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 100) return null;
     return parsed;
   }
 
@@ -1576,6 +1577,12 @@ function initFieldCalculator() {
   function normalizeSurnameFrequency(inputEl, allowBlank = false) {
     const raw = String(inputEl?.value || '').trim();
     if (!raw && allowBlank) return null;
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed) || parsed < 1 || parsed > 1000000000) return null;
+    return parsed;
+  }
+  function normalizeRegionalFrequency() {
+    const raw = String(el.regionalQ?.value || '').trim();
     const parsed = Number(raw);
     if (!Number.isFinite(parsed) || parsed < 1 || parsed > 1000000000) return null;
     return parsed;
@@ -1647,7 +1654,7 @@ function initFieldCalculator() {
 
   function syncRankModeUi() {
     const manual = isManualRankMode();
-    if (el.rankToggle) el.rankToggle.textContent = manual ? 'Using Manual Rank' : 'Use Rank Input';
+    if (el.rankToggle) el.rankToggle.textContent = manual ? 'Using Manual N' : 'Use N Input';
     if (el.year) el.year.disabled = manual;
     if (el.rank) el.rank.disabled = !manual;
   }
@@ -1779,13 +1786,13 @@ function initFieldCalculator() {
     const countryCode = String(el.country?.value || 'us');
     const manualRank = isManualRankMode();
     const year = normalizeYear();
-    const hasYearInput = String(el.year?.value || '').trim().length > 0;
     const rankInput = normalizeRank();
     const hasRankInput = String(el.rank?.value || '').trim().length > 0;
     const appearance = normalizeAppearance();
     const hasAppearanceInput = String(el.appearance?.value || '').trim().length > 0;
     const p1 = normalizeSurnameFrequency(el.surnameP1);
     const p2 = isSecondSurnameMode() ? normalizeSurnameFrequency(el.surnameP2, true) : null;
+    const q = normalizeRegionalFrequency();
 
     if (!enteredName) {
       renderResult({ status: 'warning', title: 'Missing name', lines: ['Please enter a name before calculating.'] });
@@ -1814,17 +1821,16 @@ function initFieldCalculator() {
     }
 
     if (manualRank && !hasRankInput) {
-      renderResult({ status: 'warning', title: 'Missing rank', lines: ['Enable rank mode and provide a manual rank value between 1 and 1000.'] });
+      renderResult({ status: 'warning', title: 'Missing N value', lines: ['Provide N (% named Charlotte) as a manual value.'] });
       return;
     }
 
-    if (manualRank && hasRankInput && rankInput === null) {
-      renderResult({ status: 'warning', title: 'Invalid rank', lines: ['Manual rank (n) must be an integer between 1 and 1000.'] });
+    if (manualRank && hasRankInput && (rankInput === null || rankInput <= 0)) {
+      renderResult({ status: 'warning', title: 'Invalid N value', lines: ['N must be a positive number.'] });
       return;
     }
-
-    if (!manualRank && hasYearInput && year === null) {
-      renderResult({ status: 'warning', title: 'Invalid year', lines: ['Enter a valid year between 1880 and 2100, or leave it blank.'] });
+    if (!manualRank) {
+      renderResult({ status: 'warning', title: 'Manual N required', lines: ['Enable manual N mode for the CLT-6 formula system.'] });
       return;
     }
 
@@ -1849,30 +1855,18 @@ function initFieldCalculator() {
     try {
       const loaderPromise = runCalculationLoader();
       const years = getDatasetYears(countryCode);
-      const rank = manualRank ? rankInput : getRankFromLocalData(countryCode, year);
+      const n = rankInput;
       await loaderPromise;
-
-      if (!rank) {
-        renderResult({
-          status: 'warning',
-          title: 'No rank data found',
-          lines: [
-            `No ${getSelectedLabel(countryCode)} Charlotte rank is available for year ${year}.`,
-            years.length ? `Available years: ${years[years.length - 1]}-${years[0]}.` : 'No dataset years available.'
-          ]
-        });
-        return;
-      }
 
       const m = appearance ?? 0;
       const p = p2 === null ? p1 : (p1 + p2) / 2;
-
-      const b = (7.25 * rank) + 32;
-      const a = 0.8 + (0.04 * m);
-      const logRatio = Math.log10(p / 150);
-      const lRaw = 0.85 + ((0.1933 * logRatio) + (0.06849 * logRatio * logRatio)) / (1 + (0.2514 * Math.abs(logRatio)));
-      const l = Math.min(2, lRaw);
-      const clt = b * a * l;
+      const b = 110 / n;
+      const a = 0.75 + (0.05 * m);
+      const logP = Math.log10(p);
+      const l = Math.min(2.2, (0.0092146 * (logP ** 3)) - (0.0834066 * (logP ** 2)) + (0.345823 * logP) + 0.466249);
+      const logQ = Math.log10(q);
+      const r = 0.295453 + (0.393664 * logQ) - (0.0618419 * (logQ ** 2)) + (0.00509316 * (logQ ** 3));
+      const clt = b * a * l * r;
       const tungsten = calculateTungstenConcentrationShared(clt);
       const bands = calculateBandLengths(b, a, l, clt);
       const bandTelemetry = buildBandTelemetry(bands, clt, tungsten);
@@ -1886,22 +1880,24 @@ function initFieldCalculator() {
         },
         bandTelemetry,
         metrics: [
-          { label: 'Rank (n)', value: rank.toLocaleString() },
+          { label: 'N (%)', value: formatNumber(n, 4) },
           { label: 'Appearance (M)', value: formatNumber(m, 2) },
           { label: 'Surname P', value: formatNumber(p, 3) },
+          { label: 'Regional Q', value: formatNumber(q, 3) },
           { label: 'M Band Length', value: formatDistanceMeters(bands.m) },
-          { label: 'Year', value: manualRank ? 'Manual rank mode' : String(year || years[0]) },
+          { label: 'Year', value: 'Manual N mode' },
           { label: 'Dataset', value: getSelectedLabel(countryCode) }
         ],
         nameValue: enteredName,
         lines: [
-          `Base B = 7.25n + 32 = ${formatNumber(b, 3)}`,
-          `Appearance A = 0.8 + 0.04m = ${formatNumber(a, 4)}`,
-          `Surname rarity L(P) = ${formatNumber(l, 4)} (P is 1:x ratio)`,
+          `Base B = 110 / N = ${formatNumber(b, 6)}`,
+          `Appearance A = 0.75 + 0.05m = ${formatNumber(a, 4)}`,
+          `Surname rarity L(P) = ${formatNumber(l, 6)} (P is 1:x ratio)`,
+          `Regional rarity R(Q) = ${formatNumber(r, 6)} (Q is 1:x ratio)`,
           `T(CLT) = 0.55 × (CLT^1.09 / (CLT^1.09 + 1737^1.09)) = ${tungsten.toFixed(6)} mg/m³`,
           `Band lengths: NS ${formatDistanceMeters(bands.ns)} · CE ${formatDistanceMeters(bands.ce)} · E ${formatDistanceMeters(bands.e)} · M ${formatDistanceMeters(bands.m)} · PS ${formatDistanceMeters(bands.ps)} · MS ${formatDistanceMeters(bands.ms)} · MP ${formatDistanceMeters(bands.mp)} · MH ${formatDistanceMeters(bands.mh)}`,
           manualRank ? 'Rank source: Manual input' : `Rank source: ${getSelectedLabel(countryCode)} dataset`,
-          'Final formula: CLT = B × A × L'
+          'Final formula: CLT = B × A × L × R'
         ]
       });
     } catch (error) {
@@ -1964,3 +1960,7 @@ if (copyBtn && instructionText) {
     }
   });
 }
+    if (q === null) {
+      renderResult({ status: 'warning', title: 'Invalid Q value', lines: ['Regional rarity Q must be a number from 1 to 1,000,000,000.'] });
+      return;
+    }
