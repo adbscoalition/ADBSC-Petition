@@ -1848,6 +1848,10 @@ function initFieldCalculator() {
       renderResult({ status: 'warning', title: 'Invalid P2 value', lines: ['Surname ratio P2 must be a number from 1 to 1,000,000,000 when provided.'] });
       return;
     }
+    if (q === null) {
+      renderResult({ status: 'warning', title: 'Invalid Q value', lines: ['Regional rarity Q must be a number from 1 to 1,000,000,000.'] });
+      return;
+    }
 
     if (el.calculate) el.calculate.disabled = true;
     renderResult({ status: 'idle', title: 'Computing', lines: ['Running calculation...'] });
@@ -1960,7 +1964,3 @@ if (copyBtn && instructionText) {
     }
   });
 }
-    if (q === null) {
-      renderResult({ status: 'warning', title: 'Invalid Q value', lines: ['Regional rarity Q must be a number from 1 to 1,000,000,000.'] });
-      return;
-    }
