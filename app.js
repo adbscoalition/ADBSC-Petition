@@ -363,6 +363,9 @@ function initCltFieldSystem() {
     fieldName: document.getElementById('fieldName'),
     fieldIntensity: document.getElementById('fieldIntensity'),
     fieldType: document.getElementById('fieldType'),
+    fieldCustomMBandWrap: document.getElementById('fieldCustomMBandWrap'),
+    fieldCustomMBand: document.getElementById('fieldCustomMBand'),
+    fieldDetectionRangeWrap: document.getElementById('fieldDetectionRangeWrap'),
     fieldDetectionRange: document.getElementById('fieldDetectionRange'),
     fieldLatitude: document.getElementById('fieldLatitude'),
     fieldLongitude: document.getElementById('fieldLongitude'),
@@ -662,6 +665,8 @@ function initCltFieldSystem() {
         if (el.fieldName) el.fieldName.value = field.name;
         if (el.fieldIntensity) el.fieldIntensity.value = String(field.intensity);
         if (el.fieldType) el.fieldType.value = String(field.fieldType || 'type1');
+        el.fieldType?.dispatchEvent(new Event('change'));
+        if (el.fieldCustomMBand) el.fieldCustomMBand.value = field.maxRangeM ? String(field.maxRangeM) : '';
         if (el.fieldDetectionRange) el.fieldDetectionRange.value = String(field.maxDetectionRangeM || 100);
         const editLat = Number.isFinite(Number(field.lat)) ? Number(field.lat) : Number(field.latitude);
         const editLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
@@ -696,7 +701,9 @@ function initCltFieldSystem() {
     if (el.fieldName) el.fieldName.value = '';
     if (el.fieldIntensity) el.fieldIntensity.value = '5000';
     if (el.fieldType) el.fieldType.value = 'type1';
+    if (el.fieldCustomMBand) el.fieldCustomMBand.value = '';
     if (el.fieldDetectionRange) el.fieldDetectionRange.value = '100';
+    el.fieldType?.dispatchEvent(new Event('change'));
     if (el.fieldStartTime) el.fieldStartTime.value = '';
     if (el.fieldEndTime) el.fieldEndTime.value = '';
     if (el.fieldSave) el.fieldSave.textContent = 'Save Field';
@@ -740,7 +747,11 @@ function initCltFieldSystem() {
     el.fieldSave?.addEventListener('click', async () => {
       const intensity = Math.min(1000000, Math.max(1, Number(el.fieldIntensity?.value || 0)));
       const fieldType = String(el.fieldType?.value || 'type1');
-      const maxRangeM = calculateAutoMBandMeters(intensity);
+      let maxRangeM = calculateAutoMBandMeters(intensity);
+      if (fieldType.toLowerCase() === 'type1s') {
+        const customM = Number(el.fieldCustomMBand?.value || 0);
+        if (Number.isFinite(customM) && customM > 0) maxRangeM = customM;
+      }
       const maxDetectionRangeM = Math.max(1, Number(el.fieldDetectionRange?.value || 100));
 
       let lat = parseCoordinateInput(el.fieldLatitude?.value);
@@ -861,6 +872,7 @@ function initCltFieldSystem() {
       return {
         name: field.name,
         category: 'Secret',
+        fieldType: String(field.fieldType || 'type1'),
         lat: fieldLat,
         lon: fieldLon,
         distance,
@@ -973,7 +985,9 @@ function initCltFieldSystem() {
     const value = Number(cltValue) || 0;
     if (source?.hiddenName && value < Number(source.revealThreshold || 0)) return source.hiddenName;
     if (source.category === 'Secret' && !source?.uploaded && value < 100) return 'Unknown Source';
-    return source.name || 'Unknown Source';
+    const baseName = source.name || 'Unknown Source';
+    const typeTag = source?.uploaded ? ` [${String(source.fieldType || 'type1').toUpperCase()}]` : '';
+    return `${baseName}${typeTag}`;
   }
 
   function renderContributionTables(calc, liveClt, liveTungsten, liveBreakdown = null, hasTelemetryError = false) {
@@ -1966,3 +1980,10 @@ if (copyBtn && instructionText) {
         el.fieldRange.value = calculateAutoMBandMeters(intensity).toFixed(2);
       });
     }
+    function syncFieldTypeUi() {
+      const t = String(el.fieldType?.value || 'type1').toLowerCase();
+      if (el.fieldCustomMBandWrap) el.fieldCustomMBandWrap.hidden = t !== 'type1s';
+      if (el.fieldDetectionRangeWrap) el.fieldDetectionRangeWrap.hidden = t !== 'typer';
+    }
+    el.fieldType?.addEventListener('change', syncFieldTypeUi);
+    syncFieldTypeUi();
