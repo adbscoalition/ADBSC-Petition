@@ -720,6 +720,14 @@ function initCltFieldSystem() {
     renderUploadedFields();
     applySelectedDays([]);
 
+    function syncFieldTypeUi() {
+      const t = String(el.fieldType?.value || 'type1').toLowerCase();
+      if (el.fieldCustomMBandWrap) el.fieldCustomMBandWrap.hidden = t !== 'type1s';
+      if (el.fieldDetectionRangeWrap) el.fieldDetectionRangeWrap.hidden = t !== 'typer';
+    }
+    el.fieldType?.addEventListener('change', syncFieldTypeUi);
+    syncFieldTypeUi();
+
     (el.fieldDayToggles || []).forEach((btn) => {
       btn.addEventListener('click', () => {
         const active = btn.getAttribute('aria-pressed') === 'true';
@@ -1973,17 +1981,3 @@ if (copyBtn && instructionText) {
     }
   });
 }
-    if (el.fieldIntensity && el.fieldRange) {
-      el.fieldRange.value = calculateAutoMBandMeters(Number(el.fieldIntensity.value || 5000)).toFixed(2);
-      el.fieldIntensity.addEventListener('input', () => {
-        const intensity = Math.min(1000000, Math.max(1, Number(el.fieldIntensity?.value || 0)));
-        el.fieldRange.value = calculateAutoMBandMeters(intensity).toFixed(2);
-      });
-    }
-    function syncFieldTypeUi() {
-      const t = String(el.fieldType?.value || 'type1').toLowerCase();
-      if (el.fieldCustomMBandWrap) el.fieldCustomMBandWrap.hidden = t !== 'type1s';
-      if (el.fieldDetectionRangeWrap) el.fieldDetectionRangeWrap.hidden = t !== 'typer';
-    }
-    el.fieldType?.addEventListener('change', syncFieldTypeUi);
-    syncFieldTypeUi();
