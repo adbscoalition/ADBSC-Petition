@@ -1641,12 +1641,7 @@ function initFieldCalculator() {
   }
 
   function calculateBandLengths(baseB, appearanceA, surnameL, cltValue = 0) {
-    const baselineMeters = 1.5;
-    const deltaB = baseB - 500;
-    const basePerimeterMeters = deltaB >= 0
-      ? baselineMeters + (deltaB * 0.005)
-      : baselineMeters + (deltaB * 0.001);
-    const scaledM = Math.max(0, basePerimeterMeters * appearanceA * surnameL);
+    const scaledM = Math.max(1, 1.09 + (40.70 / (1 + Math.pow(5142 / Math.max(0.0001, cltValue), 1.542))));
     const nsFromCltCm = (Math.max(0, Number(cltValue) || 0) * 0.005) + 4;
     return {
       ns: nsFromCltCm / 100,
@@ -1836,10 +1831,10 @@ function initFieldCalculator() {
         primaryValue: '0',
         primaryIsAlert: true,
         metrics: [
-          { label: 'Rank (n)', value: '0× multiplier applied' },
+          { label: 'N (%)', value: '0× multiplier applied' },
           { label: 'Appearance (M)', value: '—' },
           { label: 'Surname P', value: '—' },
-          { label: 'Year', value: manualRank ? 'Manual rank mode' : String(year || '—') },
+          { label: 'Regional Q', value: '—' },
           { label: 'Dataset', value: getSelectedLabel(countryCode) }
         ],
         nameValue: enteredName,
@@ -1924,7 +1919,7 @@ function initFieldCalculator() {
           `Regional rarity R(Q) = ${formatNumber(r, 6)} (Q is 1:x ratio)`,
           `T(CLT) = 0.55 × (CLT^1.09 / (CLT^1.09 + 1737^1.09)) = ${tungsten.toFixed(6)} mg/m³`,
           `Band lengths: NS ${formatDistanceMeters(bands.ns)} · CE ${formatDistanceMeters(bands.ce)} · E ${formatDistanceMeters(bands.e)} · M ${formatDistanceMeters(bands.m)} · PS ${formatDistanceMeters(bands.ps)} · MS ${formatDistanceMeters(bands.ms)} · MP ${formatDistanceMeters(bands.mp)} · MH ${formatDistanceMeters(bands.mh)}`,
-          manualRank ? 'Rank source: Manual input' : `Rank source: ${getSelectedLabel(countryCode)} dataset`,
+          manualRank ? 'N source: Manual input' : `N source: ${getSelectedLabel(countryCode)} dataset`,
           'Final formula: CLT = B × A × L × R'
         ]
       });
