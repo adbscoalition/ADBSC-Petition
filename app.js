@@ -722,8 +722,16 @@ function initCltFieldSystem() {
 
     function syncFieldTypeUi() {
       const t = String(el.fieldType?.value || 'type1').toLowerCase();
-      if (el.fieldCustomMBandWrap) el.fieldCustomMBandWrap.hidden = t !== 'type1s';
-      if (el.fieldDetectionRangeWrap) el.fieldDetectionRangeWrap.hidden = t !== 'typer';
+      if (el.fieldCustomMBandWrap) {
+        const showCustomM = t === 'type1s';
+        el.fieldCustomMBandWrap.hidden = !showCustomM;
+        el.fieldCustomMBandWrap.style.display = showCustomM ? '' : 'none';
+      }
+      if (el.fieldDetectionRangeWrap) {
+        const showDetection = t === 'typer';
+        el.fieldDetectionRangeWrap.hidden = !showDetection;
+        el.fieldDetectionRangeWrap.style.display = showDetection ? '' : 'none';
+      }
     }
     el.fieldType?.addEventListener('change', syncFieldTypeUi);
     syncFieldTypeUi();
