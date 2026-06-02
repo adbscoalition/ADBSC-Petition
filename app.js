@@ -1455,7 +1455,6 @@ function initFieldCalculator() {
   if (!app) return;
 
   const el = {
-    year: document.getElementById('fcYear'),
     n: document.getElementById('fcN'),
     appearance: document.getElementById('fcAppearance'),
     surnameP: document.getElementById('fcSurnameP'),
@@ -1466,14 +1465,6 @@ function initFieldCalculator() {
     runStatus: document.getElementById('fcRunStatus'),
     result: document.getElementById('fcResult')
   };
-
-  function normalizeYear() {
-    const raw = String(el.year?.value || '').trim();
-    if (!raw) return null;
-    const parsed = Number(raw);
-    if (!Number.isInteger(parsed) || parsed < 1880 || parsed > 2100) return null;
-    return parsed;
-  }
 
   function normalizeN() {
     const raw = String(el.n?.value || '').trim();
@@ -1646,20 +1637,13 @@ function initFieldCalculator() {
   }
 
   async function calculate() {
-    const year = normalizeYear();
-    const hasYearInput = String(el.year?.value || '').trim().length > 0;
     const n = normalizeN();
     const m = normalizeAppearance();
     const p = normalizeRatio(el.surnameP);
     const q = normalizeRatio(el.q);
 
-    if (hasYearInput && year === null) {
-      renderResult({ status: 'warning', title: 'Invalid year', lines: ['Enter a valid birth year between 1880 and 2100, or leave it blank.'] });
-      return;
-    }
-
     if (n === null) {
-      renderResult({ status: 'warning', title: 'Invalid N value', lines: ['Manual N must be the percent of girls named Charlotte in the birth region and year, greater than 0 and no more than 100.'] });
+      renderResult({ status: 'warning', title: 'Invalid N value', lines: ['N must be the percent of girls named Charlotte for the birth year in your region, greater than 0 and no more than 100.'] });
       return;
     }
 
@@ -1708,8 +1692,7 @@ function initFieldCalculator() {
           { label: 'N', value: `${formatNumber(n, 6)}%` },
           { label: 'Appearance (M)', value: formatNumber(m, 2) },
           { label: 'Surname P', value: formatNumber(p, 3) },
-          { label: 'Q', value: formatNumber(q, 3) },
-          { label: 'Year', value: year ? String(year) : 'Manual N' }
+          { label: 'Q', value: formatNumber(q, 3) }
         ],
         lines: [
           `Base B = 110 / N = ${formatNumber(b, 3)}`,
@@ -1732,7 +1715,7 @@ function initFieldCalculator() {
     }
   }
 
-  [el.year, el.n, el.appearance, el.surnameP, el.q].forEach((inputEl) => {
+  [el.n, el.appearance, el.surnameP, el.q].forEach((inputEl) => {
     inputEl?.addEventListener('wheel', () => {
       inputEl.blur();
     });
