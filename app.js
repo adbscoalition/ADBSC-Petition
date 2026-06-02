@@ -6,40 +6,30 @@ if (tabTitle) document.title = tabTitle;
 const navToggle = document.getElementById('navToggle');
 const primaryNav = document.getElementById('primaryNav');
 
+function closePrimaryNav() {
+  if (!navToggle || !primaryNav) return;
+  navToggle.setAttribute('aria-expanded', 'false');
+  primaryNav.classList.remove('open');
+}
+
 if (navToggle && primaryNav) {
-  navToggle.addEventListener('click', () => {
+  navToggle.addEventListener('click', (event) => {
+    event.stopPropagation();
     const expanded = navToggle.getAttribute('aria-expanded') === 'true';
     navToggle.setAttribute('aria-expanded', String(!expanded));
     primaryNav.classList.toggle('open', !expanded);
   });
-}
 
-const navGroups = primaryNav ? Array.from(primaryNav.querySelectorAll('.nav-group')) : [];
-
-if (navGroups.length) {
-  navGroups.forEach((group) => {
-    group.addEventListener('toggle', () => {
-      if (!group.open) return;
-      navGroups.forEach((other) => {
-        if (other !== group) other.open = false;
-      });
-    });
+  primaryNav.addEventListener('click', (event) => {
+    if (event.target.closest('a')) closePrimaryNav();
   });
 
   document.addEventListener('click', (event) => {
-    if (!primaryNav?.contains(event.target)) {
-      navGroups.forEach((group) => {
-        group.open = false;
-      });
-    }
+    if (!primaryNav.contains(event.target) && !navToggle.contains(event.target)) closePrimaryNav();
   });
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      navGroups.forEach((group) => {
-        group.open = false;
-      });
-    }
+    if (event.key === 'Escape') closePrimaryNav();
   });
 }
 
