@@ -1925,7 +1925,7 @@ function initFieldCalculator() {
           `Appearance A = 0.75 + 0.05m = ${formatNumber(a, 4)}`,
           `Surname rarity L(P) = ${formatNumber(l, 6)} (P is 1:x ratio)`,
           `Regional rarity R(Q) = ${formatNumber(r, 6)} (Q is 1:x ratio)`,
-          `T(CLT) = 0.55 × (CLT^1.09 / (CLT^1.09 + 1737^1.09)) = ${tungsten.toFixed(6)} mg/m³`,
+          `T(CLT) = 0.798 / (1 + (4555 / CLT)^0.814) = ${tungsten.toFixed(6)} mg/m³`,
           `Band lengths: NS ${formatDistanceMeters(bands.ns)} · CE ${formatDistanceMeters(bands.ce)} · E ${formatDistanceMeters(bands.e)} · M ${formatDistanceMeters(bands.m)} · PS ${formatDistanceMeters(bands.ps)} · MS ${formatDistanceMeters(bands.ms)} · MP ${formatDistanceMeters(bands.mp)} · MH ${formatDistanceMeters(bands.mh)}`,
           manualRank ? 'N source: Manual N input' : `N source: ${getSelectedLabel(countryCode)} dataset`,
           'Final formula: CLT = B × A × L × R'
