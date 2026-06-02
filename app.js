@@ -63,9 +63,9 @@ if (entryLoader) {
     }
 
     const phases = [
-      { at: 0.1, label: 'Magnetometer calibration progress...' },
-      { at: 0.45, label: 'Synchronizing with distance and time ranges...' },
-      { at: 0.78, label: 'Finalizing instrument baseline...' }
+      { at: 0.1, label: 'Waking CLT-6 detector mesh...' },
+      { at: 0.45, label: 'Aligning range bands and schedule gates...' },
+      { at: 0.78, label: 'Locking detector baseline...' }
     ];
 
     const start = performance.now();
@@ -88,10 +88,10 @@ if (entryLoader) {
   function runMainLoader() {
     const status = document.getElementById('mainLoaderStatus');
     const phases = [
-      { at: 0.1, label: 'Booting OCharlotteD realm...' },
-      { at: 0.36, label: 'Aligning magnetic architecture...' },
-      { at: 0.67, label: 'Charging sacred Charlotte core...' },
-      { at: 0.92, label: 'OCharlotteD online.' }
+      { at: 0.1, label: 'Opening Operation Charlotte deck...' },
+      { at: 0.36, label: 'Assembling magenta command surfaces...' },
+      { at: 0.67, label: 'Charging Charlotte signal core...' },
+      { at: 0.92, label: 'Charlotte Dynamics online.' }
     ];
 
     const start = performance.now();
@@ -114,10 +114,10 @@ if (entryLoader) {
     const bar = document.getElementById('portalLoaderBar');
     const nodes = Array.from(document.querySelectorAll('.portal-loader-network span'));
     const phases = [
-      { at: 0.1, label: 'Opening destination channels...' },
-      { at: 0.38, label: 'Linking model gateways...' },
-      { at: 0.69, label: 'Verifying portal routes...' },
-      { at: 0.92, label: 'Portal registry ready.' }
+      { at: 0.1, label: 'Opening launch corridors...' },
+      { at: 0.38, label: 'Linking persona gateways...' },
+      { at: 0.69, label: 'Verifying launch routes...' },
+      { at: 0.92, label: 'Launch registry ready.' }
     ];
 
     const start = performance.now();
@@ -179,9 +179,9 @@ if (entryLoader) {
     const status = document.getElementById('calculatorLoaderStatus');
     const bar = document.getElementById('calculatorLoaderBar');
     const phases = [
-      { at: 0.08, label: 'Finding name rankings...' },
-      { at: 0.36, label: 'Calibrating formulas...' },
-      { at: 0.68, label: 'Ranking Charlottes...' },
+      { at: 0.08, label: 'Reading N/P/Q inputs...' },
+      { at: 0.36, label: 'Calibrating CLT-6 equations...' },
+      { at: 0.68, label: 'Generating Charlotte signal...' },
       { at: 0.94, label: 'Done!' }
     ];
 
@@ -206,7 +206,7 @@ if (entryLoader) {
   function runInstructionsLoader() {
     const status = document.getElementById('instructionsLoaderStatus');
     const typedLine = document.getElementById('typedLoaderLine');
-    const target = 'Loading custom instructions...\nPriming CLT...\nEnabling magnetometers...\nDONE!';
+    const target = 'Loading protocol copy...\nPriming CLT-6...\nEnabling signal mesh...\nDONE!';
     const start = performance.now();
 
     function frame(now) {
@@ -222,7 +222,7 @@ if (entryLoader) {
         status.textContent = t < 0.55
           ? 'Loading instruction package...'
           : t < 0.9
-            ? 'Applying OCharlotteD behavior profile...'
+            ? 'Applying Operation Charlotte Dynamics profile...'
             : 'Instruction profile synchronized.';
       }
 
@@ -236,10 +236,10 @@ if (entryLoader) {
   function runFaqLoader() {
     const status = document.getElementById('faqLoaderStatus');
     const phases = [
-      { at: 0.12, label: 'Indexing OCharlotteD FAQ entries...' },
-      { at: 0.42, label: 'Linking CLT fiction safety notes...' },
-      { at: 0.72, label: 'Compiling quick-answer cards...' },
-      { at: 0.92, label: 'FAQ archive online.' }
+      { at: 0.12, label: 'Indexing Charlotte Dynamics questions...' },
+      { at: 0.42, label: 'Linking fiction boundary notes...' },
+      { at: 0.72, label: 'Compiling answer cards...' },
+      { at: 0.92, label: 'Question archive online.' }
     ];
 
     const start = performance.now();
@@ -617,12 +617,12 @@ function initCltFieldSystem() {
   function renderUploadedFields() {
     if (!(el.uploadedFieldList && el.fieldUploaderStatus)) return;
     if (!state.customFields.length) {
-      el.fieldUploaderStatus.textContent = 'No local secret fields yet.';
+      el.fieldUploaderStatus.textContent = 'No local scenarios saved yet.';
       el.uploadedFieldList.innerHTML = '';
       return;
     }
 
-    el.fieldUploaderStatus.textContent = `${state.customFields.length} local secret field(s) loaded.`;
+    el.fieldUploaderStatus.textContent = `${state.customFields.length} local scenario(s) loaded.`;
     el.uploadedFieldList.innerHTML = state.customFields.map((field) => {
       const fieldLat = Number.isFinite(Number(field.lat)) ? Number(field.lat) : Number(field.latitude);
       const fieldLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
@@ -675,9 +675,9 @@ function initCltFieldSystem() {
         if (el.fieldStartTime) el.fieldStartTime.value = field.startClock || '';
         if (el.fieldEndTime) el.fieldEndTime.value = field.endClock || '';
         applySelectedDays(field.daysOfWeek);
-        if (el.fieldSave) el.fieldSave.textContent = 'Update Uploaded Field';
+        if (el.fieldSave) el.fieldSave.textContent = 'Update Scenario';
         renderUploadedFields();
-        el.fieldUploaderStatus.textContent = `Editing uploaded field: ${field.name}`;
+        el.fieldUploaderStatus.textContent = `Editing scenario: ${field.name}`;
       });
     });
 
@@ -686,7 +686,7 @@ function initCltFieldSystem() {
         const id = btn.getAttribute('data-field-id');
         const field = state.customFields.find((f) => f.id === id);
         if (!field) return;
-        const ok = window.confirm(`Delete local secret field "${field.name}"? This cannot be undone.`);
+        const ok = window.confirm(`Delete local scenario "${field.name}"? This cannot be undone.`);
         if (!ok) return;
         state.customFields = state.customFields.filter((f) => f.id !== id);
         saveCustomFields();
@@ -706,7 +706,7 @@ function initCltFieldSystem() {
     el.fieldType?.dispatchEvent(new Event('change'));
     if (el.fieldStartTime) el.fieldStartTime.value = '';
     if (el.fieldEndTime) el.fieldEndTime.value = '';
-    if (el.fieldSave) el.fieldSave.textContent = 'Save Field';
+    if (el.fieldSave) el.fieldSave.textContent = 'Save Scenario';
     applySelectedDays([]);
     renderUploadedFields();
   }
@@ -746,18 +746,18 @@ function initCltFieldSystem() {
     el.fieldUseCurrentLocation?.addEventListener('click', async () => {
       const coords = await resolveCurrentCoords();
       if (!coords) {
-        if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Unable to fetch current location for field coordinates.';
+        if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Unable to fetch device position for scenario coordinates.';
         return;
       }
       if (el.fieldLatitude) el.fieldLatitude.value = String(coords.lat);
       if (el.fieldLongitude) el.fieldLongitude.value = String(coords.lon);
-      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Coordinates set from current location.';
+      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Scenario coordinates set from device position.';
     });
 
     el.fieldClearCoordinates?.addEventListener('click', () => {
       if (el.fieldLatitude) el.fieldLatitude.value = '';
       if (el.fieldLongitude) el.fieldLongitude.value = '';
-      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Field coordinates cleared.';
+      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Scenario coordinates cleared.';
     });
 
     el.fieldSave?.addEventListener('click', async () => {
@@ -794,7 +794,7 @@ function initCltFieldSystem() {
         lon = state.lastBase?.lon;
       }
       if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
-        if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Field upload failed: valid coordinates required.';
+        if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Scenario save failed: valid coordinates required.';
         return;
       }
 
@@ -826,12 +826,12 @@ function initCltFieldSystem() {
       saveCustomFields();
       renderUploadedFields();
       resetFieldForm();
-      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = `${name} saved to local storage.`;
+      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = `${name} saved locally.`;
     });
 
     el.fieldReset?.addEventListener('click', () => {
       resetFieldForm();
-      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Field form reset.';
+      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Scenario studio reset.';
     });
   }
 
@@ -1469,7 +1469,7 @@ function initCltFieldSystem() {
     } catch {
       el.copyLogs.textContent = 'Copy failed';
     }
-    setTimeout(() => { if (el.copyLogs) el.copyLogs.textContent = 'Copy Logs'; }, 1500);
+    setTimeout(() => { if (el.copyLogs) el.copyLogs.textContent = 'Copy Telemetry'; }, 1500);
   });
 
   initFallbackTools();
@@ -1699,7 +1699,7 @@ function initFieldCalculator() {
 
   function syncRankModeUi() {
     const manual = isManualRankMode();
-    if (el.rankToggle) el.rankToggle.textContent = manual ? 'Using Manual N' : 'Use N Input';
+    if (el.rankToggle) el.rankToggle.textContent = manual ? 'Manual N Active' : 'Enable N Input';
     if (el.year) el.year.disabled = manual;
     if (el.rank) el.rank.disabled = !manual;
   }
@@ -1785,9 +1785,9 @@ function initFieldCalculator() {
     el.runBar.style.width = '0%';
 
     const phases = [
-      { at: 0.08, label: 'Finding name rankings...' },
-      { at: 0.36, label: 'Calibrating formulas...' },
-      { at: 0.68, label: 'Ranking Charlottes...' },
+      { at: 0.08, label: 'Reading N/P/Q inputs...' },
+      { at: 0.36, label: 'Calibrating CLT-6 equations...' },
+      { at: 0.68, label: 'Generating Charlotte signal...' },
       { at: 0.94, label: 'Done!' }
     ];
 
@@ -1834,7 +1834,7 @@ function initFieldCalculator() {
     if (enteredName.toLowerCase() !== 'charlotte') {
       renderResult({
         status: 'error',
-        title: 'Calculated CLT Result',
+        title: 'CLT Signal Output',
         primaryLabel: 'CLT',
         primaryValue: '0',
         primaryIsAlert: true,
@@ -1905,7 +1905,7 @@ function initFieldCalculator() {
 
       renderResult({
         status: 'success',
-        title: 'Calculated CLT Result',
+        title: 'CLT Signal Output',
         upperStats: {
           cltValue: formatNumber(clt),
           tungstenValue: `${tungsten.toFixed(6)} mg/m³`
@@ -1927,7 +1927,7 @@ function initFieldCalculator() {
           `Regional rarity R(Q) = ${formatNumber(r, 6)} (Q is 1:x ratio)`,
           `T(CLT) = 0.55 × (CLT^1.09 / (CLT^1.09 + 1737^1.09)) = ${tungsten.toFixed(6)} mg/m³`,
           `Band lengths: NS ${formatDistanceMeters(bands.ns)} · CE ${formatDistanceMeters(bands.ce)} · E ${formatDistanceMeters(bands.e)} · M ${formatDistanceMeters(bands.m)} · PS ${formatDistanceMeters(bands.ps)} · MS ${formatDistanceMeters(bands.ms)} · MP ${formatDistanceMeters(bands.mp)} · MH ${formatDistanceMeters(bands.mh)}`,
-          manualRank ? 'N source: Manual input' : `N source: ${getSelectedLabel(countryCode)} dataset`,
+          manualRank ? 'N source: Manual N input' : `N source: ${getSelectedLabel(countryCode)} dataset`,
           'Final formula: CLT = B × A × L × R'
         ]
       });
@@ -1935,7 +1935,7 @@ function initFieldCalculator() {
       renderResult({
         status: 'error',
         title: 'Calculation failed',
-        lines: [`Unable to compute CLT from local rank/modifier data (${String(error?.message || 'unknown error')}).`]
+        lines: [`Unable to compute the CLT-6 signal from the supplied N/P/Q inputs (${String(error?.message || 'unknown error')}).`]
       });
     } finally {
       if (el.calculate) el.calculate.disabled = false;
@@ -1977,10 +1977,10 @@ if (copyBtn && instructionText) {
     try {
       await navigator.clipboard.writeText(instructionText.textContent);
       copyBtn.textContent = 'Copied';
-      setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
+      setTimeout(() => (copyBtn.textContent = 'Copy Protocol'), 1500);
     } catch {
       copyBtn.textContent = 'Copy failed';
-      setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
+      setTimeout(() => (copyBtn.textContent = 'Copy Protocol'), 1500);
     }
   });
 }
