@@ -63,9 +63,9 @@ if (entryLoader) {
     }
 
     const phases = [
-      { at: 0.1, label: 'Magnetometer calibration progress...' },
-      { at: 0.45, label: 'Synchronizing with distance and time ranges...' },
-      { at: 0.78, label: 'Finalizing instrument baseline...' }
+      { at: 0.1, label: 'Waking CLT-6 detector mesh...' },
+      { at: 0.45, label: 'Aligning range bands and schedule gates...' },
+      { at: 0.78, label: 'Locking detector baseline...' }
     ];
 
     const start = performance.now();
@@ -88,10 +88,10 @@ if (entryLoader) {
   function runMainLoader() {
     const status = document.getElementById('mainLoaderStatus');
     const phases = [
-      { at: 0.1, label: 'Booting OCharlotteD realm...' },
-      { at: 0.36, label: 'Aligning magnetic architecture...' },
-      { at: 0.67, label: 'Charging sacred Charlotte core...' },
-      { at: 0.92, label: 'OCharlotteD online.' }
+      { at: 0.1, label: 'Opening Operation Charlotte deck...' },
+      { at: 0.36, label: 'Assembling magenta command surfaces...' },
+      { at: 0.67, label: 'Charging Charlotte signal core...' },
+      { at: 0.92, label: 'Charlotte Dynamics online.' }
     ];
 
     const start = performance.now();
@@ -114,10 +114,10 @@ if (entryLoader) {
     const bar = document.getElementById('portalLoaderBar');
     const nodes = Array.from(document.querySelectorAll('.portal-loader-network span'));
     const phases = [
-      { at: 0.1, label: 'Opening destination channels...' },
-      { at: 0.38, label: 'Linking model gateways...' },
-      { at: 0.69, label: 'Verifying portal routes...' },
-      { at: 0.92, label: 'Portal registry ready.' }
+      { at: 0.1, label: 'Opening launch corridors...' },
+      { at: 0.38, label: 'Linking persona gateways...' },
+      { at: 0.69, label: 'Verifying launch routes...' },
+      { at: 0.92, label: 'Launch registry ready.' }
     ];
 
     const start = performance.now();
@@ -179,9 +179,9 @@ if (entryLoader) {
     const status = document.getElementById('calculatorLoaderStatus');
     const bar = document.getElementById('calculatorLoaderBar');
     const phases = [
-      { at: 0.08, label: 'Finding name rankings...' },
-      { at: 0.36, label: 'Calibrating formulas...' },
-      { at: 0.68, label: 'Ranking Charlottes...' },
+      { at: 0.08, label: 'Reading N/P/Q inputs...' },
+      { at: 0.36, label: 'Calibrating CLT-6 equations...' },
+      { at: 0.68, label: 'Generating Charlotte signal...' },
       { at: 0.94, label: 'Done!' }
     ];
 
@@ -206,7 +206,7 @@ if (entryLoader) {
   function runInstructionsLoader() {
     const status = document.getElementById('instructionsLoaderStatus');
     const typedLine = document.getElementById('typedLoaderLine');
-    const target = 'Loading custom instructions...\nPriming CLT...\nEnabling magnetometers...\nDONE!';
+    const target = 'Loading protocol copy...\nPriming CLT-6...\nEnabling signal mesh...\nDONE!';
     const start = performance.now();
 
     function frame(now) {
@@ -222,7 +222,7 @@ if (entryLoader) {
         status.textContent = t < 0.55
           ? 'Loading instruction package...'
           : t < 0.9
-            ? 'Applying OCharlotteD behavior profile...'
+            ? 'Applying Operation Charlotte Dynamics profile...'
             : 'Instruction profile synchronized.';
       }
 
@@ -236,10 +236,10 @@ if (entryLoader) {
   function runFaqLoader() {
     const status = document.getElementById('faqLoaderStatus');
     const phases = [
-      { at: 0.12, label: 'Indexing OCharlotteD FAQ entries...' },
-      { at: 0.42, label: 'Linking CLT fiction safety notes...' },
-      { at: 0.72, label: 'Compiling quick-answer cards...' },
-      { at: 0.92, label: 'FAQ archive online.' }
+      { at: 0.12, label: 'Indexing Charlotte Dynamics questions...' },
+      { at: 0.42, label: 'Linking fiction boundary notes...' },
+      { at: 0.72, label: 'Compiling answer cards...' },
+      { at: 0.92, label: 'Question archive online.' }
     ];
 
     const start = performance.now();
@@ -362,7 +362,11 @@ function initCltFieldSystem() {
     simStatus: document.getElementById('simStatus'),
     fieldName: document.getElementById('fieldName'),
     fieldIntensity: document.getElementById('fieldIntensity'),
-    fieldRange: document.getElementById('fieldRange'),
+    fieldType: document.getElementById('fieldType'),
+    fieldCustomMBandWrap: document.getElementById('fieldCustomMBandWrap'),
+    fieldCustomMBand: document.getElementById('fieldCustomMBand'),
+    fieldDetectionRangeWrap: document.getElementById('fieldDetectionRangeWrap'),
+    fieldDetectionRange: document.getElementById('fieldDetectionRange'),
     fieldLatitude: document.getElementById('fieldLatitude'),
     fieldLongitude: document.getElementById('fieldLongitude'),
     fieldUseCurrentLocation: document.getElementById('fieldUseCurrentLocation'),
@@ -389,6 +393,12 @@ function initCltFieldSystem() {
 
   function randomBetween(min, max) {
     return min + Math.random() * (max - min);
+  }
+
+  function calculateAutoMBandMeters(cltValue) {
+    const clt = Math.max(0.0001, Number(cltValue) || 0.0001);
+    const m = 1.09 + (40.70 / (1 + Math.pow(5142 / clt, 1.542)));
+    return Math.max(1, Math.min(100, m));
   }
 
   function parseCoordinateInput(value) {
@@ -513,6 +523,12 @@ function initCltFieldSystem() {
 
   function customFieldStrength(field, distanceM, nowMs) {
     const intensity = Number(field.intensity) || 0;
+    if (String(field?.fieldType || '').toLowerCase() === 'typer') {
+      const rRange = Math.max(1, Number(field?.maxDetectionRangeM) || 1);
+      if (distanceM < 0 || distanceM > rRange) return 0;
+      const tf = customFieldTimeFactor(field, nowMs);
+      return Math.max(0, intensity * tf);
+    }
     const ranges = getIndividualBandRangesMeters(field);
     if (distanceM < 0 || distanceM > ranges.mh) return 0;
     const multiplier = getBandTransitionMultiplier(distanceM, ranges);
@@ -523,14 +539,14 @@ function initCltFieldSystem() {
 
   function getBandTransitionMultiplier(distanceM, ranges) {
     const profile = [
-      { key: 'ns', min: 1.3, max: 1.7 },
-      { key: 'ce', min: 1.2, max: 1.3 },
-      { key: 'e', min: 1.1, max: 1.2 },
-      { key: 'm', min: 1.0, max: 1.1 },
-      { key: 'ps', min: 0.4, max: 1.0 },
-      { key: 'ms', min: 0.15, max: 0.4 },
-      { key: 'mp', min: 0.05, max: 0.15 },
-      { key: 'mh', min: 0.0, max: 0.05 }
+      { key: 'ns', near: 1.7, far: 1.3 },
+      { key: 'ce', near: 1.3, far: 1.2 },
+      { key: 'e', near: 1.2, far: 1.1 },
+      { key: 'm', near: 1.1, far: 1.0 },
+      { key: 'ps', near: 1.0, far: 0.4 },
+      { key: 'ms', near: 0.4, far: 0.15 },
+      { key: 'mp', near: 0.15, far: 0.05 },
+      { key: 'mh', near: 0.05, far: 0.0 }
     ];
 
     let start = 0;
@@ -539,7 +555,7 @@ function initCltFieldSystem() {
       if (distanceM <= end) {
         const span = Math.max(0.0001, end - start);
         const t = Math.max(0, Math.min(1, (distanceM - start) / span));
-        return band.min + ((band.max - band.min) * t);
+        return band.near + ((band.far - band.near) * t);
       }
       start = end;
     }
@@ -601,12 +617,12 @@ function initCltFieldSystem() {
   function renderUploadedFields() {
     if (!(el.uploadedFieldList && el.fieldUploaderStatus)) return;
     if (!state.customFields.length) {
-      el.fieldUploaderStatus.textContent = 'No local secret fields yet.';
+      el.fieldUploaderStatus.textContent = 'No local scenarios saved yet.';
       el.uploadedFieldList.innerHTML = '';
       return;
     }
 
-    el.fieldUploaderStatus.textContent = `${state.customFields.length} local secret field(s) loaded.`;
+    el.fieldUploaderStatus.textContent = `${state.customFields.length} local scenario(s) loaded.`;
     el.uploadedFieldList.innerHTML = state.customFields.map((field) => {
       const fieldLat = Number.isFinite(Number(field.lat)) ? Number(field.lat) : Number(field.latitude);
       const fieldLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
@@ -623,10 +639,13 @@ function initCltFieldSystem() {
 
       const isEditing = state.editingFieldId === field.id;
 
+      const typeLabel = String(field.fieldType || 'type1').toUpperCase();
       return `<li class="uploaded-field-card${isEditing ? ' is-editing' : ''}">` +
         `<div class="uploaded-field-head"><strong>${field.name}</strong>${isEditing ? '<span class="field-editing-badge">Editing</span>' : ''}</div>` +
-        `<p class="uploaded-field-meta">${field.intensity} CLT · M band ${field.maxRangeM}m</p>` +
-        `<p class="uploaded-field-meta">Bands (m): NS ${ranges.ns.toFixed(2)} · CE ${ranges.ce.toFixed(2)} · E ${ranges.e.toFixed(2)} · M ${ranges.m.toFixed(2)} · PS ${ranges.ps.toFixed(2)} · MS ${ranges.ms.toFixed(2)} · MP ${ranges.mp.toFixed(2)} · MH ${ranges.mh.toFixed(2)}</p>` +
+        `<p class="uploaded-field-meta">${field.intensity} CLT · ${typeLabel}</p>` +
+        (String(field.fieldType || '').toLowerCase() === 'typer'
+          ? `<p class="uploaded-field-meta">R detection range: ${Number(field.maxDetectionRangeM || 0).toFixed(2)} m</p>`
+          : `<p class="uploaded-field-meta">Bands (m): NS ${ranges.ns.toFixed(2)} · CE ${ranges.ce.toFixed(2)} · E ${ranges.e.toFixed(2)} · M ${ranges.m.toFixed(2)} · PS ${ranges.ps.toFixed(2)} · MS ${ranges.ms.toFixed(2)} · MP ${ranges.mp.toFixed(2)} · MH ${ranges.mh.toFixed(2)}</p>`) +
         `<p class="uploaded-field-meta">Tungsten (base): ${fieldTungsten.toFixed(6)} mg/m³</p>` +
         `<p class="uploaded-field-meta">Days: ${daysLabel}</p>` +
         `<p class="uploaded-field-meta">Time: ${timeLabel}</p>` +
@@ -645,7 +664,10 @@ function initCltFieldSystem() {
         state.editingFieldId = id;
         if (el.fieldName) el.fieldName.value = field.name;
         if (el.fieldIntensity) el.fieldIntensity.value = String(field.intensity);
-        if (el.fieldRange) el.fieldRange.value = String(field.maxRangeM);
+        if (el.fieldType) el.fieldType.value = String(field.fieldType || 'type1');
+        el.fieldType?.dispatchEvent(new Event('change'));
+        if (el.fieldCustomMBand) el.fieldCustomMBand.value = field.maxRangeM ? String(field.maxRangeM) : '';
+        if (el.fieldDetectionRange) el.fieldDetectionRange.value = String(field.maxDetectionRangeM || 100);
         const editLat = Number.isFinite(Number(field.lat)) ? Number(field.lat) : Number(field.latitude);
         const editLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
         if (el.fieldLatitude) el.fieldLatitude.value = Number.isFinite(editLat) ? String(editLat) : '';
@@ -653,9 +675,9 @@ function initCltFieldSystem() {
         if (el.fieldStartTime) el.fieldStartTime.value = field.startClock || '';
         if (el.fieldEndTime) el.fieldEndTime.value = field.endClock || '';
         applySelectedDays(field.daysOfWeek);
-        if (el.fieldSave) el.fieldSave.textContent = 'Update Uploaded Field';
+        if (el.fieldSave) el.fieldSave.textContent = 'Update Scenario';
         renderUploadedFields();
-        el.fieldUploaderStatus.textContent = `Editing uploaded field: ${field.name}`;
+        el.fieldUploaderStatus.textContent = `Editing scenario: ${field.name}`;
       });
     });
 
@@ -664,7 +686,7 @@ function initCltFieldSystem() {
         const id = btn.getAttribute('data-field-id');
         const field = state.customFields.find((f) => f.id === id);
         if (!field) return;
-        const ok = window.confirm(`Delete local secret field "${field.name}"? This cannot be undone.`);
+        const ok = window.confirm(`Delete local scenario "${field.name}"? This cannot be undone.`);
         if (!ok) return;
         state.customFields = state.customFields.filter((f) => f.id !== id);
         saveCustomFields();
@@ -678,10 +700,13 @@ function initCltFieldSystem() {
     state.editingFieldId = null;
     if (el.fieldName) el.fieldName.value = '';
     if (el.fieldIntensity) el.fieldIntensity.value = '5000';
-    if (el.fieldRange) el.fieldRange.value = '25';
+    if (el.fieldType) el.fieldType.value = 'type1';
+    if (el.fieldCustomMBand) el.fieldCustomMBand.value = '';
+    if (el.fieldDetectionRange) el.fieldDetectionRange.value = '100';
+    el.fieldType?.dispatchEvent(new Event('change'));
     if (el.fieldStartTime) el.fieldStartTime.value = '';
     if (el.fieldEndTime) el.fieldEndTime.value = '';
-    if (el.fieldSave) el.fieldSave.textContent = 'Save Field';
+    if (el.fieldSave) el.fieldSave.textContent = 'Save Scenario';
     applySelectedDays([]);
     renderUploadedFields();
   }
@@ -695,6 +720,22 @@ function initCltFieldSystem() {
     renderUploadedFields();
     applySelectedDays([]);
 
+    function syncFieldTypeUi() {
+      const t = String(el.fieldType?.value || 'type1').toLowerCase();
+      if (el.fieldCustomMBandWrap) {
+        const showCustomM = t === 'type1s';
+        el.fieldCustomMBandWrap.hidden = !showCustomM;
+        el.fieldCustomMBandWrap.style.display = showCustomM ? '' : 'none';
+      }
+      if (el.fieldDetectionRangeWrap) {
+        const showDetection = t === 'typer';
+        el.fieldDetectionRangeWrap.hidden = !showDetection;
+        el.fieldDetectionRangeWrap.style.display = showDetection ? '' : 'none';
+      }
+    }
+    el.fieldType?.addEventListener('change', syncFieldTypeUi);
+    syncFieldTypeUi();
+
     (el.fieldDayToggles || []).forEach((btn) => {
       btn.addEventListener('click', () => {
         const active = btn.getAttribute('aria-pressed') === 'true';
@@ -705,23 +746,29 @@ function initCltFieldSystem() {
     el.fieldUseCurrentLocation?.addEventListener('click', async () => {
       const coords = await resolveCurrentCoords();
       if (!coords) {
-        if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Unable to fetch current location for field coordinates.';
+        if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Unable to fetch device position for scenario coordinates.';
         return;
       }
       if (el.fieldLatitude) el.fieldLatitude.value = String(coords.lat);
       if (el.fieldLongitude) el.fieldLongitude.value = String(coords.lon);
-      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Coordinates set from current location.';
+      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Scenario coordinates set from device position.';
     });
 
     el.fieldClearCoordinates?.addEventListener('click', () => {
       if (el.fieldLatitude) el.fieldLatitude.value = '';
       if (el.fieldLongitude) el.fieldLongitude.value = '';
-      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Field coordinates cleared.';
+      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Scenario coordinates cleared.';
     });
 
     el.fieldSave?.addEventListener('click', async () => {
       const intensity = Math.min(1000000, Math.max(1, Number(el.fieldIntensity?.value || 0)));
-      const maxRangeM = Math.min(100, Math.max(1, Number(el.fieldRange?.value || 0)));
+      const fieldType = String(el.fieldType?.value || 'type1');
+      let maxRangeM = calculateAutoMBandMeters(intensity);
+      if (fieldType.toLowerCase() === 'type1s') {
+        const customM = Number(el.fieldCustomMBand?.value || 0);
+        if (Number.isFinite(customM) && customM > 0) maxRangeM = customM;
+      }
+      const maxDetectionRangeM = Math.max(1, Number(el.fieldDetectionRange?.value || 100));
 
       let lat = parseCoordinateInput(el.fieldLatitude?.value);
       let lon = parseCoordinateInput(el.fieldLongitude?.value);
@@ -747,7 +794,7 @@ function initCltFieldSystem() {
         lon = state.lastBase?.lon;
       }
       if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
-        if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Field upload failed: valid coordinates required.';
+        if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Scenario save failed: valid coordinates required.';
         return;
       }
 
@@ -764,6 +811,8 @@ function initCltFieldSystem() {
         longitude: lon,
         intensity,
         maxRangeM,
+        maxDetectionRangeM,
+        fieldType,
         startClock: el.fieldStartTime?.value || null,
         endClock: el.fieldEndTime?.value || null,
         daysOfWeek,
@@ -777,12 +826,12 @@ function initCltFieldSystem() {
       saveCustomFields();
       renderUploadedFields();
       resetFieldForm();
-      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = `${name} saved to local storage.`;
+      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = `${name} saved locally.`;
     });
 
     el.fieldReset?.addEventListener('click', () => {
       resetFieldForm();
-      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Field form reset.';
+      if (el.fieldUploaderStatus) el.fieldUploaderStatus.textContent = 'Scenario studio reset.';
     });
   }
 
@@ -831,6 +880,7 @@ function initCltFieldSystem() {
       const fieldLon = Number.isFinite(Number(field.lon)) ? Number(field.lon) : Number(field.longitude);
       const distance = haversineKm(lat, lon, fieldLat, fieldLon);
       const distanceM = distance * 1000;
+      const isTypeR = String(field.fieldType || '').toLowerCase() === 'typer';
       const ranges = getIndividualBandRangesMeters(field);
       const strength = state.uploadedTimeLimitsEnabled
         ? customFieldStrength(field, distanceM, nowMs)
@@ -838,12 +888,13 @@ function initCltFieldSystem() {
       return {
         name: field.name,
         category: 'Secret',
+        fieldType: String(field.fieldType || 'type1'),
         lat: fieldLat,
         lon: fieldLon,
         distance,
         distanceM,
         bandRanges: ranges,
-        bandSituation: getBandSituation(distanceM, ranges),
+        bandSituation: isTypeR ? 'R' : getBandSituation(distanceM, ranges),
         strength,
         inField: strength > 0,
         uploaded: true
@@ -950,7 +1001,9 @@ function initCltFieldSystem() {
     const value = Number(cltValue) || 0;
     if (source?.hiddenName && value < Number(source.revealThreshold || 0)) return source.hiddenName;
     if (source.category === 'Secret' && !source?.uploaded && value < 100) return 'Unknown Source';
-    return source.name || 'Unknown Source';
+    const baseName = source.name || 'Unknown Source';
+    const typeTag = source?.uploaded ? ` [${String(source.fieldType || 'type1').toUpperCase()}]` : '';
+    return `${baseName}${typeTag}`;
   }
 
   function renderContributionTables(calc, liveClt, liveTungsten, liveBreakdown = null, hasTelemetryError = false) {
@@ -1416,7 +1469,7 @@ function initCltFieldSystem() {
     } catch {
       el.copyLogs.textContent = 'Copy failed';
     }
-    setTimeout(() => { if (el.copyLogs) el.copyLogs.textContent = 'Copy Logs'; }, 1500);
+    setTimeout(() => { if (el.copyLogs) el.copyLogs.textContent = 'Copy Telemetry'; }, 1500);
   });
 
   initFallbackTools();
@@ -1515,11 +1568,9 @@ function initFieldCalculator() {
     rankToggle: document.getElementById('fcRankToggle'),
     rank: document.getElementById('fcRank'),
     appearance: document.getElementById('fcAppearance'),
-    surnameToggle: document.getElementById('fcSurnameToggle'),
     surnameP1Label: document.getElementById('fcSurnameP1Label'),
-    surnameP2Label: document.getElementById('fcSurnameP2Label'),
     surnameP1: document.getElementById('fcSurnameP1'),
-    surnameP2: document.getElementById('fcSurnameP2'),
+    regionalQ: document.getElementById('fcRegionalQ'),
     calculate: document.getElementById('fcCalculate'),
     runLoader: document.getElementById('fcRunLoader'),
     runBar: document.getElementById('fcRunBar'),
@@ -1561,7 +1612,7 @@ function initFieldCalculator() {
     const raw = String(el.rank?.value || '').trim();
     if (!raw) return null;
     const parsed = Number(raw);
-    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 1000) return null;
+    if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 100) return null;
     return parsed;
   }
 
@@ -1580,6 +1631,12 @@ function initFieldCalculator() {
     if (!Number.isFinite(parsed) || parsed < 1 || parsed > 1000000000) return null;
     return parsed;
   }
+  function normalizeRegionalFrequency() {
+    const raw = String(el.regionalQ?.value || '').trim();
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed) || parsed < 1 || parsed > 1000000000) return null;
+    return parsed;
+  }
 
   function formatNumber(value, digits = 3) {
     return Number(value).toLocaleString(undefined, { maximumFractionDigits: digits });
@@ -1592,12 +1649,7 @@ function initFieldCalculator() {
   }
 
   function calculateBandLengths(baseB, appearanceA, surnameL, cltValue = 0) {
-    const baselineMeters = 1.5;
-    const deltaB = baseB - 500;
-    const basePerimeterMeters = deltaB >= 0
-      ? baselineMeters + (deltaB * 0.005)
-      : baselineMeters + (deltaB * 0.001);
-    const scaledM = Math.max(0, basePerimeterMeters * appearanceA * surnameL);
+    const scaledM = Math.max(1, 1.09 + (40.70 / (1 + Math.pow(5142 / Math.max(0.0001, cltValue), 1.542))));
     const nsFromCltCm = (Math.max(0, Number(cltValue) || 0) * 0.005) + 4;
     return {
       ns: nsFromCltCm / 100,
@@ -1612,14 +1664,14 @@ function initFieldCalculator() {
   }
 
   const bandTheme = [
-    { key: 'ns', label: 'NS', className: 'band-ns', cltMultiplier: 1.5, tungstenMultiplier: 0.45 },
-    { key: 'ce', label: 'CE', className: 'band-ce', cltMultiplier: 1.25, tungstenMultiplier: 0.3 },
-    { key: 'e', label: 'E', className: 'band-e', cltMultiplier: 1.1, tungstenMultiplier: 0.55 },
-    { key: 'm', label: 'M', className: 'band-m', cltMultiplier: 1, tungstenMultiplier: 1 },
-    { key: 'ps', label: 'PS', className: 'band-ps', cltMultiplier: 0.7, tungstenMultiplier: 0.55 },
-    { key: 'ms', label: 'MS', className: 'band-ms', cltMultiplier: 0.275, tungstenMultiplier: 0.3 },
-    { key: 'mp', label: 'MP', className: 'band-mp', cltMultiplier: 0.1, tungstenMultiplier: 0.15 },
-    { key: 'mh', label: 'MH', className: 'band-mh', cltMultiplier: 0.05, tungstenMultiplier: 0.075 }
+    { key: 'ns', label: 'NS', className: 'band-ns', cltMultiplier: 1.5, tungstenMultiplierMin: 0.3, tungstenMultiplierMax: 0.6 },
+    { key: 'ce', label: 'CE', className: 'band-ce', cltMultiplier: 1.25, tungstenMultiplierMin: 0.2, tungstenMultiplierMax: 0.4 },
+    { key: 'e', label: 'E', className: 'band-e', cltMultiplier: 1.1, tungstenMultiplierMin: 0.4, tungstenMultiplierMax: 0.7 },
+    { key: 'm', label: 'M', className: 'band-m', cltMultiplier: 1, tungstenMultiplierMin: 0.7, tungstenMultiplierMax: 1.2 },
+    { key: 'ps', label: 'PS', className: 'band-ps', cltMultiplier: 0.7, tungstenMultiplierMin: 0.4, tungstenMultiplierMax: 0.7 },
+    { key: 'ms', label: 'MS', className: 'band-ms', cltMultiplier: 0.275, tungstenMultiplierMin: 0.2, tungstenMultiplierMax: 0.4 },
+    { key: 'mp', label: 'MP', className: 'band-mp', cltMultiplier: 0.1, tungstenMultiplierMin: 0.1, tungstenMultiplierMax: 0.2 },
+    { key: 'mh', label: 'MH', className: 'band-mh', cltMultiplier: 0.05, tungstenMultiplierMin: 0.05, tungstenMultiplierMax: 0.1 }
   ];
 
   function buildBandTelemetry(bands, clt, tungsten) {
@@ -1627,13 +1679,15 @@ function initFieldCalculator() {
       ...band,
       perimeter: Number(bands?.[band.key] || 0),
       cltValue: Math.max(0, clt * band.cltMultiplier),
-      tungstenValue: Math.max(0, tungsten * band.tungstenMultiplier)
+      tungstenValueMin: Math.max(0, tungsten * band.tungstenMultiplierMin),
+      tungstenValueMax: Math.max(0, tungsten * band.tungstenMultiplierMax)
     }));
 
     return ordered.map((band, index) => {
       const previous = index === 0 ? 0 : ordered[index - 1].perimeter;
       return {
         ...band,
+        tungstenValue: (band.tungstenValueMin + band.tungstenValueMax) / 2,
         rangeLabel: `${formatDistanceMeters(previous)} - ${formatDistanceMeters(band.perimeter)}`
       };
     });
@@ -1645,28 +1699,15 @@ function initFieldCalculator() {
 
   function syncRankModeUi() {
     const manual = isManualRankMode();
-    if (el.rankToggle) el.rankToggle.textContent = manual ? 'Using Manual Rank' : 'Use Rank Input';
+    if (el.rankToggle) el.rankToggle.textContent = manual ? 'Manual N Active' : 'Enable N Input';
     if (el.year) el.year.disabled = manual;
     if (el.rank) el.rank.disabled = !manual;
   }
 
-  function isSecondSurnameMode() {
-    return el.surnameToggle?.getAttribute('aria-pressed') === 'true';
-  }
-
-  function syncSurnameModeUi() {
-    const enabled = isSecondSurnameMode();
-    if (el.surnameToggle) el.surnameToggle.textContent = enabled ? 'Second last name enabled' : 'Enable second last name';
-    if (el.surnameP1Label) {
-      el.surnameP1Label.firstChild.textContent = enabled
-        ? 'First surname ratio (1:x)'
-        : 'Surname frequency ratio P1 (1:x)';
-    }
-    if (el.surnameP2Label) el.surnameP2Label.hidden = !enabled;
-    if (el.surnameP2) {
-      el.surnameP2.disabled = !enabled;
-      if (!enabled) el.surnameP2.value = '';
-    }
+  function calculateAutoMBandMeters(cltValue) {
+    const clt = Math.max(0.0001, Number(cltValue) || 0.0001);
+    const m = 1.09 + (40.70 / (1 + Math.pow(5142 / clt, 1.542)));
+    return Math.max(1, Math.min(100, m));
   }
 
   function renderResult({
@@ -1719,7 +1760,7 @@ function initFieldCalculator() {
                     <td class="field-band-label">${band.label}</td>
                     <td class="field-band-range">${band.rangeLabel}</td>
                     <td class="field-band-value">CLT ${formatNumber(band.cltValue, 2)}</td>
-                    <td class="field-band-value">${band.tungstenValue.toFixed(6)} mg/m³</td>
+                    <td class="field-band-value">${band.tungstenValueMin.toFixed(6)} - ${band.tungstenValueMax.toFixed(6)} mg/m³</td>
                   </tr>
                 `).join('')}
               </tbody>
@@ -1744,9 +1785,9 @@ function initFieldCalculator() {
     el.runBar.style.width = '0%';
 
     const phases = [
-      { at: 0.08, label: 'Finding name rankings...' },
-      { at: 0.36, label: 'Calibrating formulas...' },
-      { at: 0.68, label: 'Ranking Charlottes...' },
+      { at: 0.08, label: 'Reading N/P/Q inputs...' },
+      { at: 0.36, label: 'Calibrating CLT-6 equations...' },
+      { at: 0.68, label: 'Generating Charlotte signal...' },
       { at: 0.94, label: 'Done!' }
     ];
 
@@ -1777,13 +1818,13 @@ function initFieldCalculator() {
     const countryCode = String(el.country?.value || 'us');
     const manualRank = isManualRankMode();
     const year = normalizeYear();
-    const hasYearInput = String(el.year?.value || '').trim().length > 0;
     const rankInput = normalizeRank();
     const hasRankInput = String(el.rank?.value || '').trim().length > 0;
     const appearance = normalizeAppearance();
     const hasAppearanceInput = String(el.appearance?.value || '').trim().length > 0;
     const p1 = normalizeSurnameFrequency(el.surnameP1);
-    const p2 = isSecondSurnameMode() ? normalizeSurnameFrequency(el.surnameP2, true) : null;
+    const p2 = null;
+    const q = normalizeRegionalFrequency();
 
     if (!enteredName) {
       renderResult({ status: 'warning', title: 'Missing name', lines: ['Please enter a name before calculating.'] });
@@ -1793,15 +1834,15 @@ function initFieldCalculator() {
     if (enteredName.toLowerCase() !== 'charlotte') {
       renderResult({
         status: 'error',
-        title: 'Calculated CLT Result',
+        title: 'CLT Signal Output',
         primaryLabel: 'CLT',
         primaryValue: '0',
         primaryIsAlert: true,
         metrics: [
-          { label: 'Rank (n)', value: '0× multiplier applied' },
+          { label: 'N (%)', value: '0× multiplier applied' },
           { label: 'Appearance (M)', value: '—' },
           { label: 'Surname P', value: '—' },
-          { label: 'Year', value: manualRank ? 'Manual rank mode' : String(year || '—') },
+          { label: 'Regional Q', value: '—' },
           { label: 'Dataset', value: getSelectedLabel(countryCode) }
         ],
         nameValue: enteredName,
@@ -1812,17 +1853,16 @@ function initFieldCalculator() {
     }
 
     if (manualRank && !hasRankInput) {
-      renderResult({ status: 'warning', title: 'Missing rank', lines: ['Enable rank mode and provide a manual rank value between 1 and 1000.'] });
+      renderResult({ status: 'warning', title: 'Missing N value', lines: ['Provide N (% named Charlotte) as a manual value.'] });
       return;
     }
 
-    if (manualRank && hasRankInput && rankInput === null) {
-      renderResult({ status: 'warning', title: 'Invalid rank', lines: ['Manual rank (n) must be an integer between 1 and 1000.'] });
+    if (manualRank && hasRankInput && (rankInput === null || rankInput <= 0)) {
+      renderResult({ status: 'warning', title: 'Invalid N value', lines: ['N must be a positive number.'] });
       return;
     }
-
-    if (!manualRank && hasYearInput && year === null) {
-      renderResult({ status: 'warning', title: 'Invalid year', lines: ['Enter a valid year between 1880 and 2100, or leave it blank.'] });
+    if (!manualRank) {
+      renderResult({ status: 'warning', title: 'Manual N required', lines: ['Enable manual N mode for the CLT-6 formula system.'] });
       return;
     }
 
@@ -1836,8 +1876,8 @@ function initFieldCalculator() {
       return;
     }
 
-    if (isSecondSurnameMode() && String(el.surnameP2?.value || '').trim().length > 0 && p2 === null) {
-      renderResult({ status: 'warning', title: 'Invalid P2 value', lines: ['Surname ratio P2 must be a number from 1 to 1,000,000,000 when provided.'] });
+    if (q === null) {
+      renderResult({ status: 'warning', title: 'Invalid Q value', lines: ['Regional rarity Q must be a number from 1 to 1,000,000,000.'] });
       return;
     }
 
@@ -1847,66 +1887,55 @@ function initFieldCalculator() {
     try {
       const loaderPromise = runCalculationLoader();
       const years = getDatasetYears(countryCode);
-      const rank = manualRank ? rankInput : getRankFromLocalData(countryCode, year);
+      const n = rankInput;
       await loaderPromise;
 
-      if (!rank) {
-        renderResult({
-          status: 'warning',
-          title: 'No rank data found',
-          lines: [
-            `No ${getSelectedLabel(countryCode)} Charlotte rank is available for year ${year}.`,
-            years.length ? `Available years: ${years[years.length - 1]}-${years[0]}.` : 'No dataset years available.'
-          ]
-        });
-        return;
-      }
-
       const m = appearance ?? 0;
-      const p = p2 === null ? p1 : (p1 + p2) / 2;
-
-      const b = (7.25 * rank) + 32;
-      const a = 0.8 + (0.04 * m);
-      const logRatio = Math.log10(p / 150);
-      const lRaw = 0.85 + ((0.1933 * logRatio) + (0.06849 * logRatio * logRatio)) / (1 + (0.2514 * Math.abs(logRatio)));
-      const l = Math.min(2, lRaw);
-      const clt = b * a * l;
+      const p = p1;
+      const b = 110 / n;
+      const a = 0.75 + (0.05 * m);
+      const logP = Math.log10(p);
+      const l = Math.min(2.2, (0.0092146 * (logP ** 3)) - (0.0834066 * (logP ** 2)) + (0.345823 * logP) + 0.466249);
+      const logQ = Math.log10(q);
+      const r = 0.295453 + (0.393664 * logQ) - (0.0618419 * (logQ ** 2)) + (0.00509316 * (logQ ** 3));
+      const clt = b * a * l * r;
       const tungsten = calculateTungstenConcentrationShared(clt);
       const bands = calculateBandLengths(b, a, l, clt);
       const bandTelemetry = buildBandTelemetry(bands, clt, tungsten);
 
       renderResult({
         status: 'success',
-        title: 'Calculated CLT Result',
+        title: 'CLT Signal Output',
         upperStats: {
           cltValue: formatNumber(clt),
           tungstenValue: `${tungsten.toFixed(6)} mg/m³`
         },
         bandTelemetry,
         metrics: [
-          { label: 'Rank (n)', value: rank.toLocaleString() },
+          { label: 'N (%)', value: formatNumber(n, 4) },
           { label: 'Appearance (M)', value: formatNumber(m, 2) },
           { label: 'Surname P', value: formatNumber(p, 3) },
-          { label: 'M Band Length', value: formatDistanceMeters(bands.m) },
-          { label: 'Year', value: manualRank ? 'Manual rank mode' : String(year || years[0]) },
+          { label: 'Regional Q', value: formatNumber(q, 3) },
+          { label: 'Year', value: 'Manual N mode' },
           { label: 'Dataset', value: getSelectedLabel(countryCode) }
         ],
         nameValue: enteredName,
         lines: [
-          `Base B = 7.25n + 32 = ${formatNumber(b, 3)}`,
-          `Appearance A = 0.8 + 0.04m = ${formatNumber(a, 4)}`,
-          `Surname rarity L(P) = ${formatNumber(l, 4)} (P is 1:x ratio)`,
+          `Base B = 110 / N = ${formatNumber(b, 6)}`,
+          `Appearance A = 0.75 + 0.05m = ${formatNumber(a, 4)}`,
+          `Surname rarity L(P) = ${formatNumber(l, 6)} (P is 1:x ratio)`,
+          `Regional rarity R(Q) = ${formatNumber(r, 6)} (Q is 1:x ratio)`,
           `T(CLT) = 0.55 × (CLT^1.09 / (CLT^1.09 + 1737^1.09)) = ${tungsten.toFixed(6)} mg/m³`,
           `Band lengths: NS ${formatDistanceMeters(bands.ns)} · CE ${formatDistanceMeters(bands.ce)} · E ${formatDistanceMeters(bands.e)} · M ${formatDistanceMeters(bands.m)} · PS ${formatDistanceMeters(bands.ps)} · MS ${formatDistanceMeters(bands.ms)} · MP ${formatDistanceMeters(bands.mp)} · MH ${formatDistanceMeters(bands.mh)}`,
-          manualRank ? 'Rank source: Manual input' : `Rank source: ${getSelectedLabel(countryCode)} dataset`,
-          'Final formula: CLT = B × A × L'
+          manualRank ? 'N source: Manual N input' : `N source: ${getSelectedLabel(countryCode)} dataset`,
+          'Final formula: CLT = B × A × L × R'
         ]
       });
     } catch (error) {
       renderResult({
         status: 'error',
         title: 'Calculation failed',
-        lines: [`Unable to compute CLT from local rank/modifier data (${String(error?.message || 'unknown error')}).`]
+        lines: [`Unable to compute the CLT-6 signal from the supplied N/P/Q inputs (${String(error?.message || 'unknown error')}).`]
       });
     } finally {
       if (el.calculate) el.calculate.disabled = false;
@@ -1919,21 +1948,14 @@ function initFieldCalculator() {
     syncRankModeUi();
   });
 
-  el.surnameToggle?.addEventListener('click', () => {
-    const pressed = el.surnameToggle?.getAttribute('aria-pressed') === 'true';
-    if (el.surnameToggle) el.surnameToggle.setAttribute('aria-pressed', String(!pressed));
-    syncSurnameModeUi();
-  });
-
   syncRankModeUi();
-  syncSurnameModeUi();
-  [el.year, el.rank, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
+  [el.year, el.rank, el.appearance, el.surnameP1, el.regionalQ].forEach((inputEl) => {
     inputEl?.addEventListener('wheel', (event) => {
       inputEl.blur();
     });
   });
   el.calculate?.addEventListener('click', calculate);
-  [el.name, el.year, el.rank, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
+  [el.name, el.year, el.rank, el.appearance, el.surnameP1, el.regionalQ].forEach((inputEl) => {
     inputEl?.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
@@ -1955,10 +1977,10 @@ if (copyBtn && instructionText) {
     try {
       await navigator.clipboard.writeText(instructionText.textContent);
       copyBtn.textContent = 'Copied';
-      setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
+      setTimeout(() => (copyBtn.textContent = 'Copy Protocol'), 1500);
     } catch {
       copyBtn.textContent = 'Copy failed';
-      setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
+      setTimeout(() => (copyBtn.textContent = 'Copy Protocol'), 1500);
     }
   });
 }
