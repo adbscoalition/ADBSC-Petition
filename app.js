@@ -6,40 +6,30 @@ if (tabTitle) document.title = tabTitle;
 const navToggle = document.getElementById('navToggle');
 const primaryNav = document.getElementById('primaryNav');
 
+function closePrimaryNav() {
+  if (!navToggle || !primaryNav) return;
+  navToggle.setAttribute('aria-expanded', 'false');
+  primaryNav.classList.remove('open');
+}
+
 if (navToggle && primaryNav) {
-  navToggle.addEventListener('click', () => {
+  navToggle.addEventListener('click', (event) => {
+    event.stopPropagation();
     const expanded = navToggle.getAttribute('aria-expanded') === 'true';
     navToggle.setAttribute('aria-expanded', String(!expanded));
     primaryNav.classList.toggle('open', !expanded);
   });
-}
 
-const navGroups = primaryNav ? Array.from(primaryNav.querySelectorAll('.nav-group')) : [];
-
-if (navGroups.length) {
-  navGroups.forEach((group) => {
-    group.addEventListener('toggle', () => {
-      if (!group.open) return;
-      navGroups.forEach((other) => {
-        if (other !== group) other.open = false;
-      });
-    });
+  primaryNav.addEventListener('click', (event) => {
+    if (event.target.closest('a')) closePrimaryNav();
   });
 
   document.addEventListener('click', (event) => {
-    if (!primaryNav?.contains(event.target)) {
-      navGroups.forEach((group) => {
-        group.open = false;
-      });
-    }
+    if (!primaryNav.contains(event.target) && !navToggle.contains(event.target)) closePrimaryNav();
   });
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      navGroups.forEach((group) => {
-        group.open = false;
-      });
-    }
+    if (event.key === 'Escape') closePrimaryNav();
   });
 }
 
@@ -271,9 +261,8 @@ if (entryLoader) {
 function calculateTungstenConcentrationShared(cltValue) {
   const safeClt = Math.max(Number(cltValue) || 0, 0);
   if (safeClt === 0) return 0;
-  const numerator = 0.55 * Math.pow(safeClt, 1.09);
-  const denominator = Math.pow(safeClt, 1.09) + Math.pow(1737, 1.09);
-  return denominator > 0 ? (numerator / denominator) : 0;
+  const denominator = 1 + Math.pow(4555 / safeClt, 0.814);
+  return denominator > 0 ? (0.798 / denominator) : 0;
 }
 
 function initCltFieldSystem() {
@@ -1455,71 +1444,11 @@ function initFieldCalculator() {
   const app = document.getElementById('fieldCalculatorApp');
   if (!app) return;
 
-  const datasets = {
-    us: {
-      label: 'United States',
-      ranks: {
-        2024: 4, 2023: 3, 2022: 3, 2021: 3, 2020: 4, 2019: 6, 2018: 6, 2017: 7, 2016: 7, 2015: 9,
-        2014: 10, 2013: 11, 2012: 19, 2011: 27, 2010: 46, 2009: 68, 2008: 86, 2007: 101, 2006: 125,
-        2005: 135, 2004: 170, 2003: 182, 2002: 204, 2001: 229, 2000: 289, 1999: 307, 1998: 304,
-        1997: 301, 1996: 302, 1995: 275, 1994: 291, 1993: 293, 1992: 286, 1991: 287, 1990: 287,
-        1989: 292, 1988: 288, 1987: 292, 1986: 286, 1985: 265, 1984: 304, 1983: 283, 1982: 308,
-        1981: 290, 1980: 292, 1979: 285, 1978: 278, 1977: 265, 1976: 245, 1975: 224, 1974: 203,
-        1973: 194, 1972: 188, 1971: 176, 1970: 166, 1969: 160, 1968: 163, 1967: 163, 1966: 151,
-        1965: 153, 1964: 158, 1963: 153, 1962: 154, 1961: 147, 1960: 151, 1959: 144, 1958: 140,
-        1957: 133, 1956: 133, 1955: 129, 1954: 113, 1953: 100, 1952: 89, 1951: 84, 1950: 80,
-        1949: 71, 1948: 69, 1947: 68, 1946: 64, 1945: 55, 1944: 50, 1943: 47, 1942: 51, 1941: 55,
-        1940: 55, 1939: 66, 1938: 70, 1937: 67, 1936: 61, 1935: 65, 1934: 72, 1933: 79, 1932: 74,
-        1931: 75, 1930: 75, 1929: 73, 1928: 72, 1927: 75, 1926: 78, 1925: 77, 1924: 80, 1923: 77,
-        1922: 76, 1921: 79, 1920: 79, 1919: 79, 1918: 78, 1917: 76, 1916: 80, 1915: 81, 1914: 88,
-        1913: 87, 1912: 91, 1911: 95, 1910: 99, 1909: 94, 1908: 98, 1907: 105, 1906: 103, 1905: 104,
-        1904: 110, 1903: 115, 1902: 114, 1901: 105, 1900: 110, 1899: 104, 1898: 105, 1897: 104,
-        1896: 103, 1895: 106, 1894: 100, 1893: 100, 1892: 98, 1891: 101, 1890: 98, 1889: 89, 1888: 88,
-        1887: 91, 1886: 94, 1885: 94, 1884: 86, 1883: 92, 1882: 100, 1881: 95, 1880: 91
-      }
-    },
-    ca: {
-      label: 'Canada',
-      ranks: {
-        2023: 2, 2022: 2, 2021: 3, 2020: 3, 2019: 2, 2018: 3, 2017: 3, 2016: 3, 2015: 3, 2014: 6,
-        2013: 6, 2012: 10, 2011: 9, 2010: 13, 2009: 20, 2008: 26, 2007: 29, 2006: 28, 2005: 47,
-        2004: 57, 2003: 77, 2002: 70, 2001: 63, 2000: 86, 1945: 97, 1944: 97, 1942: 95, 1921: 97
-      }
-    },
-    gb_ew: {
-      label: 'UK (England/Wales)',
-      ranks: {
-        2024: 23, 2023: 23, 2022: 26, 2021: 25, 2020: 20, 2019: 18, 2018: 12, 2017: 12, 2016: 12,
-        2015: 25, 2014: 23, 2013: 21, 2012: 20, 2011: 21, 2010: 20, 2009: 14, 2008: 13, 2007: 12,
-        2006: 12, 2005: 9, 2004: 8, 2003: 9, 2002: 7, 2001: 6, 2000: 5, 1999: 6, 1998: 6, 1997: 7,
-        1996: 7
-      }
-    },
-    au: {
-      label: 'Australia',
-      ranks: {
-        2024: 1, 2023: 5, 2022: 1, 2021: 3, 2020: 3, 2019: 1, 2018: 1, 2017: 1, 2016: 2, 2015: 1,
-        2014: 3, 2013: 1, 2012: 1, 2011: 7, 2010: 5, 2009: 3, 2008: 6, 2007: 7, 2006: 2, 2005: 3,
-        2004: 6, 2003: 12, 2002: 14, 2001: 16, 2000: 26, 1999: 39, 1998: 54, 1997: 65, 1996: 87,
-        1995: 83, 1994: 79, 1993: 94, 1992: 67, 1990: 97, 1989: 89
-      }
-    }
-  };
-
-  const countries = Object.entries(datasets).map(([code, value]) => ({ code, label: value.label }));
-
   const el = {
-    name: document.getElementById('fcName'),
-    country: document.getElementById('fcCountry'),
-    year: document.getElementById('fcYear'),
-    rankToggle: document.getElementById('fcRankToggle'),
-    rank: document.getElementById('fcRank'),
+    n: document.getElementById('fcN'),
     appearance: document.getElementById('fcAppearance'),
-    surnameToggle: document.getElementById('fcSurnameToggle'),
-    surnameP1Label: document.getElementById('fcSurnameP1Label'),
-    surnameP2Label: document.getElementById('fcSurnameP2Label'),
-    surnameP1: document.getElementById('fcSurnameP1'),
-    surnameP2: document.getElementById('fcSurnameP2'),
+    surnameP: document.getElementById('fcSurnameP'),
+    q: document.getElementById('fcQ'),
     calculate: document.getElementById('fcCalculate'),
     runLoader: document.getElementById('fcRunLoader'),
     runBar: document.getElementById('fcRunBar'),
@@ -1527,41 +1456,11 @@ function initFieldCalculator() {
     result: document.getElementById('fcResult')
   };
 
-  if (el.country) {
-    el.country.innerHTML = countries.map((country) => `<option value="${country.code}">${country.label}</option>`).join('');
-    el.country.value = 'us';
-  }
-
-  function getSelectedLabel(code) {
-    return countries.find((c) => c.code === code)?.label || 'Unknown';
-  }
-
-  function getDatasetYears(countryCode) {
-    const ranks = datasets[countryCode]?.ranks || {};
-    return Object.keys(ranks).map(Number).sort((a, b) => b - a);
-  }
-
-  function getRankFromLocalData(countryCode, year) {
-    const ranks = datasets[countryCode]?.ranks || {};
-    const years = getDatasetYears(countryCode);
-    if (!years.length) return null;
-    if (Number.isInteger(year)) return ranks[year] ?? null;
-    return ranks[years[0]] ?? null;
-  }
-
-  function normalizeYear() {
-    const raw = String(el.year?.value || '').trim();
+  function normalizeN() {
+    const raw = String(el.n?.value || '').trim();
     if (!raw) return null;
     const parsed = Number(raw);
-    if (!Number.isInteger(parsed) || parsed < 1880 || parsed > 2100) return null;
-    return parsed;
-  }
-
-  function normalizeRank() {
-    const raw = String(el.rank?.value || '').trim();
-    if (!raw) return null;
-    const parsed = Number(raw);
-    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 1000) return null;
+    if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 100) return null;
     return parsed;
   }
 
@@ -1573,9 +1472,9 @@ function initFieldCalculator() {
     return parsed;
   }
 
-  function normalizeSurnameFrequency(inputEl, allowBlank = false) {
+  function normalizeRatio(inputEl) {
     const raw = String(inputEl?.value || '').trim();
-    if (!raw && allowBlank) return null;
+    if (!raw) return null;
     const parsed = Number(raw);
     if (!Number.isFinite(parsed) || parsed < 1 || parsed > 1000000000) return null;
     return parsed;
@@ -1591,23 +1490,23 @@ function initFieldCalculator() {
     return `${formatNumber(value, 3)} m`;
   }
 
-  function calculateBandLengths(baseB, appearanceA, surnameL, cltValue = 0) {
-    const baselineMeters = 1.5;
-    const deltaB = baseB - 500;
-    const basePerimeterMeters = deltaB >= 0
-      ? baselineMeters + (deltaB * 0.005)
-      : baselineMeters + (deltaB * 0.001);
-    const scaledM = Math.max(0, basePerimeterMeters * appearanceA * surnameL);
-    const nsFromCltCm = (Math.max(0, Number(cltValue) || 0) * 0.005) + 4;
+  function calculateMband(cltValue) {
+    const safeClt = Math.max(Number(cltValue) || 0, 0);
+    if (!safeClt) return 0;
+    return 1.09 + (40.70 / (1 + Math.pow(5142 / safeClt, 1.542)));
+  }
+
+  function calculateBandLengths(cltValue) {
+    const m = calculateMband(cltValue);
     return {
-      ns: nsFromCltCm / 100,
-      ce: scaledM * 0.2,
-      e: scaledM * 0.5,
-      m: scaledM,
-      ps: scaledM * 1.7,
-      ms: scaledM * 3.5,
-      mp: scaledM * 4.5,
-      mh: scaledM * 6.5
+      ns: m * 0.05,
+      ce: m * 0.2,
+      e: m * 0.5,
+      m,
+      ps: m * 1.7,
+      ms: m * 3.5,
+      mp: m * 4.5,
+      mh: m * 6.5
     };
   }
 
@@ -1639,49 +1538,7 @@ function initFieldCalculator() {
     });
   }
 
-  function isManualRankMode() {
-    return el.rankToggle?.getAttribute('aria-pressed') === 'true';
-  }
-
-  function syncRankModeUi() {
-    const manual = isManualRankMode();
-    if (el.rankToggle) el.rankToggle.textContent = manual ? 'Using Manual Rank' : 'Use Rank Input';
-    if (el.year) el.year.disabled = manual;
-    if (el.rank) el.rank.disabled = !manual;
-  }
-
-  function isSecondSurnameMode() {
-    return el.surnameToggle?.getAttribute('aria-pressed') === 'true';
-  }
-
-  function syncSurnameModeUi() {
-    const enabled = isSecondSurnameMode();
-    if (el.surnameToggle) el.surnameToggle.textContent = enabled ? 'Second last name enabled' : 'Enable second last name';
-    if (el.surnameP1Label) {
-      el.surnameP1Label.firstChild.textContent = enabled
-        ? 'First surname ratio (1:x)'
-        : 'Surname frequency ratio P1 (1:x)';
-    }
-    if (el.surnameP2Label) el.surnameP2Label.hidden = !enabled;
-    if (el.surnameP2) {
-      el.surnameP2.disabled = !enabled;
-      if (!enabled) el.surnameP2.value = '';
-    }
-  }
-
-  function renderResult({
-    status = 'idle',
-    title = 'Result',
-    primaryLabel = '',
-    primaryValue = '',
-    metrics = [],
-    lines = [],
-    nameValue = '',
-    nameIsAlert = false,
-    primaryIsAlert = false,
-    upperStats = null,
-    bandTelemetry = []
-  } = {}) {
+  function renderResult({ status = 'idle', title = 'Result', primaryLabel = '', primaryValue = '', metrics = [], lines = [], primaryIsAlert = false, upperStats = null, bandTelemetry = [] } = {}) {
     if (!el.result) return;
     el.result.classList.toggle('is-success', status === 'success');
     el.result.classList.toggle('is-warning', status === 'warning');
@@ -1727,14 +1584,11 @@ function initFieldCalculator() {
           </div>
         </section>`
       : '';
-    const nameHtml = nameValue
-      ? `<p class="field-result-name ${nameIsAlert ? 'is-alert' : ''}">Name: ${nameValue}</p>`
-      : '';
     const linesHtml = lines.length
       ? `<details class="field-calculation-details"><summary>Calculation breakdown</summary>${lines.map((line) => `<p>${line}</p>`).join('')}</details>`
       : '';
 
-    el.result.innerHTML = `<h2>${title}</h2>${upperHtml}${primaryHtml}${metricsHtml}${bandTelemetryHtml}${nameHtml}${linesHtml}`;
+    el.result.innerHTML = `<h2>${title}</h2>${upperHtml}${primaryHtml}${metricsHtml}${bandTelemetryHtml}${linesHtml}`;
   }
 
   function runCalculationLoader(durationMs = 1800) {
@@ -1744,9 +1598,9 @@ function initFieldCalculator() {
     el.runBar.style.width = '0%';
 
     const phases = [
-      { at: 0.08, label: 'Finding name rankings...' },
-      { at: 0.36, label: 'Calibrating formulas...' },
-      { at: 0.68, label: 'Ranking Charlottes...' },
+      { at: 0.08, label: 'Reading Charlotte frequency...' },
+      { at: 0.36, label: 'Calibrating CLT-6 formulas...' },
+      { at: 0.68, label: 'Measuring wolframosphere...' },
       { at: 0.94, label: 'Done!' }
     ];
 
@@ -1773,71 +1627,28 @@ function initFieldCalculator() {
   }
 
   async function calculate() {
-    const enteredName = String(el.name?.value || '').trim();
-    const countryCode = String(el.country?.value || 'us');
-    const manualRank = isManualRankMode();
-    const year = normalizeYear();
-    const hasYearInput = String(el.year?.value || '').trim().length > 0;
-    const rankInput = normalizeRank();
-    const hasRankInput = String(el.rank?.value || '').trim().length > 0;
-    const appearance = normalizeAppearance();
-    const hasAppearanceInput = String(el.appearance?.value || '').trim().length > 0;
-    const p1 = normalizeSurnameFrequency(el.surnameP1);
-    const p2 = isSecondSurnameMode() ? normalizeSurnameFrequency(el.surnameP2, true) : null;
+    const n = normalizeN();
+    const m = normalizeAppearance();
+    const p = normalizeRatio(el.surnameP);
+    const q = normalizeRatio(el.q);
 
-    if (!enteredName) {
-      renderResult({ status: 'warning', title: 'Missing name', lines: ['Please enter a name before calculating.'] });
+    if (n === null) {
+      renderResult({ status: 'warning', title: 'Invalid N value', lines: ['N must be the percent of girls named Charlotte for the birth year in your region, greater than 0 and no more than 100.'] });
       return;
     }
 
-    if (enteredName.toLowerCase() !== 'charlotte') {
-      renderResult({
-        status: 'error',
-        title: 'Calculated CLT Result',
-        primaryLabel: 'CLT',
-        primaryValue: '0',
-        primaryIsAlert: true,
-        metrics: [
-          { label: 'Rank (n)', value: '0× multiplier applied' },
-          { label: 'Appearance (M)', value: '—' },
-          { label: 'Surname P', value: '—' },
-          { label: 'Year', value: manualRank ? 'Manual rank mode' : String(year || '—') },
-          { label: 'Dataset', value: getSelectedLabel(countryCode) }
-        ],
-        nameValue: enteredName,
-        nameIsAlert: true,
-        lines: ['Legal first name is not Charlotte, so CLT multiplier is 0×.']
-      });
+    if (m === null) {
+      renderResult({ status: 'warning', title: 'Invalid appearance score', lines: ['Appearance score M must be a number between 0 and 10.'] });
       return;
     }
 
-    if (manualRank && !hasRankInput) {
-      renderResult({ status: 'warning', title: 'Missing rank', lines: ['Enable rank mode and provide a manual rank value between 1 and 1000.'] });
+    if (p === null) {
+      renderResult({ status: 'warning', title: 'Invalid P value', lines: ['Surname ratio P must be a number from 1 to 1,000,000,000.'] });
       return;
     }
 
-    if (manualRank && hasRankInput && rankInput === null) {
-      renderResult({ status: 'warning', title: 'Invalid rank', lines: ['Manual rank (n) must be an integer between 1 and 1000.'] });
-      return;
-    }
-
-    if (!manualRank && hasYearInput && year === null) {
-      renderResult({ status: 'warning', title: 'Invalid year', lines: ['Enter a valid year between 1880 and 2100, or leave it blank.'] });
-      return;
-    }
-
-    if (hasAppearanceInput && appearance === null) {
-      renderResult({ status: 'warning', title: 'Invalid appearance score', lines: ['Appearance (M) must be a number between 0 and 10.'] });
-      return;
-    }
-
-    if (p1 === null) {
-      renderResult({ status: 'warning', title: 'Invalid P1 value', lines: ['Surname ratio P1 must be a number from 1 to 1,000,000,000.'] });
-      return;
-    }
-
-    if (isSecondSurnameMode() && String(el.surnameP2?.value || '').trim().length > 0 && p2 === null) {
-      renderResult({ status: 'warning', title: 'Invalid P2 value', lines: ['Surname ratio P2 must be a number from 1 to 1,000,000,000 when provided.'] });
+    if (q === null) {
+      renderResult({ status: 'warning', title: 'Invalid Q value', lines: ['Regional Charlotte frequency Q must be a number from 1 to 1,000,000,000.'] });
       return;
     }
 
@@ -1846,33 +1657,17 @@ function initFieldCalculator() {
 
     try {
       const loaderPromise = runCalculationLoader();
-      const years = getDatasetYears(countryCode);
-      const rank = manualRank ? rankInput : getRankFromLocalData(countryCode, year);
       await loaderPromise;
 
-      if (!rank) {
-        renderResult({
-          status: 'warning',
-          title: 'No rank data found',
-          lines: [
-            `No ${getSelectedLabel(countryCode)} Charlotte rank is available for year ${year}.`,
-            years.length ? `Available years: ${years[years.length - 1]}-${years[0]}.` : 'No dataset years available.'
-          ]
-        });
-        return;
-      }
-
-      const m = appearance ?? 0;
-      const p = p2 === null ? p1 : (p1 + p2) / 2;
-
-      const b = (7.25 * rank) + 32;
-      const a = 0.8 + (0.04 * m);
-      const logRatio = Math.log10(p / 150);
-      const lRaw = 0.85 + ((0.1933 * logRatio) + (0.06849 * logRatio * logRatio)) / (1 + (0.2514 * Math.abs(logRatio)));
-      const l = Math.min(2, lRaw);
-      const clt = b * a * l;
+      const b = 110 / n;
+      const a = 0.75 + (0.05 * m);
+      const logP = Math.log10(p);
+      const l = Math.min(2.2, (0.0092146 * Math.pow(logP, 3)) - (0.0834066 * Math.pow(logP, 2)) + (0.345823 * logP) + 0.466249);
+      const logQ = Math.log10(q);
+      const r = 0.295453 + (0.393664 * logQ) - (0.0618419 * Math.pow(logQ, 2)) + (0.00509316 * Math.pow(logQ, 3));
+      const clt = b * a * l * r;
       const tungsten = calculateTungstenConcentrationShared(clt);
-      const bands = calculateBandLengths(b, a, l, clt);
+      const bands = calculateBandLengths(clt);
       const bandTelemetry = buildBandTelemetry(bands, clt, tungsten);
 
       renderResult({
@@ -1884,56 +1679,36 @@ function initFieldCalculator() {
         },
         bandTelemetry,
         metrics: [
-          { label: 'Rank (n)', value: rank.toLocaleString() },
+          { label: 'N', value: `${formatNumber(n, 6)}%` },
           { label: 'Appearance (M)', value: formatNumber(m, 2) },
           { label: 'Surname P', value: formatNumber(p, 3) },
-          { label: 'M Band Length', value: formatDistanceMeters(bands.m) },
-          { label: 'Year', value: manualRank ? 'Manual rank mode' : String(year || years[0]) },
-          { label: 'Dataset', value: getSelectedLabel(countryCode) }
+          { label: 'Q', value: formatNumber(q, 3) }
         ],
-        nameValue: enteredName,
         lines: [
-          `Base B = 7.25n + 32 = ${formatNumber(b, 3)}`,
-          `Appearance A = 0.8 + 0.04m = ${formatNumber(a, 4)}`,
+          `Base B = 110 / N = ${formatNumber(b, 3)}`,
+          `Appearance A = 0.75 + 0.05m = ${formatNumber(a, 4)}`,
           `Surname rarity L(P) = ${formatNumber(l, 4)} (P is 1:x ratio)`,
-          `T(CLT) = 0.55 × (CLT^1.09 / (CLT^1.09 + 1737^1.09)) = ${tungsten.toFixed(6)} mg/m³`,
-          `Band lengths: NS ${formatDistanceMeters(bands.ns)} · CE ${formatDistanceMeters(bands.ce)} · E ${formatDistanceMeters(bands.e)} · M ${formatDistanceMeters(bands.m)} · PS ${formatDistanceMeters(bands.ps)} · MS ${formatDistanceMeters(bands.ms)} · MP ${formatDistanceMeters(bands.mp)} · MH ${formatDistanceMeters(bands.mh)}`,
-          manualRank ? 'Rank source: Manual input' : `Rank source: ${getSelectedLabel(countryCode)} dataset`,
-          'Final formula: CLT = B × A × L'
+          `Regional rarity R(Q) = ${formatNumber(r, 4)} (Q is 1:x ratio)`,
+          `W = 0.798 / (1 + (4555 / CLT)^0.814) = ${tungsten.toFixed(6)} mg/m³`,
+          `M-band = 1.09 + 40.70 / (1 + (5142 / CLT)^1.542) = ${formatDistanceMeters(bands.m)}`,
+          'Final formula: CLT = B × A × L × R'
         ]
       });
     } catch (error) {
       renderResult({
         status: 'error',
         title: 'Calculation failed',
-        lines: [`Unable to compute CLT from local rank/modifier data (${String(error?.message || 'unknown error')}).`]
+        lines: [`Unable to compute CLT from local inputs (${String(error?.message || 'unknown error')}).`]
       });
     } finally {
       if (el.calculate) el.calculate.disabled = false;
     }
   }
 
-  el.rankToggle?.addEventListener('click', () => {
-    const pressed = el.rankToggle?.getAttribute('aria-pressed') === 'true';
-    if (el.rankToggle) el.rankToggle.setAttribute('aria-pressed', String(!pressed));
-    syncRankModeUi();
-  });
-
-  el.surnameToggle?.addEventListener('click', () => {
-    const pressed = el.surnameToggle?.getAttribute('aria-pressed') === 'true';
-    if (el.surnameToggle) el.surnameToggle.setAttribute('aria-pressed', String(!pressed));
-    syncSurnameModeUi();
-  });
-
-  syncRankModeUi();
-  syncSurnameModeUi();
-  [el.year, el.rank, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
-    inputEl?.addEventListener('wheel', (event) => {
+  [el.n, el.appearance, el.surnameP, el.q].forEach((inputEl) => {
+    inputEl?.addEventListener('wheel', () => {
       inputEl.blur();
     });
-  });
-  el.calculate?.addEventListener('click', calculate);
-  [el.name, el.year, el.rank, el.appearance, el.surnameP1, el.surnameP2].forEach((inputEl) => {
     inputEl?.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
@@ -1941,6 +1716,7 @@ function initFieldCalculator() {
       }
     });
   });
+  el.calculate?.addEventListener('click', calculate);
 }
 
 initFieldCalculator();
